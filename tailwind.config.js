@@ -11,8 +11,11 @@ module.exports = {
         borderColor:'#414141',
         inputColor:'#161d26',
         subColor:'#7c828a',
-        fireColor:'#FBA587'
+        fireColor:'#FBA587',
       },
+      minWidth:{
+        messageMin: 270
+      }
     },
   },
   plugins: [],

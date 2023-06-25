@@ -4,6 +4,7 @@ import SideBar from './SideBar';
 import ContactBar from './ContactBar';
 import MessageTab from './MessageTab';
 import firebase from 'firebase/compat/app'
+import React, {createContext,useState,useEffect} from 'react';
 const firebaseConfig = {
   apiKey: "AIzaSyDnsU3f1fH9jPcTHniNrqJJnnV4Gb9pM7U",
   authDomain: "chatvibe-ddfac.firebaseapp.com",
@@ -15,13 +16,18 @@ const firebaseConfig = {
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
+export const MessageContext = createContext()
+
 function App() {
+  const [messages, setMessages] = useState([])
   return (
-    <div className="flex bg-bgColor h-screen w-screen">
-      <SideBar/>
-      <ContactBar/>
-      <MessageTab/>
-    </div>
+    <MessageContext.Provider value={{messages,setMessages}}>
+      <div className="flex bg-bgColor h-screen w-screen">
+            <SideBar/>
+            <ContactBar/>
+            <MessageTab/>
+      </div>
+    </MessageContext.Provider>
   );
 }
 
