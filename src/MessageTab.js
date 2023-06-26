@@ -1,24 +1,21 @@
 import React, {useState,useContext,useEffect,useRef} from 'react'
+import { getDatabase, ref, update,push } from 'firebase/database'
 import send from './images/send-message.png'
 import { MessageContext } from './App'
 export default function MessageTab() {
   const {messages,setMessages} = useContext(MessageContext)
   const [text,setText] = useState('')
   const containerRef = useRef()
-  useEffect(()=>{
-    console.log(messages)
-    console.log(messages.length)
-  },[messages])
+  const currentChat = Object.keys(messages).length!==0?messages['-MgHj2heLKjKJ75vGsaW'].messages:{}
   function handleSubmit(){
     if(text.trim()!==''){
-        setMessages(prev=>{
-            const tempObj = {
-                pfp:'https://www.asiamediajournal.com/wp-content/uploads/2022/10/Dog-Cool-PFP-1200x1200.jpg',
-                name:'Caleb',
-                msg:text,
-            }
-            return [...prev,tempObj]
-        })
+        const tempObj = {
+            content:text,
+            sender:'Caleb',
+            timestamp:Date.now()
+        }
+        const chatRef = ref(getDatabase(),'/chats/-MgHj2heLKjKJ75vGsaW/messages')
+        push(chatRef,tempObj)
         setText('')
     }
     
@@ -38,13 +35,13 @@ export default function MessageTab() {
         </div>
         <div className='overflow-scroll h-4/6' ref={containerRef}>
         {
-            messages.map((value,index)=>{
+            Object.keys(currentChat).map((value,index)=>{
                 return(
-                    <div>
+                    <div key={index}>
                     {
-                        index>0?messages[index-1].name!==messages[index].name?
-                            <MessageBox pfp='https://wallpapers.com/images/hd/shadow-boy-white-eyes-unique-cool-pfp-nft-13yuypusuweug9xn.jpg' name={value.name} msg={value.msg}/>:<p className='text-white pl-5 h-7 text-sm font-light ml-14'>{value.msg}</p>
-                    :<MessageBox pfp='https://wallpapers.com/images/hd/shadow-boy-white-eyes-unique-cool-pfp-nft-13yuypusuweug9xn.jpg' name='John' msg={value.msg}/>
+                        index>0?currentChat[value].sender!==currentChat[Object.keys(currentChat)[index-1]].sender?
+                            <MessageBox pfp='https://wallpapers.com/images/hd/shadow-boy-white-eyes-unique-cool-pfp-nft-13yuypusuweug9xn.jpg' name={currentChat[value].sender} msg={currentChat[value].content}/>:<p className='text-white pl-5 h-7 text-sm font-light ml-14'>{currentChat[value].content}</p>
+                    :<MessageBox pfp='https://wallpapers.com/images/hd/shadow-boy-white-eyes-unique-cool-pfp-nft-13yuypusuweug9xn.jpg' name={currentChat[value].sender} msg={currentChat[value].content}/>
                     }
                     </div>
                 )
