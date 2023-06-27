@@ -6,6 +6,7 @@ import MessageTab from './MessageTab';
 import firebase from 'firebase/compat/app'
 import {onValue,get,getDatabase,ref} from 'firebase/database'
 import React, {createContext,useState,useEffect} from 'react';
+import SignUp from './SignUp';
 const firebaseConfig = {
   apiKey: "AIzaSyDnsU3f1fH9jPcTHniNrqJJnnV4Gb9pM7U",
   authDomain: "chatvibe-ddfac.firebaseapp.com",
@@ -36,11 +37,11 @@ function App() {
   },[messages])
   return (
     <MessageContext.Provider value={{messages,setMessages}}>
+      
       <div className="flex bg-bgColor h-screen w-screen">
-            <SideBar/>
-            <ContactBar/>
-            <MessageTab/>
+            <SignUp/>
       </div>
+      
     </MessageContext.Provider>
   );
 }

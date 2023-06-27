@@ -12,6 +12,9 @@ module.exports = {
         inputColor:'#161d26',
         subColor:'#7c828a',
         fireColor:'#FBA587',
+        btnColor:'#00efbb',
+        purpleGrad:'#4C4177',
+        blueGrad:'#2a5470'
       },
       minWidth:{
         messageMin: 270
