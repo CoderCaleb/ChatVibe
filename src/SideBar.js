@@ -1,6 +1,6 @@
 import { BsPlus, BsFillLightningFill, BsGearFill } from "react-icons/bs";
 import { FaFire, FaPoo } from "react-icons/fa";
-import { getDatabase,ref,push } from "firebase/database";
+import { getDatabase, ref, push } from "firebase/database";
 import fire from "./fire-gif.gif";
 import peace from "./images/peace-sign.png";
 import solo from "./images/chat-icon.png";
@@ -11,7 +11,7 @@ export default function SideBar() {
   const [hover, setHover] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [formIndex, setFormIndex] = useState(1);
-  const [chatName, setChatName] = useState('')
+  const [chatName, setChatName] = useState("");
   console.log(
     "flex items-center justify-center w-screen h-screen absolute",
     showModal ? "opacity-0" : "opacity-100"
@@ -34,8 +34,8 @@ export default function SideBar() {
       </div>
     );
   };
-  function handleChange(event){
-    setChatName(event.target.value)
+  function handleChange(event) {
+    setChatName(event.target.value);
   }
   function ChoiceBox({ message, img, type }) {
     return (
@@ -64,7 +64,15 @@ export default function SideBar() {
           (showModal ? "" : " hidden")
         }
       >
-        <CreateForm formIndex={formIndex} setShowModal={setShowModal} handleChange={handleChange} chatName={chatName} setFormIndex={setFormIndex} ChoiceBox={ChoiceBox} setCloseModal={setShowModal}/>
+        <CreateForm
+          formIndex={formIndex}
+          setShowModal={setShowModal}
+          handleChange={handleChange}
+          chatName={chatName}
+          setFormIndex={setFormIndex}
+          ChoiceBox={ChoiceBox}
+          setCloseModal={setShowModal}
+        />
       </div>
       <div className="flex flex-col h-screen bg-bgColor w-16 top-0 m-0 shadow-lg text-white justify-center gap-1 relative ">
         <div
@@ -95,7 +103,15 @@ export default function SideBar() {
   );
 }
 
-function CreateForm({formIndex,setShowModal,handleChange,chatName,setFormIndex, ChoiceBox, setCloseModal}) {
+function CreateForm({
+  formIndex,
+  setShowModal,
+  handleChange,
+  chatName,
+  setFormIndex,
+  ChoiceBox,
+  setCloseModal,
+}) {
   if (formIndex == 1) {
     return (
       <div className={"text-center bg-white rounded-lg p-5 w-96 relative"}>
@@ -110,8 +126,8 @@ function CreateForm({formIndex,setShowModal,handleChange,chatName,setFormIndex, 
           <img src={peace} className="w-20 m-auto"></img>
           <p className="font-semibold text-xl mb-2">Create a VibeChat</p>
           <p className="font-normal text-neutral-500 text-sm mb-10">
-            Create a VibeChat – Hangout with Friends! Start your chat for 2 or
-            a group and enjoy lively conversations.
+            Create a VibeChat – Hangout with Friends! Start your chat for 2 or a
+            group and enjoy lively conversations.
           </p>
         </div>
         <ChoiceBox message="Initiate a Chat for Two" img={solo} type="duo" />
@@ -121,41 +137,55 @@ function CreateForm({formIndex,setShowModal,handleChange,chatName,setFormIndex, 
       </div>
     );
   } else if (formIndex == 2) {
-    return(
-    <div className={"text-center bg-white rounded-lg p-5 w-96 relative"}>
-      <img
-        src={cross}
-        className="absolute w-4 right-5 cursor-pointer"
-        onClick={() => {
-          setShowModal(false);
-        }}
-      ></img>
-      <div className="">
-        <img src={peace} className="w-20 m-auto"></img>
-        <p className="font-semibold text-xl mb-2">
-          Create your VibeChat
-        </p>
-        <p className="font-normal text-neutral-500 text-sm mb-5">
-          Give your chat a personality with a unique name
-        </p>
+    return (
+      <div className={"text-center bg-white rounded-lg p-5 w-96 relative"}>
+        <img
+          src={cross}
+          className="absolute w-4 right-5 cursor-pointer"
+          onClick={() => {
+            setShowModal(false);
+          }}
+        ></img>
+        <div className="">
+          <img src={peace} className="w-20 m-auto"></img>
+          <p className="font-semibold text-xl mb-2">Create your VibeChat</p>
+          <p className="font-normal text-neutral-500 text-sm mb-5">
+            Give your chat a personality with a unique name
+          </p>
+        </div>
+        <p className="text-start text-sm mb-2">Chat Name</p>
+        <input
+          className="w-full border border-gray-200 rounded-lg p-2 text-sm outline-none"
+          placeholder="John's chat"
+          onChange={(event) => handleChange(event)}
+          value={chatName}
+        ></input>
+        <div className="flex gap-2 mt-5">
+          <button
+            className="flex-1 rounded-lg border-gray-200 border h-10 text-stone-600"
+            onClick={() => {
+              setFormIndex((prev) => prev - 1);
+            }}
+          >
+            Previous
+          </button>
+          <button
+            className="flex-1 rounded-lg h-10 text-white bg-blue-600"
+            onClick={() => {
+              const chatRef = ref(getDatabase(), "/chats");
+              push(chatRef, {
+                author: "user69",
+                chatName: chatName,
+              }).then(() => {
+                setCloseModal(false);
+              });
+            }}
+          >
+            Create
+          </button>
+        </div>
+        <div></div>
       </div>
-      <p className="text-start text-sm mb-2">Chat Name</p>
-      <input className='w-full border border-gray-200 rounded-lg p-2 text-sm outline-none' placeholder="John's chat" onChange={event=>handleChange(event)} value={chatName}></input>
-      <div className='flex gap-2 mt-5'>
-        <button className='flex-1 rounded-lg border-gray-200 border h-10 text-stone-600' onClick={()=>{setFormIndex(prev=>prev-1)}}>Previous</button>
-        <button className='flex-1 rounded-lg h-10 text-white bg-blue-600' onClick={()=>{
-          const chatRef = ref(getDatabase(),'/chats')
-          push(chatRef,{
-            author:'user69',
-            chatName:chatName
-          })
-          .then(()=>{
-            setCloseModal(false)
-          })
-        }}>Create</button>
-      </div>
-      <div></div>
-    </div>
-    )
+    );
   }
 }
