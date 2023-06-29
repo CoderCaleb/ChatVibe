@@ -177,6 +177,9 @@ function CreateForm({
               push(chatRef, {
                 author: auth.currentUser.uid,
                 chatName: chatName,
+                participants:{
+                  [auth.currentUser.uid]:true
+                }
               }).then((value) => {
                 setCloseModal(false);
                 update(userRef,{

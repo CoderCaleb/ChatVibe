@@ -8,7 +8,7 @@ import { onValue, get, getDatabase, ref } from "firebase/database";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import React, { createContext, useState, useEffect } from "react";
 import SignUp from "./SignUp";
-import { Route, Routes, redirect, useNavigate } from "react-router-dom";
+import { Route, Routes, redirect, useNavigate, useParams } from "react-router-dom";
 import SignIn from "./SignIn";
 import DashBoard from "./Dashboard";
 const firebaseConfig = {
@@ -49,6 +49,7 @@ function App() {
               <ProtectedRoute
                 setMessages={setMessages}
                 setUserinfo={setUserinfo}
+                messages={messages}
               >
                 <DashBoard />
               </ProtectedRoute>
@@ -60,12 +61,27 @@ function App() {
     </MessageContext.Provider>
   );
 }
-function ProtectedRoute({ setMessages, setUserinfo, children }) {
+function ProtectedRoute({ setMessages, setUserinfo, messages,children }) {
   const navigate = useNavigate();
-
+  const {chatId} = useParams()
+  useEffect(()=>{
+    const participantRef = ref(getDatabase(),`/chats/${chatId}/participants`)
+    console.log('condition',messages,chatId)
+    if(chatId!=='none'&&Object.keys(messages).includes(chatId)){
+      get(participantRef)
+      .then((snapshot)=>{
+        const keys = Object.keys(snapshot.val())
+        keys.map((value,index)=>{
+          console.log('value',value,getAuth().currentUser.uid)
+          if(value!==getAuth().currentUser.uid){
+            navigate('/homescreen/none')
+          }
+        })
+      })
+    }
+  },[messages])
   useEffect(() => {
     const chatsRef = ref(getDatabase(), "/chats");
-
     const unsubscribe = onAuthStateChanged(getAuth(), (user) => {
       console.log(getAuth().currentUser);
       if (!user) {
@@ -80,9 +96,11 @@ function ProtectedRoute({ setMessages, setUserinfo, children }) {
         onValue(userRef, (snapshot) => {
           setUserinfo(snapshot.val());
         });
+
+       
       }
     });
-
+    
     // Cleanup function
     return () => unsubscribe();
   }, []);

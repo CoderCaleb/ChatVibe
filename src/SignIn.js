@@ -88,7 +88,7 @@ export default function SignUp() {
                 signInWithEmailAndPassword(auth, email, password)
                   .then((value) => {
                     const user = value.user;
-                    navigate("/homescreen");
+                    navigate("/homescreen/none");
                   })
                   .catch((err) => {
                     setShowError(true);
