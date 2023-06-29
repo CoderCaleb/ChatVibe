@@ -27,21 +27,15 @@ export const MessageContext = createContext();
 function App() {
   const navigate = useNavigate();
   const [messages, setMessages] = useState({});
+  const [userInfo, setUserinfo] = useState({});
   useEffect(() => {
-    const chatsRef = ref(getDatabase(), "/chats");
-    onValue(chatsRef, (snapshot) => {
-      setMessages(snapshot.val());
-      console.log(snapshot.val());
-    });
+    console.log("user:", getAuth().currentUser);
   }, []);
-  useEffect(() => {
-    if (Object.keys(messages).length !== 0) {
-      console.log(messages["-MgHj2heLKjKJ75vGsaW"].messages);
-    }
-    console.log(messages);
-  }, [messages]);
+  useEffect(() => {}, [messages]);
   return (
-    <MessageContext.Provider value={{ messages, setMessages }}>
+    <MessageContext.Provider
+      value={{ messages, setMessages, userInfo, setUserinfo }}
+    >
       <div className="flex bg-bgColor h-screen w-screen">
         <Routes>
           <Route path="/" element={<SignUp />} />
@@ -50,9 +44,12 @@ function App() {
             <Route path="signin" element={<SignIn />} />
           </Route>
           <Route
-            path="/homescreen"
+            path="/homescreen/:chatId"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute
+                setMessages={setMessages}
+                setUserinfo={setUserinfo}
+              >
                 <DashBoard />
               </ProtectedRoute>
             }
@@ -63,13 +60,26 @@ function App() {
     </MessageContext.Provider>
   );
 }
-function ProtectedRoute({ children }) {
+function ProtectedRoute({ setMessages, setUserinfo, children }) {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const chatsRef = ref(getDatabase(), "/chats");
+
     const unsubscribe = onAuthStateChanged(getAuth(), (user) => {
+      console.log(getAuth().currentUser);
       if (!user) {
         navigate("/auth");
+      } else {
+        onValue(chatsRef, (snapshot) => {
+          setMessages(snapshot.val());
+        });
+        const auth = getAuth();
+
+        const userRef = ref(getDatabase(), `users/${auth.currentUser.uid}`);
+        onValue(userRef, (snapshot) => {
+          setUserinfo(snapshot.val());
+        });
       }
     });
 

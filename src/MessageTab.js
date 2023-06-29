@@ -2,19 +2,24 @@ import React, {useState,useContext,useEffect,useRef} from 'react'
 import { getDatabase, ref, update,push } from 'firebase/database'
 import send from './images/send-message.png'
 import { MessageContext } from './App'
+import { useParams } from 'react-router-dom'
+import { getAuth } from 'firebase/auth'
 export default function MessageTab() {
   const {messages,setMessages} = useContext(MessageContext)
   const [text,setText] = useState('')
   const containerRef = useRef()
-  const currentChat = Object.keys(messages).length!==0?messages['-MgHj2heLKjKJ75vGsaW'].messages:{}
+  const {chatId} = useParams()
+  console.log(!!messages[chatId].messages)
+  //const currentChat = Object.keys(messages).length!==0&&'messages' in messages?messages[chatId].messages:{}
+  const currentChat =Object.keys(messages).length&&!!messages[chatId].messages?messages[chatId].messages:{}
   function handleSubmit(){
     if(text.trim()!==''){
         const tempObj = {
             content:text,
-            sender:'Caleb',
+            sender:getAuth().currentUser.displayName,
             timestamp:Date.now()
         }
-        const chatRef = ref(getDatabase(),'/chats/-MgHj2heLKjKJ75vGsaW/messages')
+        const chatRef = ref(getDatabase(),`/chats/${chatId}/messages`)
         push(chatRef,tempObj)
         setText('')
     }
@@ -24,13 +29,13 @@ export default function MessageTab() {
     const container = containerRef.current
     container.scrollTo(0,container.scrollHeight)
   },[messages])
+
   return (
     <div className='flex-1 flex min-w-messageMin w-1/4 flex-col relative break-words'>
         <div className='flex gap-4 h-20 min-h-20 items-center pl-5 border-t border-borderColor bg-stone-900 mb-5 shadow-md shadow-stone-800'>
                 <img src={'https://wallpapers.com/images/hd/shadow-boy-white-eyes-unique-cool-pfp-nft-13yuypusuweug9xn.jpg'} className='rounded-3xl w-10 h-10'></img>
                 <div>
-                    <p className='text-white'>Caleb</p>
-                    <p className=' text-subColor text-xs'>suka</p>
+                    <p className='text-white'>{messages[chatId]?messages[chatId].chatName:''}</p>
                 </div>
         </div>
         <div className='overflow-scroll h-4/6' ref={containerRef}>
@@ -40,7 +45,7 @@ export default function MessageTab() {
                     <div key={index}>
                     {
                         index>0?currentChat[value].sender!==currentChat[Object.keys(currentChat)[index-1]].sender?
-                            <MessageBox pfp='https://wallpapers.com/images/hd/shadow-boy-white-eyes-unique-cool-pfp-nft-13yuypusuweug9xn.jpg' name={currentChat[value].sender} msg={currentChat[value].content}/>:<p className='text-white pl-5 h-7 text-sm font-light ml-14'>{currentChat[value].content}</p>
+                            <MessageBox pfp='https://wallpapers.com/images/hd/shadow-boy-white-eyes-unique-cool-pfp-nft-13yuypusuweug9xn.jpg' name={currentChat[value].sender} msg={currentChat[value].content}/>:<p className='text-white pl-5 text-sm font-light mb-2 ml-14'>{currentChat[value].content}</p>
                     :<MessageBox pfp='https://wallpapers.com/images/hd/shadow-boy-white-eyes-unique-cool-pfp-nft-13yuypusuweug9xn.jpg' name={currentChat[value].sender} msg={currentChat[value].content}/>
                     }
                     </div>

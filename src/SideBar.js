@@ -1,21 +1,20 @@
 import { BsPlus, BsFillLightningFill, BsGearFill } from "react-icons/bs";
 import { FaFire, FaPoo } from "react-icons/fa";
-import { getDatabase, ref, push } from "firebase/database";
+import { getDatabase, ref, push, update } from "firebase/database";
 import fire from "./fire-gif.gif";
 import peace from "./images/peace-sign.png";
 import solo from "./images/chat-icon.png";
 import cross from "./images/close.png";
 import rightArrow from "./images/right-arrow.png";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getAuth } from "firebase/auth";
+import { useParams } from "react-router-dom";
 export default function SideBar() {
   const [hover, setHover] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [formIndex, setFormIndex] = useState(1);
   const [chatName, setChatName] = useState("");
-  console.log(
-    "flex items-center justify-center w-screen h-screen absolute",
-    showModal ? "opacity-0" : "opacity-100"
-  );
+  const auth = getAuth()
   const SidebarIcon = ({ icon, text, type }) => {
     return (
       <div
@@ -112,6 +111,7 @@ function CreateForm({
   ChoiceBox,
   setCloseModal,
 }) {
+  const auth = getAuth()
   if (formIndex == 1) {
     return (
       <div className={"text-center bg-white rounded-lg p-5 w-96 relative"}>
@@ -173,11 +173,15 @@ function CreateForm({
             className="flex-1 rounded-lg h-10 text-white bg-blue-600"
             onClick={() => {
               const chatRef = ref(getDatabase(), "/chats");
+              const userRef = ref(getDatabase(), `/users/${auth.currentUser.uid}/chats`)
               push(chatRef, {
-                author: "user69",
+                author: auth.currentUser.uid,
                 chatName: chatName,
-              }).then(() => {
+              }).then((value) => {
                 setCloseModal(false);
+                update(userRef,{
+                  [value.key]:true
+                })
               });
             }}
           >
