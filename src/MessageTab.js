@@ -41,7 +41,7 @@ export default function MessageTab() {
                <p className='text-white'>{messages[chatId]?messages[chatId].chatName:''}</p>
            </div>
    </div>
-   <div className='overflow-scroll h-4/6' ref={containerRef}>
+   <div className=' h-4/6 overflow-y-scroll' ref={containerRef}>
    {
        Object.keys(currentChat).map((value,index)=>{
            return(

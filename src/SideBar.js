@@ -1,6 +1,6 @@
 import { BsPlus, BsFillLightningFill, BsGearFill } from "react-icons/bs";
-import { FaFire, FaPoo } from "react-icons/fa";
-import { getDatabase, ref, push, update } from "firebase/database";
+import { FaFire, FaPoo, FaKey } from "react-icons/fa";
+import { getDatabase, ref, push, update, equalTo, get, query } from "firebase/database";
 import fire from "./fire-gif.gif";
 import peace from "./images/peace-sign.png";
 import solo from "./images/chat-icon.png";
@@ -12,6 +12,7 @@ import { useParams } from "react-router-dom";
 export default function SideBar() {
   const [hover, setHover] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [showJoinModal, setShowJoinModal] = useState(false)
   const [formIndex, setFormIndex] = useState(1);
   const [chatName, setChatName] = useState("");
   const auth = getAuth()
@@ -24,10 +25,13 @@ export default function SideBar() {
             setShowModal(true);
             console.log("plus");
           }
+          else if(type == 'join'){
+            setShowJoinModal(true)
+          }
         }}
       >
         {icon}
-        <span className="toolip group-hover:scale-100">
+        <span className="toolip group-hover:scale-100 w-max">
           <p>{text}</p>
         </span>
       </div>
@@ -73,6 +77,17 @@ export default function SideBar() {
           setCloseModal={setShowModal}
         />
       </div>
+      <div
+        className={
+          "flex items-center justify-center w-screen h-screen absolute transition-all duration-100 z-50" +
+          (showJoinModal ? "" : " hidden")
+        }
+      >
+        <JoinModal
+          showJoinModal={showJoinModal}
+          setShowJoinModal={setShowJoinModal}
+        />
+      </div>
       <div className="flex flex-col h-screen bg-bgColor w-16 top-0 m-0 shadow-lg text-white justify-center gap-1 relative ">
         <div
           className="absolute left-1/2 transform -translate-x-1/2
@@ -87,10 +102,10 @@ export default function SideBar() {
           )}
         </div>
         <SidebarIcon icon={<FaFire size="28" />} text="toolip💡"></SidebarIcon>
-        <SidebarIcon icon={<FaPoo size="28" />} text="toolip💡"></SidebarIcon>
+        <SidebarIcon icon={<FaKey size="28" />} text="Join chat 🚀" type='join'></SidebarIcon>
         <SidebarIcon
           icon={<BsPlus size="28" />}
-          text={"toolip💡"}
+          text={"Create chat💬"}
           type="plus"
         ></SidebarIcon>
         <SidebarIcon
@@ -112,6 +127,16 @@ function CreateForm({
   setCloseModal,
 }) {
   const auth = getAuth()
+  const [uid, setUid] = useState('')
+  function generateUID(){
+    const string = 'qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890'
+    const uid = []
+    for(let i=0;i<=8;i++){
+      uid.push(string[Math.floor(Math.random()*string.length)])
+    }
+    setUid(uid.join(''))
+    return uid.join('')
+  }
   if (formIndex == 1) {
     return (
       <div className={"text-center bg-white rounded-lg p-5 w-96 relative"}>
@@ -173,17 +198,23 @@ function CreateForm({
             className="flex-1 rounded-lg h-10 text-white bg-blue-600"
             onClick={() => {
               const chatRef = ref(getDatabase(), "/chats");
+              setFormIndex((prev) => prev + 1);
               const userRef = ref(getDatabase(), `/users/${auth.currentUser.uid}/chats`)
+              const codesRef = ref(getDatabase(),'/codes')
               push(chatRef, {
                 author: auth.currentUser.uid,
                 chatName: chatName,
                 participants:{
                   [auth.currentUser.uid]:true
-                }
+                },
               }).then((value) => {
-                setCloseModal(false);
                 update(userRef,{
                   [value.key]:true
+                })
+                .then((result)=>{
+                  update(codesRef,{
+                    [generateUID()]:value.key
+                  })
                 })
               });
             }}
@@ -195,4 +226,108 @@ function CreateForm({
       </div>
     );
   }
+  else if(formIndex==3){
+
+    return (
+      <div className={"text-center bg-white rounded-lg p-5 w-96 relative"}>
+        <img
+          src={cross}
+          className="absolute w-4 right-5 cursor-pointer"
+          onClick={() => {
+            setShowModal(false);
+          }}
+        ></img>
+        <div className="">
+          <img src={peace} className="w-20 m-auto"></img>
+          <p className="font-semibold text-xl mb-2">Chat Code Unleashed!</p>
+          <p className="font-normal text-neutral-500 text-sm mb-5">
+          Click the key icon on the navbar and paste the code there to join a chat. Share it with friends!
+          </p>
+        </div>
+       <div className='w-5/6 h-20 bg-gray-100 m-auto rounded-lg flex justify-center items-center'>
+        <p className=" text-2xl tracking-widest font-light">{uid}</p>
+       </div>
+        <div className="flex gap-2 mt-5">
+          <button
+            className="flex-1 rounded-lg border-gray-200 border h-10 text-stone-600"
+            onClick={() => {
+              setFormIndex((prev) => prev - 1);
+            }}
+          >
+            Previous
+          </button>
+          <button
+            className="flex-1 rounded-lg h-10 text-white bg-blue-600"
+            onClick={() => {
+              setFormIndex(1)
+              setShowModal(false)
+            }}
+          >
+            Done
+          </button>
+        </div>
+        <div></div>
+      </div>
+    );
+  
+  }
+}
+function JoinModal({setShowJoinModal,showJoinModal}){
+  const [joinModalIndex, setJoinModalIndex] = useState(1)
+  const [code, setCode] = useState('')
+  const userRef = ref(getDatabase(), `/users/${getAuth().currentUser.uid}/chats`)
+
+  return(
+    <div className={"text-center bg-white rounded-lg p-5 w-96 relative"}>
+    <img
+      src={cross}
+      className="absolute w-4 right-5 cursor-pointer"
+      onClick={() => {
+        setShowJoinModal(false)
+      }}
+    ></img>
+    <div className="">
+      <img src={peace} className="w-20 m-auto"></img>
+      <p className="font-semibold text-xl mb-2">Join Chat with Code</p>
+      <p className="font-normal text-neutral-500 text-sm mb-5">
+      Enter the unique code provided by the group participants to join the chat and connect with others      </p>
+    </div>
+   <input className='w-5/6 h-20 bg-gray-100 m-auto rounded-lg flex justify-center items-center text-2xl tracking-widest font-light text-center placeholder:tracking-normal' placeholder='Enter your code' value={code} onChange={(event)=>{
+    setCode(event.target.value)
+   }}>
+   </input>
+    <div className="flex gap-2 mt-5">
+      
+      <button
+        className="flex-1 rounded-lg h-10 text-white bg-blue-600"
+        onClick={() => {
+          const codesRef = ref(getDatabase(),`/codes/${code}`)
+          get(codesRef)
+          .then((snapshot)=>{
+            if(snapshot.exists()){
+              console.log('Code',snapshot.val())
+              const chatRef = ref(getDatabase(),`/chats/${snapshot.val()}/participants`)
+              update(chatRef,{
+                [getAuth().currentUser.uid]:true
+              })
+              .then((value)=>{
+                update(userRef,{
+                  [snapshot.val()]:true
+                })
+              })
+              setJoinModalIndex(1)
+              setShowJoinModal(false)
+            }
+            else{
+              console.log('Code does not exist')
+            }
+          })
+        }}
+      >
+        Done
+      </button>
+    </div>
+    <div></div>
+  </div>
+  )
 }

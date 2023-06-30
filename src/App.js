@@ -64,6 +64,7 @@ function App() {
 function ProtectedRoute({ setMessages, setUserinfo, messages,children }) {
   const navigate = useNavigate();
   const {chatId} = useParams()
+  const [isSignedIn, setIsSignedIn] = useState(false)
   useEffect(()=>{
     const participantRef = ref(getDatabase(),`/chats/${chatId}/participants`)
     console.log('condition',messages,chatId)
