@@ -7,7 +7,7 @@ import solo from "./images/chat-icon.png";
 import cross from "./images/close.png";
 import rightArrow from "./images/right-arrow.png";
 import { useEffect, useState } from "react";
-import { getAuth } from "firebase/auth";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useParams } from "react-router-dom";
 export default function SideBar() {
   const [hover, setHover] = useState(false);
@@ -105,7 +105,7 @@ export default function SideBar() {
         <SidebarIcon icon={<FaKey size="28" />} text="Join chat 🚀" type='join'></SidebarIcon>
         <SidebarIcon
           icon={<BsPlus size="28" />}
-          text={"Create chat💬"}
+          text={"Create chat 💬"}
           type="plus"
         ></SidebarIcon>
         <SidebarIcon
@@ -275,8 +275,10 @@ function CreateForm({
 function JoinModal({setShowJoinModal,showJoinModal}){
   const [joinModalIndex, setJoinModalIndex] = useState(1)
   const [code, setCode] = useState('')
-  const userRef = ref(getDatabase(), `/users/${getAuth().currentUser.uid}/chats`)
-
+  let userRef = null
+  onAuthStateChanged(getAuth(),(user)=>{
+    userRef = ref(getDatabase(), `/users/${user.uid}/chats`)
+  })
   return(
     <div className={"text-center bg-white rounded-lg p-5 w-96 relative"}>
     <img
@@ -301,7 +303,7 @@ function JoinModal({setShowJoinModal,showJoinModal}){
       <button
         className="flex-1 rounded-lg h-10 text-white bg-blue-600"
         onClick={() => {
-          const codesRef = ref(getDatabase(),`/codes/${code}`)
+          const codesRef = ref(getDatabase(),`/codes/${code.trim()}`)
           get(codesRef)
           .then((snapshot)=>{
             if(snapshot.exists()){

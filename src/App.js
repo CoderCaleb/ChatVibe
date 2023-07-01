@@ -68,18 +68,21 @@ function ProtectedRoute({ setMessages, setUserinfo, messages,children }) {
   useEffect(()=>{
     const participantRef = ref(getDatabase(),`/chats/${chatId}/participants`)
     console.log('condition',messages,chatId)
-    if(chatId!=='none'&&Object.keys(messages).includes(chatId)){
-      get(participantRef)
-      .then((snapshot)=>{
-        const keys = Object.keys(snapshot.val())
-        keys.map((value,index)=>{
-          console.log('value',value,getAuth().currentUser.uid)
-          if(value!==getAuth().currentUser.uid){
+    onAuthStateChanged(getAuth(),(user)=>{
+      if(chatId!=='none'&&Object.keys(messages).includes(chatId)){
+        get(participantRef)
+        .then((snapshot)=>{
+          const keys = Object.keys(snapshot.val())
+          if(keys.includes(user.uid)){
+            console.log('User in')
+          }
+          else{
             navigate('/homescreen/none')
           }
         })
-      })
-    }
+      }
+    })
+    
   },[messages])
   useEffect(() => {
     const chatsRef = ref(getDatabase(), "/chats");
