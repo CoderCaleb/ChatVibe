@@ -1,20 +1,25 @@
 import { BsPlus, BsFillLightningFill, BsGearFill } from "react-icons/bs";
 import { FaFire, FaPoo, FaKey } from "react-icons/fa";
-import { getDatabase, ref, push, update, equalTo, get, query } from "firebase/database";
+import { getDatabase, ref, push, update, equalTo, get, query, orderByValue } from "firebase/database";
+import EmojiPicker from "emoji-picker-react";
+import {MdOutlineEmojiEmotions} from 'react-icons/md'
 import fire from "./fire-gif.gif";
 import peace from "./images/peace-sign.png";
 import solo from "./images/chat-icon.png";
 import cross from "./images/close.png";
 import rightArrow from "./images/right-arrow.png";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useParams } from "react-router-dom";
+import { MessageContext } from "./App";
+
 export default function SideBar() {
   const [hover, setHover] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [showJoinModal, setShowJoinModal] = useState(false)
   const [formIndex, setFormIndex] = useState(1);
   const [chatName, setChatName] = useState("");
+  const {showCodeModal,setShowCodeModal} = useContext(MessageContext)
   const auth = getAuth()
   const SidebarIcon = ({ icon, text, type }) => {
     return (
@@ -63,7 +68,7 @@ export default function SideBar() {
     <>
       <div
         className={
-          "flex items-center justify-center w-screen h-screen absolute transition-all duration-100 z-50" +
+          "flex items-center justify-center w-screen h-screen absolute transition-all duration-100 z-50 bg-blackRgba" +
           (showModal ? "" : " hidden")
         }
       >
@@ -79,13 +84,24 @@ export default function SideBar() {
       </div>
       <div
         className={
-          "flex items-center justify-center w-screen h-screen absolute transition-all duration-100 z-50" +
+          "flex items-center justify-center w-screen h-screen absolute transition-all duration-100 z-50 bg-blackRgba" +
           (showJoinModal ? "" : " hidden")
         }
       >
         <JoinModal
           showJoinModal={showJoinModal}
           setShowJoinModal={setShowJoinModal}
+        />
+      </div>
+      <div
+        className={
+          "flex items-center justify-center w-screen h-screen absolute transition-all duration-100 z-50 bg-blackRgba" +
+          (showCodeModal ? "" : " hidden")
+        }
+      >
+        <CodeModal
+          setShowCodeModal={setShowCodeModal}
+          showCodeModal={showCodeModal}
         />
       </div>
       <div className="flex flex-col h-screen bg-bgColor w-16 top-0 m-0 shadow-lg text-white justify-center gap-1 relative ">
@@ -128,6 +144,8 @@ function CreateForm({
 }) {
   const auth = getAuth()
   const [uid, setUid] = useState('')
+  const [showEmoji,setShowEmoji] = useState(false)
+  const [selectedEmoji, setSelectedEmoji] = useState('')
   function generateUID(){
     const string = 'qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890'
     const uid = []
@@ -175,8 +193,21 @@ function CreateForm({
           <img src={peace} className="w-20 m-auto"></img>
           <p className="font-semibold text-xl mb-2">Create your VibeChat</p>
           <p className="font-normal text-neutral-500 text-sm mb-5">
-            Give your chat a personality with a unique name
+          Personalize your chat with a unique name and emoji profile picture.
           </p>
+        </div>
+        <div className='relative'>
+          <div className={'absolute'+(showEmoji?' right-64 bottom-1':' hidden')}>
+            <EmojiPicker height={'55vh'} onEmojiClick={(emojiData)=>{
+              setSelectedEmoji(emojiData.emoji)
+              setShowEmoji(false)
+            }}/>
+          </div>
+          <button className=" rounded-full w-20 h-20 flex items-center justify-center bg-gray-100 m-auto" onClick={()=>{
+            setShowEmoji(!showEmoji)
+          }}>
+            {selectedEmoji?<div className='flex items-center justify-center'><p className=' text-4xl'>{selectedEmoji}</p></div>:<MdOutlineEmojiEmotions size={30} className='text-subColor'/>}
+          </button>
         </div>
         <p className="text-start text-sm mb-2">Chat Name</p>
         <input
@@ -204,6 +235,7 @@ function CreateForm({
               push(chatRef, {
                 author: auth.currentUser.uid,
                 chatName: chatName,
+                pfp:selectedEmoji,
                 participants:{
                   [auth.currentUser.uid]:true
                 },
@@ -241,7 +273,7 @@ function CreateForm({
           <img src={peace} className="w-20 m-auto"></img>
           <p className="font-semibold text-xl mb-2">Chat Code Unleashed!</p>
           <p className="font-normal text-neutral-500 text-sm mb-5">
-          Click the key icon on the navbar and paste the code there to join a chat. Share it with friends!
+          Share this code with friends to invite them to the chat
           </p>
         </div>
        <div className='w-5/6 h-20 bg-gray-100 m-auto rounded-lg flex justify-center items-center'>
@@ -324,6 +356,67 @@ function JoinModal({setShowJoinModal,showJoinModal}){
               console.log('Code does not exist')
             }
           })
+        }}
+      >
+        Done
+      </button>
+    </div>
+    <div></div>
+  </div>
+  )
+}
+
+const CodeModal = ({setShowCodeModal,showCodeModal})=>{
+  const [code, setCode] = useState('')
+  const {chatId} = useParams()
+  const codesRef = ref(getDatabase(),'/codes')
+  const queryRef = query(
+    codesRef, 
+    orderByValue(), // 👈
+    equalTo(chatId)
+  );  useEffect(()=>{
+    console.log(queryRef)
+    if(showCodeModal==true){
+      setCode('')
+      get(queryRef)
+      .then((snapshot)=>{
+        console.log(snapshot.val())
+
+        if(snapshot.exists()){
+          setCode(Object.keys(snapshot.val())[0])
+          console.log('snapshot:',snapshot.val())
+        }
+        else{
+          setCode('Chat code failed')
+        }
+      })
+    }
+  },[showCodeModal])
+  
+  return(
+    <div className={"text-center bg-white rounded-lg p-5 w-96 relative"}>
+    <img
+      src={cross}
+      className="absolute w-4 right-5 cursor-pointer"
+      onClick={() => {
+        setShowCodeModal(false)
+      }}
+    ></img>
+    <div className="">
+      <img src={peace} className="w-20 m-auto"></img>
+      <p className="font-semibold text-xl mb-2">The Chat Code Revealed</p>
+      <p className="font-normal text-neutral-500 text-sm mb-5">
+      Invite others to the chat by sharing this unique code     </p>
+    </div>
+    <div className='w-5/6 h-20 bg-gray-100 m-auto rounded-lg flex justify-center items-center'>
+        <p className=" text-2xl tracking-widest font-light">{code!==''?code:'Loading...'}</p>
+    </div>
+    <div className="flex gap-2 mt-5">
+      
+      <button
+        className="flex-1 rounded-lg h-10 text-white bg-blue-600"
+        onClick={() => {
+          setShowCodeModal(false)
         }}
       >
         Done

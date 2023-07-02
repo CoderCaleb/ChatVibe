@@ -5,7 +5,8 @@ import { MessageContext } from "./App";
 import { getDatabase, ref, get } from "firebase/database";
 import { Link } from "react-router-dom";
 export default function ContactBar() {
-  const { userInfo } = useContext(MessageContext);
+  const { userInfo, messages } = useContext(MessageContext);
+
   const [chatKeys, setChatKeys] = useState([]);
   useEffect(() => {
     const tempArr = [];
@@ -53,10 +54,17 @@ export default function ContactBar() {
 }
 
 const ContactBox = ({ name, pfp, lastMsg, chatId }) => {
+  const { userInfo, messages } = useContext(MessageContext);
+
   return (
     <Link to={`/homescreen/${chatId}`}>
       <div className="flex gap-2 h-16 items-center pl-5 border-t border-borderColor cursor-pointer hover:bg-slate-800">
-        <img src={pfp} className="rounded-3xl w-10 h-10"></img>
+        <button
+          className=" rounded-xl w-10 h-10 flex items-center justify-center bg-stone-800"
+          onClick={() => {}}
+        >
+          {<p className=" text-2xl">{messages[chatId].pfp}</p>}
+        </button>
         <div>
           <p className="text-white">{name}</p>
           <p className=" text-subColor text-xs">{lastMsg}</p>

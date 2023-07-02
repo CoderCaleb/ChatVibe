@@ -14,7 +14,8 @@ module.exports = {
         fireColor:'#FBA587',
         btnColor:'#00efbb',
         purpleGrad:'#4C4177',
-        blueGrad:'#2a5470'
+        blueGrad:'#2a5470',
+        blackRgba: 'rgba(0, 0, 0, 0.2)',
       },
       minWidth:{
         messageMin: 270

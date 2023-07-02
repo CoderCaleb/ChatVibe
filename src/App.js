@@ -28,13 +28,14 @@ function App() {
   const navigate = useNavigate();
   const [messages, setMessages] = useState({});
   const [userInfo, setUserinfo] = useState({});
+  const [showCodeModal, setShowCodeModal] = useState(false)
   useEffect(() => {
     console.log("user:", getAuth().currentUser);
   }, []);
   useEffect(() => {}, [messages]);
   return (
     <MessageContext.Provider
-      value={{ messages, setMessages, userInfo, setUserinfo }}
+      value={{ messages, setMessages, userInfo, setUserinfo, showCodeModal, setShowCodeModal }}
     >
       <div className="flex bg-bgColor h-screen w-screen">
         <Routes>

@@ -5,7 +5,7 @@ import ContactBar from "./ContactBar";
 import MessageTab from "./MessageTab";
 export default function DashBoard() {
   return (
-    <div className="flex bg-bgColor h-screen w-screen">
+    <div className="flex bg-bgColor h-screen w-screen overflow-hidden">
       <SideBar />
       <ContactBar />
       <MessageTab />
