@@ -232,6 +232,7 @@ function CreateForm({
               setFormIndex((prev) => prev + 1);
               const userRef = ref(getDatabase(), `/users/${auth.currentUser.uid}/chats`)
               const codesRef = ref(getDatabase(),'/codes')
+              const metaData = ref(getDatabase(),'/chatMetaData')
               push(chatRef, {
                 author: auth.currentUser.uid,
                 chatName: chatName,
@@ -244,8 +245,17 @@ function CreateForm({
                   [value.key]:true
                 })
                 .then((result)=>{
+                  const uid = generateUID()
                   update(codesRef,{
-                    [generateUID()]:value.key
+                    [uid]:value.key
+                  })
+                  .then((result)=>{
+                    update(metaData,{
+                      [value.key]:{
+                        chatName:chatName,
+                        pfp:selectedEmoji,
+                      }
+                    })
                   })
                 })
               });

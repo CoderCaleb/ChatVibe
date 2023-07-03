@@ -26,7 +26,13 @@ export default function MessageTab() {
         timestamp: Date.now(),
       };
       const chatRef = ref(getDatabase(), `/chats/${chatId}/messages`);
-      push(chatRef, tempObj);
+      const metaDataRef = ref(getDatabase(),`/chatMetaData/${chatId}`)
+      push(chatRef, tempObj)
+      .then((value)=>{
+        update(metaDataRef,{
+          lastMsg:text
+        })
+      });
       setText("");
     }
   }
@@ -56,25 +62,27 @@ export default function MessageTab() {
     return formattedDateTime;
   }
   useEffect(() => {
-    if (Object.keys(messages).includes(chatId)) {
+    if (Object.keys(messages).length!==0&&!!containerRef.current) {
       const container = containerRef.current;
       container.scrollTo(0, container.scrollHeight);
     }
     console.log();
   }, [messages]);
-
-  return Object.keys(messages).includes(chatId) ? (
+useEffect(()=>{
+    console.log(messages)
+},[])
+  return Object.keys(messages).length!==0&&chatId!=='none' ? (
     <div className="flex-1 flex min-w-messageMin w-1/4 flex-col relative break-words">
       <div className="flex gap-2 h-20 min-h-20 items-center pl-5 border-t border-borderColor bg-stone-900 mb-5 shadow-md shadow-slate-700">
         <button
           className=" rounded-xl w-10 h-10 flex items-center justify-center m-auto bg-stone-800"
           onClick={() => {}}
         >
-          {<p className=" text-2xl">{messages[chatId].pfp}</p>}
+          {<p className=" text-2xl">{messages.pfp}</p>}
         </button>
         <div className="flex items-center justify-between flex-1 mr-5">
           <p className="text-white">
-            {messages[chatId] ? messages[chatId].chatName : ""}
+            {messages.chatName}
           </p>
           <FiLink
             size={20}
@@ -86,32 +94,32 @@ export default function MessageTab() {
         </div>
       </div>
       <div className=" h-4/6 overflow-y-scroll" ref={containerRef}>
-        {Object.keys(currentChat).map((value, index) => {
+        {Object.values(!!messages.messages?messages.messages:{}).map((value, index) => {
           return (
             <div key={index}>
               {index > 0 ? (
-                currentChat[value].senderUID !==
-                  currentChat[Object.keys(currentChat)[index - 1]].senderUID ||
-                currentChat[value].timestamp -
-                  currentChat[Object.keys(currentChat)[index - 1]].timestamp >
+                value.senderUID !==
+                  messages.messages[Object.keys(messages.messages)[index - 1]].senderUID ||
+                value.timestamp -
+                  messages.messages[Object.keys(messages.messages)[index - 1]].timestamp >
                   60000 ? (
                   <MessageBox
                     pfp="https://wallpapers.com/images/hd/shadow-boy-white-eyes-unique-cool-pfp-nft-13yuypusuweug9xn.jpg"
-                    name={currentChat[value].sender}
-                    msg={currentChat[value].content}
-                    date={formatDateTime(currentChat[value].timestamp)}
+                    name={value.sender}
+                    msg={value.content}
+                    date={formatDateTime(value.timestamp)}
                   />
                 ) : (
                   <p className="text-white pl-5 text-sm font-light mb-2 ml-14">
-                    {currentChat[value].content}
+                    {value.content}
                   </p>
                 )
               ) : (
                 <MessageBox
                   pfp="https://wallpapers.com/images/hd/shadow-boy-white-eyes-unique-cool-pfp-nft-13yuypusuweug9xn.jpg"
-                  name={currentChat[value].sender}
-                  msg={currentChat[value].content}
-                  date={formatDateTime(currentChat[value].timestamp)}
+                  name={value.sender}
+                  msg={value.content}
+                  date={formatDateTime(value.timestamp)}
                 />
               )}
             </div>

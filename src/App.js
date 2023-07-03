@@ -68,13 +68,13 @@ function ProtectedRoute({ setMessages, setUserinfo, messages,children }) {
   const [isSignedIn, setIsSignedIn] = useState(false)
   useEffect(()=>{
     const participantRef = ref(getDatabase(),`/chats/${chatId}/participants`)
-    console.log('condition',messages,chatId)
+    console.log('condition',messages)
     onAuthStateChanged(getAuth(),(user)=>{
-      if(chatId!=='none'&&Object.keys(messages).includes(chatId)){
+      if(chatId!=='none'&&Object.keys(messages).length!==0){
         get(participantRef)
         .then((snapshot)=>{
           const keys = Object.keys(snapshot.val())
-          if(keys.includes(user.uid)){
+          if(Object.keys(messages.participants).includes(user.uid)){
             console.log('User in')
           }
           else{
@@ -86,30 +86,46 @@ function ProtectedRoute({ setMessages, setUserinfo, messages,children }) {
     
   },[messages])
   useEffect(() => {
-    const chatsRef = ref(getDatabase(), "/chats");
+    const chatsRef = ref(getDatabase(), "/chats/"+chatId);
     const unsubscribe = onAuthStateChanged(getAuth(), (user) => {
-      console.log(getAuth().currentUser);
       if (!user) {
         navigate("/auth");
       } else {
         onValue(chatsRef, (snapshot) => {
-          setMessages(snapshot.val());
+          if(snapshot.exists()){
+            console.log('SNAPSHOT:',snapshot.val().messages)
+            setMessages(snapshot.val());
+          }
+          else{
+            setMessages({})
+            console.log('Data doesnt exist')
+          }
         });
         const auth = getAuth();
 
-        const userRef = ref(getDatabase(), `users/${auth.currentUser.uid}`);
-        onValue(userRef, (snapshot) => {
-          setUserinfo(snapshot.val());
-        });
-
-       
       }
     });
     
     // Cleanup function
     return () => unsubscribe();
-  }, []);
+  }, [chatId]);
 
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(getAuth(), (user) => {
+      if (!user) {
+        navigate("/auth");
+      } else {
+        const auth = getAuth();
+        const userRef = ref(getDatabase(), `users/${auth.currentUser.uid}`);
+        onValue(userRef, (snapshot) => {
+          setUserinfo(snapshot.val());
+        });
+      }
+    });
+    return () => unsubscribe();
+
+  }, []);
+  
   return children;
 }
 export default App;
