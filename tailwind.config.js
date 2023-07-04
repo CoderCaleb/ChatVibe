@@ -15,7 +15,7 @@ module.exports = {
         btnColor:'#00efbb',
         purpleGrad:'#4C4177',
         blueGrad:'#2a5470',
-        blackRgba: 'rgba(0, 0, 0, 0.2)',
+        blackRgba: 'rgba(0, 0, 0, 0.7)',
       },
       minWidth:{
         messageMin: 270

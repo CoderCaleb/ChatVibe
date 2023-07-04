@@ -7,6 +7,7 @@ import fire from "./fire-gif.gif";
 import peace from "./images/peace-sign.png";
 import solo from "./images/chat-icon.png";
 import cross from "./images/close.png";
+import group from "./images/debate.png"
 import rightArrow from "./images/right-arrow.png";
 import { useEffect, useState, useContext } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
@@ -48,7 +49,7 @@ export default function SideBar() {
   function ChoiceBox({ message, img, type }) {
     return (
       <div
-        className="flex relative justify-between items-center w-full border rounded-lg mt-3 px-3 hover:bg-slate-100 cursor-pointer transition-all duration-300"
+        className="flex relative justify-between items-center w-full border border-slate-300 rounded-lg mt-3 px-3 hover:bg-slate-200 cursor-pointer transition-all duration-100 h-16"
         onClick={() => {
           if (type == "duo") {
             setFormIndex((prev) => (prev += 1));
@@ -56,7 +57,7 @@ export default function SideBar() {
         }}
       >
         <div className="flex items-center gap-2">
-          <img src={img} className="w-12"></img>
+          <img src={img} className={type==group?"w-10":"w-12"}></img>
           <p className="font-semibold">{message}</p>
         </div>
         <img src={rightArrow} className="w-4 mr-3"></img>
@@ -168,13 +169,13 @@ function CreateForm({
         <div className="">
           <img src={peace} className="w-20 m-auto"></img>
           <p className="font-semibold text-xl mb-2">Create a VibeChat</p>
-          <p className="font-normal text-neutral-500 text-sm mb-10">
+          <p className="font-normal text-neutral-500 text-sm mb-5">
             Create a VibeChat – Hangout with Friends! Start your chat for 2 or a
             group and enjoy lively conversations.
           </p>
         </div>
         <ChoiceBox message="Initiate a Chat for Two" img={solo} type="duo" />
-        <ChoiceBox message="Start a Group Chat" img={solo} type="group" />
+        <ChoiceBox message="Start a Group Chat" img={group} type="group" />
 
         <div></div>
       </div>

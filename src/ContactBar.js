@@ -1,6 +1,6 @@
 import React from "react";
 import { getAuth } from "firebase/auth";
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext,useRef } from "react";
 import { MessageContext } from "./App";
 import { getDatabase, ref, get, onValue } from "firebase/database";
 import { Link, useParams } from "react-router-dom";
@@ -8,7 +8,8 @@ export default function ContactBar() {
   const { userInfo, messages } = useContext(MessageContext);
   const { chatId } = useParams();
   const [lastMsg,setLastMsg] = useState('')
-  const [chatKeys, setChatKeys] = useState([]);
+  const originalRef = useRef([])
+  const [filteredArr, setFilteredArr] = useState([])
   const tempArr = [];
 
   useEffect(() => {
@@ -20,16 +21,15 @@ export default function ContactBar() {
           ? (tempArr[index] = { ...snapshot.val(), chatId: snapshot.key })
           : tempArr.push({ ...snapshot.val(), chatId: value });
                   console.log('tempArr:',tempArr[0],'value',snapshot.key)
-          setChatKeys([...tempArr])
+          originalRef.current = tempArr
+          setFilteredArr([...tempArr])
         }));
       });
     }
 
     console.log(userInfo.chats ? Object.keys(userInfo.chats) : []);
   }, [userInfo]);
-  useEffect(() => {
-    console.log('chatkeystate',chatKeys)
-  }, [chatKeys]);
+
   return (
     <div className="flex border-r border-l border-borderColor w-72 flex-col">
       
@@ -37,11 +37,24 @@ export default function ContactBar() {
         <input
           placeholder="Search"
           className=" z-50 w-full my-5 bg-inputColor rounded py-2 text-white pl-2 outline-none placeholder-borderColor shadow-sm shadow-slate-500"
+          onChange={(event)=>{
+            console.log(event.target.value)
+            if(event.target.value!==''){
+              const filteredResult = filteredArr.filter((value,index)=>{
+                return value.chatName.includes(event.target.value)
+              })
+              console.log("🚀 ~ file: ContactBar.js:46 ~ ContactBar ~ console.log(filteredArr):", filteredArr)
+              setFilteredArr([...filteredResult])
+            }
+            else{
+              setFilteredArr([...originalRef.current])
+            }
+          }}
         ></input>
       </div>
-      {Object.keys(messages).length!==0?
+      {true?
       <div className="flex flex-col">
-        {chatKeys.map((value, index) => {
+        {filteredArr.map((value, index) => {
           return (
             <ContactBox
               name={value.chatName}

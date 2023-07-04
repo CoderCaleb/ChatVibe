@@ -4,7 +4,7 @@ import SideBar from "./SideBar";
 import ContactBar from "./ContactBar";
 import MessageTab from "./MessageTab";
 import firebase from "firebase/compat/app";
-import { onValue, get, getDatabase, ref } from "firebase/database";
+import { onValue, get, getDatabase, ref,off } from "firebase/database";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import React, { createContext, useState, useEffect } from "react";
 import SignUp from "./SignUp";
@@ -69,11 +69,12 @@ function ProtectedRoute({ setMessages, setUserinfo, messages,children }) {
   useEffect(()=>{
     const participantRef = ref(getDatabase(),`/chats/${chatId}/participants`)
     console.log('condition',messages)
-    onAuthStateChanged(getAuth(),(user)=>{
+    const unsubscribe = onAuthStateChanged(getAuth(),(user)=>{
       if(chatId!=='none'&&Object.keys(messages).length!==0){
         get(participantRef)
         .then((snapshot)=>{
           const keys = Object.keys(snapshot.val())
+          console.log(snapshot.val(),user.uid)
           if(Object.keys(messages.participants).includes(user.uid)){
             console.log('User in')
           }
@@ -83,7 +84,8 @@ function ProtectedRoute({ setMessages, setUserinfo, messages,children }) {
         })
       }
     })
-    
+    return () => {unsubscribe()};
+
   },[messages])
   useEffect(() => {
     const chatsRef = ref(getDatabase(), "/chats/"+chatId);
@@ -92,6 +94,7 @@ function ProtectedRoute({ setMessages, setUserinfo, messages,children }) {
         navigate("/auth");
       } else {
         onValue(chatsRef, (snapshot) => {
+          console.log('data pulled')
           if(snapshot.exists()){
             console.log('SNAPSHOT:',snapshot.val().messages)
             setMessages(snapshot.val());
@@ -107,7 +110,7 @@ function ProtectedRoute({ setMessages, setUserinfo, messages,children }) {
     });
     
     // Cleanup function
-    return () => unsubscribe();
+    return () => {unsubscribe()};
   }, [chatId]);
 
   useEffect(() => {
