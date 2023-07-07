@@ -2,7 +2,7 @@ import React from "react";
 import { getAuth } from "firebase/auth";
 import { useState, useEffect, useContext,useRef } from "react";
 import { MessageContext } from "./App";
-import { getDatabase, ref, get, onValue } from "firebase/database";
+import { getDatabase, ref, get, onValue,off } from "firebase/database";
 import { Link, useParams } from "react-router-dom";
 export default function ContactBar() {
   const { userInfo, messages } = useContext(MessageContext);
@@ -13,22 +13,30 @@ export default function ContactBar() {
   const tempArr = [];
 
   useEffect(() => {
+    const listenerRefs = []; // Array to store the listener references
+  
     if (userInfo.chats) {
-      const promises = Object.keys(userInfo.chats).map(async (value, index) => {
+      Object.keys(userInfo.chats).forEach((value, index) => {
         const chatsRef = ref(getDatabase(), `/chatMetaData/${value}`);
-        return onValue(chatsRef,((snapshot) => {
-          tempArr.some(obj => Object.values(obj).includes(value))
-          ? (tempArr[index] = { ...snapshot.val(), chatId: snapshot.key })
-          : tempArr.push({ ...snapshot.val(), chatId: value });
-                  console.log('tempArr:',tempArr[0],'value',snapshot.key)
-          originalRef.current = tempArr
-          setFilteredArr([...tempArr])
-        }));
+        const listenerRef = onValue(chatsRef, (snapshot) => {
+          tempArr.some((obj) => Object.values(obj).includes(value))
+            ? (tempArr[index] = { ...snapshot.val(), chatId: snapshot.key })
+            : tempArr.push({ ...snapshot.val(), chatId: value });
+          console.log('tempArr:', tempArr[0], 'value', snapshot.key);
+          originalRef.current = tempArr;
+          setFilteredArr([...tempArr]);
+        });
+        listenerRefs.push(listenerRef); // Add the listener reference to the array
       });
     }
-
-    console.log(userInfo.chats ? Object.keys(userInfo.chats) : []);
+  
+    // Cleanup function to unsubscribe the listeners
+    return () => {
+      listenerRefs.forEach((listenerRef) => off(listenerRef));
+    };
+  
   }, [userInfo]);
+  
 
   return (
     <div className="flex border-r border-l border-borderColor w-72 flex-col">
@@ -40,7 +48,8 @@ export default function ContactBar() {
           onChange={(event)=>{
             console.log(event.target.value)
             if(event.target.value!==''){
-              const filteredResult = filteredArr.filter((value,index)=>{
+              const filteredResult = originalRef.current.filter((value,index)=>{
+                console.log(value.chatName)
                 return value.chatName.includes(event.target.value)
               })
               console.log("🚀 ~ file: ContactBar.js:46 ~ ContactBar ~ console.log(filteredArr):", filteredArr)

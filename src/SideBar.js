@@ -21,7 +21,14 @@ export default function SideBar() {
   const [formIndex, setFormIndex] = useState(1);
   const [chatName, setChatName] = useState("");
   const {showCodeModal,setShowCodeModal} = useContext(MessageContext)
+  const [user, setUser] = useState(null);
   const auth = getAuth()
+useEffect(()=>{
+  onAuthStateChanged(auth,(user) => {
+    setUser(user);
+  });
+},[])
+
   const SidebarIcon = ({ icon, text, type }) => {
     return (
       <div
@@ -46,6 +53,22 @@ export default function SideBar() {
   function handleChange(event) {
     setChatName(event.target.value);
   }
+   const getColorFromLetter = (letter) => {
+    const colors = [
+      " bg-red-500",
+      " bg-yellow-500",
+      " bg-green-500",
+      " bg-blue-500",
+      " bg-indigo-500",
+      " bg-purple-500",
+      " bg-pink-500",
+      " bg-gray-500",
+    ];
+
+    // Get the index based on the letter's char code
+    const index = letter.charCodeAt(0) % colors.length;
+    return colors[index];
+  };
   function ChoiceBox({ message, img, type }) {
     return (
       <div
@@ -112,11 +135,16 @@ export default function SideBar() {
           onMouseEnter={() => setHover(true)}
           onMouseLeave={() => setHover(false)}
         >
-          {hover ? (
-            <img src={fire} className=""></img>
-          ) : (
-            <FaFire size="25" className="text-fireColor" />
-          )}
+        {user && (
+      <div
+        className={
+          "rounded-3xl w-10 h-10 flex items-center justify-center cursor-pointer hover:animate-bounce" +
+          getColorFromLetter(user.displayName[0].toUpperCase())
+        }
+      >
+        <p className="text-white">{user.displayName[0].toUpperCase()}</p>
+      </div>
+    )}
         </div>
         <SidebarIcon icon={<FaFire size="28" />} text="toolip💡"></SidebarIcon>
         <SidebarIcon icon={<FaKey size="28" />} text="Join chat 🚀" type='join'></SidebarIcon>
@@ -320,7 +348,7 @@ function JoinModal({setShowJoinModal,showJoinModal}){
   const [code, setCode] = useState('')
   let userRef = null
   onAuthStateChanged(getAuth(),(user)=>{
-    userRef = ref(getDatabase(), `/users/${user.uid}/chats`)
+    userRef = user?ref(getDatabase(), `/users/${user.uid}/chats`):null
   })
   return(
     <div className={"text-center bg-white rounded-lg p-5 w-96 relative"}>

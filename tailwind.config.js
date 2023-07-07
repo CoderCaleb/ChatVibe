@@ -18,7 +18,7 @@ module.exports = {
         blackRgba: 'rgba(0, 0, 0, 0.7)',
       },
       minWidth:{
-        messageMin: 270
+        messageMin: '310px'
       }
     },
   },

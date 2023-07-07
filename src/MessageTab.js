@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect, useRef } from "react";
-import { getDatabase, ref, update, push } from "firebase/database";
+import { getDatabase, ref, update, push,get } from "firebase/database";
 import send from "./images/send-message.png";
 import { MessageContext } from "./App";
 import { useParams } from "react-router-dom";
@@ -8,9 +8,10 @@ import { HiOutlineUserGroup } from "react-icons/hi";
 import { FiLink } from "react-icons/fi";
 import EmojiPicker from "emoji-picker-react";
 export default function MessageTab() {
-  const { messages, setMessages, showCodeModal, setShowCodeModal } =
+  const { messages, setMessages, showCodeModal, setShowCodeModal,userInfo } =
     useContext(MessageContext);
   const [text, setText] = useState("");
+  const [names,setNames] = useState([])
   const containerRef = useRef();
   const { chatId } = useParams();
   const currentChat =
@@ -66,14 +67,34 @@ export default function MessageTab() {
       const container = containerRef.current;
       container.scrollTo(0, container.scrollHeight);
     }
-    console.log();
   }, [messages]);
 useEffect(()=>{
-    console.log(messages)
-},[])
+  let namesArr = []
+  if(Object.keys(messages).length!==0){
+    Promise.all(
+      Object.keys(messages.participants).map((uid,index)=>{
+        const nameRef = ref(getDatabase(),'/users/'+uid+'/name')
+        return get(nameRef)
+      })
+    )
+    .then((names)=>{
+      const tempArr = names.map((snapshot,index)=>{
+        console.log(snapshot.val())
+        return snapshot.val()
+      })
+      namesArr = tempArr.slice()
+      console.log('NAME ARR:',tempArr)
+      setNames(tempArr)
+    })
+    .catch((err)=>{
+      console.log(err)
+    })
+  }
+},[messages.chatName])
+
   return Object.keys(messages).length!==0&&chatId!=='none' ? (
     <div className="flex-1 flex min-w-messageMin w-1/4 flex-col relative break-words">
-      <div className="flex gap-2 h-20 min-h-20 items-center pl-5 border-t border-borderColor bg-stone-900 mb-5 shadow-md shadow-slate-700">
+      <div className="flex gap-2 h-24 min-h-20 items-center pl-5 border-t border-borderColor bg-stone-900 mb-5 shadow-md shadow-slate-700">
         <button
           className=" rounded-xl w-10 h-10 flex items-center justify-center m-auto bg-stone-800"
           onClick={() => {}}
@@ -81,9 +102,18 @@ useEffect(()=>{
           {<p className=" text-2xl">{messages.pfp}</p>}
         </button>
         <div className="flex items-center justify-between flex-1 mr-5">
+          <div className='flex flex-col'>
           <p className="text-white">
             {messages.chatName}
           </p>
+          <div className='flex flex-row'>
+            {
+              names.map((name,index)=>{
+                return <p className='text-xs text-subColor' key={index}>{names.length-1===index?name:name+', '}</p>
+              })
+            }
+          </div>
+          </div>
           <FiLink
             size={20}
             className="text-white cursor-pointer"
@@ -93,7 +123,7 @@ useEffect(()=>{
           />
         </div>
       </div>
-      <div className=" h-4/6 overflow-y-scroll" ref={containerRef}>
+      <div className=" h-full mb-20 overflow-y-scroll" ref={containerRef}>
         {Object.values(!!messages.messages?messages.messages:{}).map((value, index) => {
           return (
             <div key={index}>
@@ -196,3 +226,6 @@ const MessageBox = ({ pfp, name, msg, date }) => {
     </div>
   );
 };
+
+
+
