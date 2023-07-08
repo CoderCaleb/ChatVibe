@@ -79,8 +79,8 @@ export default function SignUp() {
         </Link>
       </div>
       <Tilt>
-        <div className="flex h-96 rounded-lg overflow-hidden">
-          <div className="relative flex justify-center items-center flex-1">
+        <div className="flex h-96 rounded-lg overflow-hidden m-auto shadow-lg shadow-slate-600">
+          <div className="relative justify-center items-center flex-1 w-96 hidden md:flex">
             <p className="absolute text-3xl z-50 font-bold text-blue-700 text-center">
               Immerse Yourself in Interaction
             </p>

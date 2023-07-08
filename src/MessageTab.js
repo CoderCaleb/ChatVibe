@@ -2,10 +2,11 @@ import React, { useState, useContext, useEffect, useRef } from "react";
 import { getDatabase, ref, update, push,get } from "firebase/database";
 import send from "./images/send-message.png";
 import { MessageContext } from "./App";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { getAuth } from "firebase/auth";
 import { HiOutlineUserGroup } from "react-icons/hi";
 import { FiLink } from "react-icons/fi";
+import {FaAngleLeft} from 'react-icons/fa'
 import EmojiPicker from "emoji-picker-react";
 export default function MessageTab() {
   const { messages, setMessages, showCodeModal, setShowCodeModal,userInfo } =
@@ -93,8 +94,11 @@ useEffect(()=>{
 },[messages.chatName])
 
   return Object.keys(messages).length!==0&&chatId!=='none' ? (
-    <div className="flex-1 flex min-w-messageMin w-1/4 flex-col relative break-words">
-      <div className="flex gap-2 h-24 min-h-20 items-center pl-5 border-t border-borderColor bg-stone-900 mb-5 shadow-md shadow-slate-700">
+    <div className={"flex-1 min-w-messageMin w-1/4 flex-col relative break-words md:flex border-borderColor border-l md:border-none"+(Object.keys(messages).length!==0?' flex':' hidden')}>
+      <div className="flex gap-2 h-24 min-h-20 items-center pl-5  bg-stone-900 mb-5 md:shadow-md shadow-slate-700">
+        <Link to={'/homescreen/none'}>
+        <FaAngleLeft className='md:hidden text-white text-2xl mr-3 cursor-pointer'></FaAngleLeft>
+        </Link>
         <button
           className=" rounded-xl w-10 h-10 flex items-center justify-center m-auto bg-stone-800"
           onClick={() => {}}
@@ -183,7 +187,7 @@ useEffect(()=>{
       </div>
     </div>
   ) : (
-    <div className="flex items-center justify-center flex-1">
+    <div className="hidden items-center justify-center flex-1 md:flex">
       <h1 className="text-white text-xl">Start chatting with people!</h1>
     </div>
   );

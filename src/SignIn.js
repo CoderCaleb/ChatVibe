@@ -35,14 +35,14 @@ export default function SignUp() {
         </Link>
       </div>
       <Tilt>
-        <div className="flex h-96 rounded-lg overflow-hidden">
-          <div className="relative flex justify-center items-center flex-1">
+        <div className="flex h-96 rounded-lg overflow-hidden m-auto shadow-lg shadow-slate-600">
+          <div className="relative justify-center items-center flex-1 w-96 hidden md:flex">
             <p className="absolute text-3xl z-50 font-bold text-blue-700 text-center">
               Immerse Yourself in Interaction
             </p>
             <img src={abstractBg} className="h-full"></img>
           </div>
-          <div className=" w-96 h-96 bg-neutral-900 px-5 py-7">
+          <div className=" w-96 bg-neutral-900 px-5 py-7 flex flex-col justify-center">
             <p className="text-white text-xl mb-1">Login to your account</p>
             <p className="text-white text-xs font-light text-neutral-400 mb-3">
               Welcome back! Please enter your details
