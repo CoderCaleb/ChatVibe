@@ -6,7 +6,6 @@ import { getDatabase, ref, get, onValue, off } from "firebase/database";
 import { Link, useParams } from "react-router-dom";
 export default function ContactBar() {
   const { userInfo, messages } = useContext(MessageContext);
-  const { chatId } = useParams();
   const [lastMsg, setLastMsg] = useState("");
   const originalRef = useRef([]);
   const [filteredArr, setFilteredArr] = useState([]);
@@ -78,7 +77,7 @@ export default function ContactBar() {
                 key={index}
                 lastMsg={value.lastMsg ? value.lastMsg : " "}
                 pfp={value.pfp}
-                chatId={value.chatId}
+                chatKey={value.chatId}
               />
             );
           })}
@@ -88,10 +87,12 @@ export default function ContactBar() {
   );
 }
 
-const ContactBox = ({ name, pfp, lastMsg, chatId }) => {
+const ContactBox = ({ name, pfp, lastMsg, chatKey }) => {
+  const { chatId } = useParams();
+  console.log(chatId, chatId)
   return (
-    <Link to={`/homescreen/${chatId}`}>
-      <div className="flex gap-2 h-16 items-center pl-5 border-t border-borderColor cursor-pointer hover:bg-slate-800">
+    <Link to={`/homescreen/${chatKey}`}>
+      <div className={"flex gap-2 h-16 items-center pl-5 border-t border-borderColor cursor-pointer hover:bg-slate-700"+(chatId==chatKey?' bg-slate-800':'')}>
         <button
           className=" rounded-xl w-10 h-10 flex items-center justify-center bg-stone-800"
           onClick={() => {}}

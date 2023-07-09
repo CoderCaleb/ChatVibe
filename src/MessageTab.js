@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect, useRef } from "react";
-import { getDatabase, ref, update, push, get } from "firebase/database";
+import { getDatabase, ref, update, push, get, set } from "firebase/database";
 import send from "./images/send-message.png";
 import { MessageContext } from "./App";
 import { Link, useParams } from "react-router-dom";
@@ -9,12 +9,15 @@ import { FiLink } from "react-icons/fi";
 import { FaAngleLeft } from "react-icons/fa";
 import EmojiPicker from "emoji-picker-react";
 import InfoTab from "./InfoTab";
+import { MdReply } from "react-icons/md";
+import cross from "./images/close.png";
 export default function MessageTab() {
   const { messages, setMessages, showCodeModal, setShowCodeModal, userInfo } =
     useContext(MessageContext);
   const [text, setText] = useState("");
   const [names, setNames] = useState([]);
-  const [screen, setScreen] = useState("info");
+  const [screen, setScreen] = useState("message");
+  const [replyInfo, setReplyInfo] = useState({});
   const containerRef = useRef();
   const { chatId } = useParams();
   const currentChat =
@@ -22,12 +25,14 @@ export default function MessageTab() {
       ? messages[chatId].messages
       : {};
   function handleSubmit() {
+    const msgType = Object.keys(replyInfo).length !== 0 ? "reply" : "normal";
     if (text.trim() !== "") {
       const tempObj = {
         content: text,
         sender: getAuth().currentUser.displayName,
         senderUID: getAuth().currentUser.uid,
         timestamp: Date.now(),
+        replyInfo: msgType == "reply" ? replyInfo : false,
       };
       const chatRef = ref(getDatabase(), `/chats/${chatId}/messages`);
       const metaDataRef = ref(getDatabase(), `/chatMetaData/${chatId}`);
@@ -69,7 +74,14 @@ export default function MessageTab() {
       const container = containerRef.current;
       container.scrollTo(0, container.scrollHeight);
     }
+    setReplyInfo({});
   }, [messages]);
+  useEffect(() => {
+    setReplyInfo({});
+  }, [chatId]);
+  useEffect(() => {
+    console.log(userInfo);
+  }, [userInfo]);
   useEffect(() => {
     let namesArr = [];
     if (Object.keys(messages).length !== 0) {
@@ -103,20 +115,25 @@ export default function MessageTab() {
     >
       {screen == "message" ? (
         <>
-          <div className="flex gap-2 h-24 min-h-20 items-center pl-5  bg-stone-900 mb-5 md:shadow-md shadow-slate-700">
+          <div className="flex gap-2 h-24 min-h-20 items-center pl-5  bg-stone-900 mb-3 md:shadow-md shadow-slate-700">
             <Link to={"/homescreen/none"}>
               <FaAngleLeft className="md:hidden text-white text-2xl mr-3 cursor-pointer"></FaAngleLeft>
             </Link>
             <button
               className=" rounded-xl w-10 h-10 flex items-center justify-center m-auto bg-stone-800"
-              onClick={() => {setScreen('info')}}
+              onClick={() => {
+                setScreen("info");
+              }}
             >
               {<p className=" text-2xl">{messages.pfp}</p>}
             </button>
             <div className="flex items-center justify-between flex-1 mr-5">
-              <div className="flex flex-col cursor-pointer" onClick={()=>{
-                setScreen('info')
-              }}>
+              <div
+                className="flex flex-col cursor-pointer"
+                onClick={() => {
+                  setScreen("info");
+                }}
+              >
                 <p className="text-white">{messages.chatName}</p>
                 <div className="flex flex-row">
                   {names.map((name, index) => {
@@ -151,17 +168,33 @@ export default function MessageTab() {
                         messages.messages[
                           Object.keys(messages.messages)[index - 1]
                         ].timestamp >
-                        60000 ? (
+                        60000 ||
+                      value.replyInfo ? (
                         <MessageBox
                           pfp="https://wallpapers.com/images/hd/shadow-boy-white-eyes-unique-cool-pfp-nft-13yuypusuweug9xn.jpg"
                           name={value.sender}
                           msg={value.content}
                           date={formatDateTime(value.timestamp)}
+                          setReplyInfo={setReplyInfo}
+                          msgType={value.replyInfo}
                         />
                       ) : (
-                        <p className="text-white pl-5 text-sm font-light mb-2 ml-14">
-                          {value.content}
-                        </p>
+                        <div className="relative hover:bg-stone-800 h-6 group flex items-center">
+                          <div
+                            className="absolute right-10 text-white hidden cursor-pointer group-hover:block"
+                            onClick={() =>
+                              setReplyInfo({
+                                name: value.sender,
+                                msg: value.content,
+                              })
+                            }
+                          >
+                            <MdReply size="22" />
+                          </div>
+                          <p className="text-white pl-5 text-sm font-light ml-14">
+                            {value.content}
+                          </p>
+                        </div>
                       )
                     ) : (
                       <MessageBox
@@ -169,6 +202,8 @@ export default function MessageTab() {
                         name={value.sender}
                         msg={value.content}
                         date={formatDateTime(value.timestamp)}
+                        setReplyInfo={setReplyInfo}
+                        msgType={value.replyInfo}
                       />
                     )}
                   </div>
@@ -176,34 +211,57 @@ export default function MessageTab() {
               }
             )}
           </div>
-          <div className=" bg-inputColor rounded-xl py-3 text-white pl-4 outline-none placeholder-borderColor absolute bottom-6 left-5 right-5 shadow-slate-600 shadow-lg flex justify-between">
-            <input
-              className="bg-inputColor outline-none flex-1"
-              placeholder="Type message"
-              onChange={(event) => {
-                setText(event.target.value);
-              }}
-              value={text}
-              onKeyDown={(event) => {
-                if (event.key == "Enter") {
-                  handleSubmit();
-                }
-              }}
-            ></input>
-            <div>
-              <img
-                src={send}
-                className="h-6 mr-4 hover:opacity-80 transition-all duration-200"
-                onClick={() => {
-                  handleSubmit();
-                  console.log("clicked");
+          <div className=" bg-inputColor rounded-xl py-3 text-white pl-4 outline-none placeholder-borderColor absolute bottom-6 left-5 right-5 shadow-slate-600 shadow-lg flex flex-col">
+            {Object.keys(replyInfo).length !== 0 ? (
+              <div className="bg-slate-800 py-2 rounded-lg mr-4 pl-4 mb-4 relative">
+                <img
+                  src={cross}
+                  className="w-3 h-3 absolute top-3 right-3 cursor-pointer"
+                  onClick={() => {
+                    setReplyInfo({});
+                  }}
+                />
+                <p className="text-subColor text-sm">
+                  Replying to {replyInfo.name}
+                </p>
+                <p>{replyInfo.msg}</p>
+              </div>
+            ) : (
+              <></>
+            )}
+            <div className="flex justify-between">
+              <input
+                className="bg-inputColor outline-none flex-1"
+                placeholder="Type message"
+                onChange={(event) => {
+                  setText(event.target.value);
                 }}
-              ></img>
+                value={text}
+                onKeyDown={(event) => {
+                  if (event.key == "Enter") {
+                    handleSubmit();
+                  }
+                }}
+              ></input>
+              <div>
+                <img
+                  src={send}
+                  className="h-6 mr-4 hover:opacity-80 transition-all duration-200"
+                  onClick={() => {
+                    handleSubmit();
+                    console.log("clicked");
+                  }}
+                ></img>
+              </div>
             </div>
           </div>
         </>
       ) : (
-        <InfoTab setScreen={setScreen} messages={messages} formatDateTime={formatDateTime}/>
+        <InfoTab
+          setScreen={setScreen}
+          messages={messages}
+          formatDateTime={formatDateTime}
+        />
       )}
     </div>
   ) : (
@@ -213,7 +271,7 @@ export default function MessageTab() {
   );
 }
 
-const MessageBox = ({ pfp, name, msg, date }) => {
+const MessageBox = ({ pfp, name, msg, date, setReplyInfo, msgType }) => {
   const getColorFromLetter = (letter) => {
     const colors = [
       " bg-red-500",
@@ -231,21 +289,50 @@ const MessageBox = ({ pfp, name, msg, date }) => {
     return colors[index];
   };
   return (
-    <div className="flex gap-4 h-16 items-center pl-5">
+    <div className="flex flex-col justify-center py-2 pl-5 relative group hover:bg-stone-800">
       <div
-        className={
-          "rounded-3xl w-10 h-10 flex items-center justify-center" +
-          getColorFromLetter(name[0].toUpperCase())
-        }
+        className="absolute right-10 text-white hidden cursor-pointer group-hover:block"
+        onClick={() => {
+          setReplyInfo({
+            name: name,
+            msg: msg,
+          });
+        }}
       >
-        <p className="text-white">{name[0].toUpperCase()}</p>
+        <MdReply size="25" />
       </div>
-      <div>
-        <div className="flex gap-3 items-center">
-          <p className="text-white">{name}</p>
-          <p className=" text-subColor text-xs">{date}</p>
+      {!!msgType?
+      <div className='flex ml-14 text-subColor gap-2 text-sm items-center'>
+        <div className='flex gap-2 items-center'>
+        <div
+          className={
+            "rounded-3xl w-4 h-4 flex items-center justify-center" +
+            getColorFromLetter(!!msgType?msgType.name[0]:'')
+          }
+        >
+          <p className="text-white">{!!msgType?msgType.name[0]:''}</p>
         </div>
-        <p className="text-white text-sm font-light">{msg}</p>
+        <p className=" font-semibold">{!!msgType?msgType.name:''}</p>
+        </div>
+        <p className=" font-light">{!!msgType?msgType.msg:''}</p>
+      </div>:<></>
+}
+      <div className="flex gap-4">
+        <div
+          className={
+            "rounded-3xl w-10 h-10 flex items-center justify-center" +
+            getColorFromLetter(name[0].toUpperCase())
+          }
+        >
+          <p className="text-white">{name[0].toUpperCase()}</p>
+        </div>
+        <div>
+          <div className="flex gap-3 items-center">
+            <p className="text-white">{name}</p>
+            <p className=" text-subColor text-xs">{date}</p>
+          </div>
+          <p className="text-white text-sm font-light">{msg}</p>
+        </div>
       </div>
     </div>
   );

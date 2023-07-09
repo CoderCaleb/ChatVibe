@@ -56,7 +56,7 @@ export default function InfoTab({ setScreen, messages, formatDateTime }) {
     }
   }, [messages.chatName]);
   return (
-    <div className="flex flex-col gap-4 overflow-y-scroll relative">
+    <div className="flex flex-col gap-3 overflow-y-scroll relative">
       <FaAngleLeft
         className="text-white absolute left-4 top-4 cursor-pointer"
         size="30"
