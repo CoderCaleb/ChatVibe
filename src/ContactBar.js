@@ -43,7 +43,12 @@ export default function ContactBar() {
   }, [userInfo]);
 
   return (
-    <div className={"flex-1 border-r border-l border-borderColor w-72 flex-col md:flex-none md:flex"+(Object.keys(messages).length!==0?' hidden':' flex')}>
+    <div
+      className={
+        "flex-1 border-r border-l border-borderColor w-72 flex-col md:flex-none md:flex" +
+        (Object.keys(messages).length !== 0 ? " hidden" : " flex")
+      }
+    >
       <div className="mx-5">
         <input
           placeholder="Search"
@@ -89,10 +94,15 @@ export default function ContactBar() {
 
 const ContactBox = ({ name, pfp, lastMsg, chatKey }) => {
   const { chatId } = useParams();
-  console.log(chatId, chatId)
+  console.log(chatId, chatId);
   return (
     <Link to={`/homescreen/${chatKey}`}>
-      <div className={"flex gap-2 h-16 items-center pl-5 border-t border-borderColor cursor-pointer hover:bg-slate-700"+(chatId==chatKey?' bg-slate-800':'')}>
+      <div
+        className={
+          "flex gap-2 h-16 items-center pl-5 border-t border-borderColor cursor-pointer hover:bg-slate-700" +
+          (chatId == chatKey ? " bg-slate-800" : "")
+        }
+      >
         <button
           className=" rounded-xl w-10 h-10 flex items-center justify-center bg-stone-800"
           onClick={() => {}}
