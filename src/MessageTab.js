@@ -301,22 +301,24 @@ const MessageBox = ({ pfp, name, msg, date, setReplyInfo, msgType }) => {
       >
         <MdReply size="25" />
       </div>
-      {!!msgType?
-      <div className='flex ml-14 text-subColor gap-2 text-sm items-center'>
-        <div className='flex gap-2 items-center'>
-        <div
-          className={
-            "rounded-3xl w-4 h-4 flex items-center justify-center" +
-            getColorFromLetter(!!msgType?msgType.name[0]:'')
-          }
-        >
-          <p className="text-white">{!!msgType?msgType.name[0]:''}</p>
+      {!!msgType ? (
+        <div className="flex ml-14 text-subColor gap-2 text-sm items-center">
+          <div className="flex gap-2 items-center">
+            <div
+              className={
+                "rounded-3xl w-4 h-4 flex items-center justify-center" +
+                getColorFromLetter(!!msgType ? msgType.name[0] : "")
+              }
+            >
+              <p className="text-white">{!!msgType ? msgType.name[0] : ""}</p>
+            </div>
+            <p className=" font-semibold">{!!msgType ? msgType.name : ""}</p>
+          </div>
+          <p className=" font-light">{!!msgType ? msgType.msg : ""}</p>
         </div>
-        <p className=" font-semibold">{!!msgType?msgType.name:''}</p>
-        </div>
-        <p className=" font-light">{!!msgType?msgType.msg:''}</p>
-      </div>:<></>
-}
+      ) : (
+        <></>
+      )}
       <div className="flex gap-4">
         <div
           className={
