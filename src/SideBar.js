@@ -266,6 +266,7 @@ function CreateForm({
                 author: auth.currentUser.uid,
                 chatName: chatName,
                 pfp:selectedEmoji,
+                timeCreated:Date.now(),
                 participants:{
                   [auth.currentUser.uid]:true
                 },
