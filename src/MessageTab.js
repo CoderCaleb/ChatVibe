@@ -74,6 +74,8 @@ export default function MessageTab() {
       const container = containerRef.current;
       container.scrollTo(0, container.scrollHeight);
     }
+  }, [messages, replyInfo]);
+  useEffect(() => {
     setReplyInfo({});
   }, [messages]);
   useEffect(() => {
@@ -104,7 +106,7 @@ export default function MessageTab() {
           console.log(err);
         });
     }
-  }, [messages.chatName]);
+  }, [messages.chatName, messages.participants]);
 
   return Object.keys(messages).length !== 0 && chatId !== "none" ? (
     <div
@@ -154,7 +156,13 @@ export default function MessageTab() {
               />
             </div>
           </div>
-          <div className=" h-full mb-20 overflow-y-scroll" ref={containerRef}>
+          <div
+            className={
+              " h-full overflow-y-scroll" +
+              (Object.keys(replyInfo).length !== 0 ? " mb-44" : " mb-20")
+            }
+            ref={containerRef}
+          >
             {Object.values(!!messages.messages ? messages.messages : {}).map(
               (value, index) => {
                 return (

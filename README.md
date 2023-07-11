@@ -15,6 +15,6 @@ Technologies Used
 -----------------
 - **React:** JavaScript library for building user interfaces.
 - **Tailwind CSS:** Utility-first CSS framework for styling the user interface.
-- **Firebase Realtime Database:** Backend service for real-time data synchronization.
+- **Firebase Realtime Database:** Backend service for real-time data synchronization and user authentication.
 
 Feel free to explore the features and start chatting with other users!

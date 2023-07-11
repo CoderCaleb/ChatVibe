@@ -35,6 +35,8 @@ function App() {
   const [messages, setMessages] = useState({});
   const [userInfo, setUserinfo] = useState({});
   const [showCodeModal, setShowCodeModal] = useState(false);
+  const [showRemoveModal, setShowRemoveModal] = useState('')
+
   useEffect(() => {
     console.log("user:", getAuth().currentUser);
   }, []);
@@ -48,6 +50,8 @@ function App() {
         setUserinfo,
         showCodeModal,
         setShowCodeModal,
+        showRemoveModal,
+        setShowRemoveModal,
       }}
     >
       <div className="flex bg-bgColor h-screen w-screen">

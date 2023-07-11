@@ -3,8 +3,13 @@ import { FaAngleLeft } from "react-icons/fa";
 import { FiEdit3 } from "react-icons/fi";
 import { BsCheck2 } from "react-icons/bs";
 import { useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { ref, getDatabase, get, update } from "firebase/database";
+import { onAuthStateChanged, getAuth } from "firebase/auth";
+import { FaUserTimes } from "react-icons/fa";
+import { MessageContext } from "./App";
+import cross from "./images/close.png";
+import peace from "./images/peace-sign.png";
 export default function InfoTab({ setScreen, messages, formatDateTime }) {
   const name = "caleb";
   const { chatId } = useParams();
@@ -12,6 +17,8 @@ export default function InfoTab({ setScreen, messages, formatDateTime }) {
   const [author, setAuthor] = useState("");
   const [editMode, setEditMode] = useState(false);
   const [descInput, setDescInput] = useState("");
+  const { setShowRemoveModal, showRemoveModal } = useContext(MessageContext);
+  const [userObj, setUserObj] = useState(null);
   const getColorFromLetter = (letter) => {
     const colors = [
       " bg-red-500",
@@ -28,7 +35,6 @@ export default function InfoTab({ setScreen, messages, formatDateTime }) {
     return colors[index];
   };
   useEffect(() => {
-    let namesArr = [];
     if (Object.keys(messages).length !== 0) {
       Promise.all(
         Object.keys(messages.participants).map((uid, index) => {
@@ -39,10 +45,12 @@ export default function InfoTab({ setScreen, messages, formatDateTime }) {
         .then((names) => {
           const tempArr = names.map((snapshot, index) => {
             console.log(snapshot.val());
-            return snapshot.val();
+            console.log(Object.keys(messages.participants)[index]);
+            return {
+              name: snapshot.val(),
+              uid: Object.keys(messages.participants)[index],
+            };
           });
-          namesArr = tempArr.slice();
-          console.log("USER ARR:", tempArr);
           setNames(tempArr);
         })
         .catch((err) => {
@@ -56,7 +64,12 @@ export default function InfoTab({ setScreen, messages, formatDateTime }) {
         setAuthor(snapshot.val());
       });
     }
-  }, [messages.chatName]);
+  }, [messages.chatName, messages.participants]);
+  useEffect(() => {
+    onAuthStateChanged(getAuth(), (user) => {
+      setUserObj(user);
+    });
+  }, []);
   return (
     <div className="flex flex-col gap-3 overflow-y-scroll relative">
       <FaAngleLeft
@@ -66,6 +79,7 @@ export default function InfoTab({ setScreen, messages, formatDateTime }) {
           setScreen("message");
         }}
       />
+
       <div className="bg-zinc-900 w-full py-6 flex flex-col justify-center items-center gap-2">
         <div className=" rounded-3xl w-36 h-36 bg-stone-800 flex justify-center items-center">
           <p className="text-7xl">{messages.pfp}</p>
@@ -134,16 +148,30 @@ export default function InfoTab({ setScreen, messages, formatDateTime }) {
         <div className="flex flex-col gap-6">
           {names.map((user, index) => {
             return (
-              <div className="flex gap-2 items-center" key={index}>
+              <div className="flex gap-2 items-center group" key={index}>
+                <div onClick={() => setShowRemoveModal(user.uid)}>
+                  <FaUserTimes
+                    className={
+                      "text-red-400 absolute right-5 hidden cursor-pointer" +
+                      (user.uid !== userObj.uid ? " group-hover:block" : "")
+                    }
+                    size={20}
+                  />
+                </div>
                 <div
                   className={
                     "rounded-3xl w-10 h-10 flex items-center justify-center" +
-                    getColorFromLetter(user[0].toUpperCase())
+                    getColorFromLetter(user.name[0].toUpperCase())
                   }
                 >
-                  <p className="text-white">{user[0].toUpperCase()}</p>
+                  <p className="text-white">{user.name[0].toUpperCase()}</p>
                 </div>
-                <p className="text-white">{user}</p>
+                <div>
+                  <p className="text-white inline-block mr-1">{user.name}</p>
+                  <p className={"text-sm text-subColor inline-block"}>
+                    {user.uid == userObj.uid ? "(You)" : ""}
+                  </p>
+                </div>
               </div>
             );
           })}

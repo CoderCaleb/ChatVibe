@@ -9,6 +9,7 @@ import {
   get,
   query,
   orderByValue,
+  remove
 } from "firebase/database";
 import EmojiPicker from "emoji-picker-react";
 import { MdOutlineEmojiEmotions } from "react-icons/md";
@@ -29,7 +30,7 @@ export default function SideBar() {
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [formIndex, setFormIndex] = useState(1);
   const [chatName, setChatName] = useState("");
-  const { showCodeModal, setShowCodeModal } = useContext(MessageContext);
+  const { showCodeModal, setShowCodeModal,setShowRemoveModal,showRemoveModal } = useContext(MessageContext);
   const [user, setUser] = useState(null);
   const auth = getAuth();
   useEffect(() => {
@@ -77,6 +78,9 @@ export default function SideBar() {
     const index = letter.charCodeAt(0) % colors.length;
     return colors[index];
   };
+  useEffect(()=>{
+    console.log('REMOVE MODAL',showRemoveModal)
+  },[showRemoveModal])
   function ChoiceBox({ message, img, type }) {
     return (
       <div
@@ -134,6 +138,17 @@ export default function SideBar() {
         <CodeModal
           setShowCodeModal={setShowCodeModal}
           showCodeModal={showCodeModal}
+        />
+      </div>
+      <div
+        className={
+          "flex items-center justify-center w-screen h-screen absolute transition-all duration-100 z-50 bg-blackRgba" +
+          (showRemoveModal.length!==0 ? "" : " hidden")
+        }
+      >
+        <ConfirmModal
+          setShowRemoveModal={setShowRemoveModal}
+          showRemoveModal={showRemoveModal}
         />
       </div>
       <div className="flex flex-col h-screen bg-bgColor w-16 top-0 m-0 shadow-lg text-white justify-center gap-1 relative ">
@@ -375,6 +390,7 @@ function JoinModal({ setShowJoinModal, showJoinModal }) {
   const [joinModalIndex, setJoinModalIndex] = useState(1);
   const [code, setCode] = useState("");
   let userRef = null;
+  const {chatId} = useParams()
   onAuthStateChanged(getAuth(), (user) => {
     userRef = user ? ref(getDatabase(), `/users/${user.uid}/chats`) : null;
   });
@@ -408,6 +424,7 @@ function JoinModal({ setShowJoinModal, showJoinModal }) {
           className="flex-1 rounded-lg h-10 text-white bg-blue-600"
           onClick={() => {
             const codesRef = ref(getDatabase(), `/codes/${code.trim()}`);
+            const metaRef = ref(getDatabase(),'chatMetaData/'+chatId)
             get(codesRef).then((snapshot) => {
               if (snapshot.exists()) {
                 console.log("Code", snapshot.val());
@@ -421,6 +438,13 @@ function JoinModal({ setShowJoinModal, showJoinModal }) {
                   update(userRef, {
                     [snapshot.val()]: true,
                   });
+                })
+                .then(()=>{
+                  update(metaRef,{
+                    admin:{
+                      [snapshot.val()]:true
+                    }
+                  })
                 });
                 setJoinModalIndex(1);
                 setShowJoinModal(false);
@@ -493,6 +517,66 @@ const CodeModal = ({ setShowCodeModal, showCodeModal }) => {
           }}
         >
           Done
+        </button>
+      </div>
+      <div></div>
+    </div>
+  );
+};
+
+const ConfirmModal = ({ setShowRemoveModal, showRemoveModal }) => {
+  const {chatId} = useParams()
+  const auth = getAuth()
+  return (
+    <div className={"text-center bg-white rounded-lg p-5 w-96 relative"}>
+      <img
+        src={cross}
+        className="absolute w-4 right-5 cursor-pointer"
+        onClick={() => {
+          setShowRemoveModal('')
+        }}
+      ></img>
+      <div className="">
+        <img src={peace} className="w-20 m-auto"></img>
+        <p className="font-semibold text-xl mb-2">Remove User</p>
+        <p className="font-normal text-neutral-500 text-sm mb-5">
+        Are you sure you want to remove this user from the chat? {" "}
+        </p>
+      </div>
+      <div className="flex gap-2 mt-5">
+        <button
+          className="flex-1 rounded-lg border-gray-300 border h-10 text-stone-600"
+          onClick={() => {
+            setShowRemoveModal('')
+          }}
+        >
+          Cancel
+        </button>
+        <button
+          className="flex-1 rounded-lg h-10 text-white bg-blue-600"
+          onClick={() => {
+            const chatRef = ref(getDatabase(),`chats/${chatId}/participants/${showRemoveModal}`)
+            remove(chatRef)
+            .then(()=>{
+              setShowRemoveModal('')
+              onAuthStateChanged(auth, (user) => {
+                if(user){
+                  const userRef = ref(getDatabase(),`users/${showRemoveModal}/chats/${chatId}`)
+                  remove(userRef)
+                  .then(()=>{
+                    console.log('success!')
+                  })
+                  .catch((err)=>{
+                    console.log(err)
+                  })
+                }
+              });            })
+            .catch((err)=>{
+              console.log(err)
+            })
+          }}
+        >
+          Remove
         </button>
       </div>
       <div></div>
