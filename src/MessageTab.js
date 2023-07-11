@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect, useRef } from "react";
-import { getDatabase, ref, update, push, get, set } from "firebase/database";
+import { getDatabase, ref, update, push, get, set, onValue, off } from "firebase/database";
 import send from "./images/send-message.png";
 import { MessageContext } from "./App";
 import { Link, useParams } from "react-router-dom";
@@ -17,7 +17,8 @@ export default function MessageTab() {
   const [text, setText] = useState("");
   const [names, setNames] = useState([]);
   const [screen, setScreen] = useState("message");
-  const [replyInfo, setReplyInfo] = useState({});
+  const [replyInfo, setReplyInfo] = useState({}); 
+  const [metaInfo, setMetaInfo] = useState({})
   const containerRef = useRef();
   const { chatId } = useParams();
   const currentChat =
@@ -81,9 +82,23 @@ export default function MessageTab() {
   useEffect(() => {
     setReplyInfo({});
   }, [chatId]);
-  useEffect(() => {
-    console.log(userInfo);
-  }, [userInfo]);
+  useEffect(()=>{
+    const metaRef = ref(getDatabase(),'/chatMetaData/'+chatId+'/admin')
+    const callback = (snapshot)=>{
+      if(snapshot.exists()){
+        setMetaInfo(snapshot.val())
+        console.log('Snapshot meta data called',snapshot.val())
+      }
+      else{
+        setMetaInfo({})
+      }
+    }
+    const unsubscribe = onValue(metaRef,callback)
+    return ()=>{
+      off(metaRef,'value',callback)
+      unsubscribe()
+    }
+  },[chatId])
   useEffect(() => {
     let namesArr = [];
     if (Object.keys(messages).length !== 0) {
@@ -269,6 +284,7 @@ export default function MessageTab() {
           setScreen={setScreen}
           messages={messages}
           formatDateTime={formatDateTime}
+          metaInfo={metaInfo}
         />
       )}
     </div>

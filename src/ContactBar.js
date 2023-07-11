@@ -74,7 +74,7 @@ export default function ContactBar() {
         ></input>
       </div>
       {true ? (
-        <div className="flex flex-col">
+        <div className="flex flex-col overflow-y-scroll">
           {filteredArr.map((value, index) => {
             return (
               <ContactBox

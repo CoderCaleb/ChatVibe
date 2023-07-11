@@ -8,9 +8,10 @@ import { ref, getDatabase, get, update } from "firebase/database";
 import { onAuthStateChanged, getAuth } from "firebase/auth";
 import { FaUserTimes } from "react-icons/fa";
 import { MessageContext } from "./App";
+import {VscVerifiedFilled} from 'react-icons/vsc'
 import cross from "./images/close.png";
 import peace from "./images/peace-sign.png";
-export default function InfoTab({ setScreen, messages, formatDateTime }) {
+export default function InfoTab({ setScreen, messages, formatDateTime,metaInfo }) {
   const name = "caleb";
   const { chatId } = useParams();
   const [names, setNames] = useState([]);
@@ -34,6 +35,9 @@ export default function InfoTab({ setScreen, messages, formatDateTime }) {
     const index = letter.charCodeAt(0) % colors.length;
     return colors[index];
   };
+  useEffect(()=>{
+    console.log('metaInfo:',Object.keys(metaInfo))
+  },[])
   useEffect(() => {
     if (Object.keys(messages).length !== 0) {
       Promise.all(
@@ -148,19 +152,19 @@ export default function InfoTab({ setScreen, messages, formatDateTime }) {
         <div className="flex flex-col gap-6">
           {names.map((user, index) => {
             return (
-              <div className="flex gap-2 items-center group" key={index}>
+              <div className="flex gap-2 items-center group relative" key={index}>
                 <div onClick={() => setShowRemoveModal(user.uid)}>
                   <FaUserTimes
                     className={
                       "text-red-400 absolute right-5 hidden cursor-pointer" +
-                      (user.uid !== userObj.uid ? " group-hover:block" : "")
+                      (user.uid !== userObj.uid&&Object.keys(metaInfo).includes(userObj.uid) ? " group-hover:block" : "")
                     }
                     size={20}
                   />
                 </div>
                 <div
                   className={
-                    "rounded-3xl w-10 h-10 flex items-center justify-center" +
+                    "rounded-3xl w-10 h-10 flex items-center justify-center relative" +
                     getColorFromLetter(user.name[0].toUpperCase())
                   }
                 >
@@ -171,6 +175,10 @@ export default function InfoTab({ setScreen, messages, formatDateTime }) {
                   <p className={"text-sm text-subColor inline-block"}>
                     {user.uid == userObj.uid ? "(You)" : ""}
                   </p>
+                  <span className={'flex gap-1 items-center'+(Object.keys(metaInfo).includes(user.uid) ?'':' hidden')}>
+                  <p className={"text-sm text-gray-400"}>{"Group admin"}</p>
+                  <VscVerifiedFilled className=' text-blue-500'/>
+                  </span>
                 </div>
               </div>
             );

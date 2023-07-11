@@ -19,6 +19,14 @@ module.exports = {
       },
       minWidth:{
         messageMin: '310px'
+      },
+      minHeight:{
+        emojiMin:'330px'
+      },maxHeight:{
+        emojiMax:'500px'
+      },
+      height:{
+        halfHeight:'55vh'
       }
     },
   },

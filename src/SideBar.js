@@ -202,6 +202,7 @@ function CreateForm({
   const [uid, setUid] = useState("");
   const [showEmoji, setShowEmoji] = useState(false);
   const [selectedEmoji, setSelectedEmoji] = useState("");
+  const {chatId} = useParams()
   function generateUID() {
     const string =
       "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890";
@@ -256,11 +257,11 @@ function CreateForm({
         <div className="relative">
           <div
             className={
-              "absolute" + (showEmoji ? " right-64 bottom-1" : " hidden")
+              "absolute min-h-emojiMin max-h-emojiMax h-halfHeight overflow-y-auto" + (showEmoji ? " right-64 bottom-1" : " hidden")
             }
           >
             <EmojiPicker
-              height={"55vh"}
+              height={"100%"}
               onEmojiClick={(emojiData) => {
                 setSelectedEmoji(emojiData.emoji);
                 setShowEmoji(false);
@@ -309,6 +310,8 @@ function CreateForm({
               );
               const codesRef = ref(getDatabase(), "/codes");
               const metaData = ref(getDatabase(), "/chatMetaData");
+                          const metaRef = ref(getDatabase(),'chatMetaData/'+chatId)
+
               push(chatRef, {
                 author: auth.currentUser.uid,
                 chatName: chatName,
@@ -329,8 +332,11 @@ function CreateForm({
                       [value.key]: {
                         chatName: chatName,
                         pfp: selectedEmoji,
+                        admin:{
+                          [auth.currentUser.uid]:true
+                        }
                       },
-                    });
+                    });;
                   });
                 });
               });
@@ -424,7 +430,6 @@ function JoinModal({ setShowJoinModal, showJoinModal }) {
           className="flex-1 rounded-lg h-10 text-white bg-blue-600"
           onClick={() => {
             const codesRef = ref(getDatabase(), `/codes/${code.trim()}`);
-            const metaRef = ref(getDatabase(),'chatMetaData/'+chatId)
             get(codesRef).then((snapshot) => {
               if (snapshot.exists()) {
                 console.log("Code", snapshot.val());
@@ -439,13 +444,7 @@ function JoinModal({ setShowJoinModal, showJoinModal }) {
                     [snapshot.val()]: true,
                   });
                 })
-                .then(()=>{
-                  update(metaRef,{
-                    admin:{
-                      [snapshot.val()]:true
-                    }
-                  })
-                });
+                
                 setJoinModalIndex(1);
                 setShowJoinModal(false);
               } else {
