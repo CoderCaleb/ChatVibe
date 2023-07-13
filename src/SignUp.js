@@ -65,7 +65,7 @@ export default function SignUp() {
     console.log("input typed on");
   }, [username, password, email]);
   return (
-    <div className="w-full h-full flex items-center justify-center bg-neutral-800 bg-gradient-to-r from-purpleGrad from-blueGrad">
+    <div className="w-full h-full flex items-center justify-center bg-neutral-800 bg-gradient-to-r from-purpleGrad to-blueGrad">
       <div className="absolute top-5 right-10 flex gap-3">
         <Link to={"/auth/signin"}>
           <button className=" w-20 h-9 rounded-lg bg-transparent text-white font-semibold">
@@ -73,22 +73,21 @@ export default function SignUp() {
           </button>
         </Link>
         <Link to={"/auth"}>
-          <button className="w-20 h-9 rounded-xl bg-indigo-600 text-white">
+          <button className="w-20 h-9 rounded-xl bg-indigo-600 text-white shadow-md transition-all duration-200 hover:shadow-indigo-400">
             Sign Up
           </button>
         </Link>
       </div>
-      <Tilt>
-        <div className="flex h-96 rounded-lg overflow-hidden m-auto shadow-lg shadow-slate-600">
-          <div className="relative justify-center items-center flex-1 w-96 hidden md:flex">
+        <div className="flex max-w-si h-signUpHeight md:w-10/12 w-11/12 md:min-w-signUpMin max-w-maxSignUp rounded-lg overflow-hidden m-auto shadow-lg shadow-slate-600">
+          <div className="relative justify-center items-center flex-1 hidden md:flex">
             <p className="absolute text-3xl z-50 font-bold text-blue-700 text-center">
               Immerse Yourself in Interaction
             </p>
-            <img src={abstractBg} className="h-full"></img>
+            <img src={abstractBg} className="h-full w-full"></img>
           </div>
-          <div className=" w-96 h-96 bg-neutral-900 px-5 py-7">
+          <div className=" md:w-96 w-full bg-neutral-900 px-5 py-7">
             <p className="text-white text-xl mb-1">Sign up</p>
-            <p className="text-white text-xs font-light text-neutral-400 mb-3">
+            <p className="text-white text-xs font-light mb-3">
               Discover a new way to communicate - sign up for our innovative
               chat app
             </p>
@@ -188,7 +187,6 @@ export default function SignUp() {
             </p>
           </div>
         </div>
-      </Tilt>
     </div>
   );
 }

@@ -9,6 +9,7 @@ import { onAuthStateChanged, getAuth } from "firebase/auth";
 import { FaUserTimes } from "react-icons/fa";
 import { MessageContext } from "./App";
 import {VscVerifiedFilled} from 'react-icons/vsc'
+import {FiLink} from 'react-icons/fi'
 import cross from "./images/close.png";
 import peace from "./images/peace-sign.png";
 export default function InfoTab({ setScreen, messages, formatDateTime,metaInfo }) {
@@ -20,6 +21,8 @@ export default function InfoTab({ setScreen, messages, formatDateTime,metaInfo }
   const [descInput, setDescInput] = useState("");
   const { setShowRemoveModal, showRemoveModal } = useContext(MessageContext);
   const [userObj, setUserObj] = useState(null);
+  const { setShowCodeModal } =
+    useContext(MessageContext);
   const getColorFromLetter = (letter) => {
     const colors = [
       " bg-red-500",
@@ -88,7 +91,16 @@ export default function InfoTab({ setScreen, messages, formatDateTime,metaInfo }
         <div className=" rounded-3xl w-36 h-36 bg-stone-800 flex justify-center items-center">
           <p className="text-7xl">{messages.pfp}</p>
         </div>
-        <p className="text-white text-xl">{messages.chatName}</p>
+        <div className='flex items-center gap-2'>
+          <p className="text-white text-xl">{messages.chatName}</p>
+          <FiLink
+                size={20}
+                className="cursor-pointer text-subColor"
+                onClick={()=>{
+                  setShowCodeModal(true)
+                }}
+              />
+        </div>
         <p className="text-subColor text-sm">
           {Object.keys(messages.participants).length + " participants"}
         </p>
@@ -101,7 +113,7 @@ export default function InfoTab({ setScreen, messages, formatDateTime,metaInfo }
           }
         >
           <input
-            className="text-white bg-transparent border-none outline-none"
+            className="text-white bg-transparent border-none outline-none w-full"
             value={
               !editMode
                 ? !messages.chatDesc

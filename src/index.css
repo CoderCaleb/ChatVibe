@@ -10,4 +10,10 @@
   .toolip {
     @apply absolute left-16 w-20 h-8 bg-slate-900 font-semibold text-white rounded-lg justify-center items-center flex scale-0 transition-all duration-200;
   }
+  .done-button {
+    @apply flex-1 rounded-lg h-10 text-white bg-blue-600 shadow-md transition-all duration-300 hover:shadow-blue-400
+  }
+  .back-button {
+    @apply flex-1 rounded-lg border-gray-200 hover:bg-gray-100 border h-10 text-stone-600 transition-all duration-200
+  }
 }

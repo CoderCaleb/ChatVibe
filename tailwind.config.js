@@ -18,7 +18,8 @@ module.exports = {
         blackRgba: 'rgba(0, 0, 0, 0.7)',
       },
       minWidth:{
-        messageMin: '310px'
+        messageMin: '310px',
+        signUpMin:'749px'
       },
       minHeight:{
         emojiMin:'330px'
@@ -26,7 +27,14 @@ module.exports = {
         emojiMax:'500px'
       },
       height:{
-        halfHeight:'55vh'
+        halfHeight:'55vh',
+        signUpHeight:'400px'
+      },
+      width:{
+        signUpWidth:'700px'
+      },
+      maxWidth:{
+        maxSignUp:'1200px'
       }
     },
   },
