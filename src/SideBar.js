@@ -16,13 +16,13 @@ import { MdOutlineEmojiEmotions } from "react-icons/md";
 import { RxCross2 } from "react-icons/rx";
 import fire from "./fire-gif.gif";
 import peace from "./images/peace-sign.png";
-import smileyFace from './images/smiley-face.png'
-import alien from './images/alien-face.png'
+import smileyFace from "./images/smiley-face.png";
+import alien from "./images/alien-face.png";
 import solo from "./images/chat-icon.png";
 import cross from "./images/close.png";
 import group from "./images/debate.png";
-import yingyang from './images/yingyang.png'
-import stero from './images/streo.png'
+import yingyang from "./images/yingyang.png";
+import stero from "./images/streo.png";
 import rightArrow from "./images/right-arrow.png";
 import { useEffect, useState, useContext } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
@@ -155,7 +155,7 @@ export default function SideBar() {
       <div
         className={
           "flex items-center justify-center w-screen h-screen absolute transition-all duration-100 z-50 bg-blackRgba" +
-          (showRemoveModal.length !== 0 ? "" : " hidden")
+          (Object.keys(showRemoveModal).length !== 0 ? "" : " hidden")
         }
       >
         <ConfirmModal
@@ -311,7 +311,7 @@ function CreateForm({
             ) : !showEmoji ? (
               <MdOutlineEmojiEmotions size={30} className="text-subColor" />
             ) : (
-              <RxCross2 size={30} className='text-subColor'/>
+              <RxCross2 size={30} className="text-subColor" />
             )}
           </button>
         </div>
@@ -339,7 +339,10 @@ function CreateForm({
           <button
             className="done-button "
             onClick={() => {
-              if (chatName.trim().length !== 0&&selectedEmoji.trim().length!==0) {
+              if (
+                chatName.trim().length !== 0 &&
+                selectedEmoji.trim().length !== 0
+              ) {
                 const chatRef = ref(getDatabase(), "/chats");
                 setFormIndex((prev) => prev + 1);
                 const userRef = ref(
@@ -377,11 +380,9 @@ function CreateForm({
                     });
                   });
                 });
-              } 
-              else if(selectedEmoji.trim().length==0){
-                setError('Please choose an emoji for group pfp')
-              }
-              else {
+              } else if (selectedEmoji.trim().length == 0) {
+                setError("Please choose an emoji for group pfp");
+              } else {
                 setError("Please enter a valid chat name");
               }
             }}
@@ -576,21 +577,31 @@ const ConfirmModal = ({ setShowRemoveModal, showRemoveModal }) => {
         src={cross}
         className="absolute w-4 right-5 cursor-pointer"
         onClick={() => {
-          setShowRemoveModal("");
+          setShowRemoveModal({});
         }}
       ></img>
       <div className="">
         <img src={peace} className="w-20 m-auto"></img>
-        <p className="font-semibold text-xl mb-2">Remove User</p>
+        <p className="font-semibold text-xl mb-2">
+          {showRemoveModal.type == "remove"
+            ? "Remove User"
+            : showRemoveModal.type == "dismiss"
+            ? "Dismiss as admin"
+            : "Make admin"}
+        </p>
         <p className="font-normal text-neutral-500 text-sm mb-5">
-          Are you sure you want to remove this user from the chat?{" "}
+          {showRemoveModal.type == "remove"
+            ? "Are you sure you want to remove this user from the chat?"
+            : showRemoveModal.type == "dismiss"
+            ? "Are you sure you want to dismiss this user as admin"
+            : "Are you sure you want to make this user an admin"}
         </p>
       </div>
       <div className="flex gap-2 mt-5">
         <button
           className="back-button"
           onClick={() => {
-            setShowRemoveModal("");
+            setShowRemoveModal({});
           }}
         >
           Cancel
@@ -598,35 +609,53 @@ const ConfirmModal = ({ setShowRemoveModal, showRemoveModal }) => {
         <button
           className=" done-button"
           onClick={() => {
-            const chatRef = ref(
-              getDatabase(),
-              `chats/${chatId}/participants/${showRemoveModal}`
-            );
-            remove(chatRef)
-              .then(() => {
-                setShowRemoveModal("");
-                onAuthStateChanged(auth, (user) => {
-                  if (user) {
-                    const userRef = ref(
-                      getDatabase(),
-                      `users/${showRemoveModal}/chats/${chatId}`
-                    );
-                    remove(userRef)
-                      .then(() => {
-                        console.log("success!");
-                      })
-                      .catch((err) => {
-                        console.log(err);
-                      });
-                  }
+            if (showRemoveModal.type == "remove") {
+              const chatRef = ref(
+                getDatabase(),
+                `chats/${chatId}/participants/${showRemoveModal.user}`
+              );
+              remove(chatRef)
+                .then(() => {
+                  setShowRemoveModal({});
+                  onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                      const userRef = ref(
+                        getDatabase(),
+                        `users/${showRemoveModal.user}/chats/${chatId}`
+                      );
+                      remove(userRef)
+                        .then(() => {
+                          console.log("success!");
+                        })
+                        .catch((err) => {
+                          console.log(err);
+                        });
+                    }
+                  });
+                })
+                .catch((err) => {
+                  console.log(err);
                 });
-              })
-              .catch((err) => {
-                console.log(err);
+            } else if (showRemoveModal.type == "admin") {
+              const adminRef = ref(
+                getDatabase(),
+                `chatMetaData/${chatId}/admin`
+              );
+              update(adminRef, {
+                [showRemoveModal.user]: true,
+              }).then(() => {
+                setShowRemoveModal({});
               });
+            } else {
+              const adminRef = ref(
+                getDatabase(),
+                `chatMetaData/${chatId}/admin/${showRemoveModal.user}`
+              );
+              remove(adminRef).then(() => setShowRemoveModal({}));
+            }
           }}
         >
-          Remove
+          {showRemoveModal.type == "remove" ? "Remove" : "Confirm"}
         </button>
       </div>
       <div></div>

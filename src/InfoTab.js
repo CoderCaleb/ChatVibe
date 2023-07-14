@@ -8,21 +8,28 @@ import { ref, getDatabase, get, update } from "firebase/database";
 import { onAuthStateChanged, getAuth } from "firebase/auth";
 import { FaUserTimes } from "react-icons/fa";
 import { MessageContext } from "./App";
-import {VscVerifiedFilled} from 'react-icons/vsc'
-import {FiLink} from 'react-icons/fi'
+import { VscVerifiedFilled } from "react-icons/vsc";
+import { BsFillPersonCheckFill } from "react-icons/bs";
+import { FiChevronDown } from "react-icons/fi";
+import { FiLink } from "react-icons/fi";
 import cross from "./images/close.png";
 import peace from "./images/peace-sign.png";
-export default function InfoTab({ setScreen, messages, formatDateTime,metaInfo }) {
+export default function InfoTab({
+  setScreen,
+  messages,
+  formatDateTime,
+  metaInfo,
+}) {
   const name = "caleb";
   const { chatId } = useParams();
   const [names, setNames] = useState([]);
   const [author, setAuthor] = useState("");
   const [editMode, setEditMode] = useState(false);
   const [descInput, setDescInput] = useState("");
-  const { setShowRemoveModal, showRemoveModal } = useContext(MessageContext);
+  const [showDropdown, setShowDropdown] = useState(false);
   const [userObj, setUserObj] = useState(null);
-  const { setShowCodeModal } =
-    useContext(MessageContext);
+  const { setShowCodeModal,    setShowRemoveModal,
+  } = useContext(MessageContext);
   const getColorFromLetter = (letter) => {
     const colors = [
       " bg-red-500",
@@ -38,9 +45,9 @@ export default function InfoTab({ setScreen, messages, formatDateTime,metaInfo }
     const index = letter.charCodeAt(0) % colors.length;
     return colors[index];
   };
-  useEffect(()=>{
-    console.log('metaInfo:',Object.keys(metaInfo))
-  },[])
+  useEffect(() => {
+    console.log("metaInfo:", Object.keys(metaInfo));
+  }, []);
   useEffect(() => {
     if (Object.keys(messages).length !== 0) {
       Promise.all(
@@ -91,15 +98,15 @@ export default function InfoTab({ setScreen, messages, formatDateTime,metaInfo }
         <div className=" rounded-3xl w-36 h-36 bg-stone-800 flex justify-center items-center">
           <p className="text-7xl">{messages.pfp}</p>
         </div>
-        <div className='flex items-center gap-2'>
+        <div className="flex items-center gap-2">
           <p className="text-white text-xl">{messages.chatName}</p>
           <FiLink
-                size={20}
-                className="cursor-pointer text-subColor"
-                onClick={()=>{
-                  setShowCodeModal(true)
-                }}
-              />
+            size={20}
+            className="cursor-pointer text-subColor"
+            onClick={() => {
+              setShowCodeModal(true);
+            }}
+          />
         </div>
         <p className="text-subColor text-sm">
           {Object.keys(messages.participants).length + " participants"}
@@ -157,46 +164,71 @@ export default function InfoTab({ setScreen, messages, formatDateTime,metaInfo }
           )}`}
         </p>
       </div>
-      <div className="bg-zinc-900 w-full py-6 flex flex-col pl-7 gap-2">
+      <div className="bg-zinc-900 w-full py-6 flex flex-col pl-7 gap-2 mb-8">
         <p className="text-subColor mb-3">
           {Object.keys(messages.participants).length + " participants"}
         </p>
         <div className="flex flex-col gap-6">
           {names.map((user, index) => {
-            return (
-              <div className="flex gap-2 items-center group relative" key={index}>
-                <div onClick={() => setShowRemoveModal(user.uid)}>
-                  <FaUserTimes
-                    className={
-                      "text-red-400 absolute right-5 hidden cursor-pointer" +
-                      (user.uid !== userObj.uid&&Object.keys(metaInfo).includes(userObj.uid) ? " group-hover:block" : "")
-                    }
-                    size={20}
-                  />
-                </div>
-                <div
-                  className={
-                    "rounded-3xl w-10 h-10 flex items-center justify-center relative" +
-                    getColorFromLetter(user.name[0].toUpperCase())
-                  }
-                >
-                  <p className="text-white">{user.name[0].toUpperCase()}</p>
-                </div>
-                <div>
-                  <p className="text-white inline-block mr-1">{user.name}</p>
-                  <p className={"text-sm text-subColor inline-block"}>
-                    {user.uid == userObj.uid ? "(You)" : ""}
-                  </p>
-                  <span className={'flex gap-1 items-center'+(Object.keys(metaInfo).includes(user.uid) ?'':' hidden')}>
-                  <p className={"text-sm text-gray-400"}>{"Group admin"}</p>
-                  <VscVerifiedFilled className=' text-blue-500'/>
-                  </span>
-                </div>
-              </div>
-            );
+            return <ContactBar index={index} user={user}/>;
           })}
         </div>
       </div>
     </div>
   );
+  function ContactBar({index,user}) {
+    const [showDropdown, setShowDropdown] = useState(false)
+    return (
+      <div className="flex gap-2 items-center group relative" key={index}>
+        <div
+          className={
+            " rounded-lg bg-slate-800 flex w-44 flex-col p-3 text-white transition-all duration-300 absolute z-30 right-5 top-12" +
+            (showDropdown ? " scale-100" : " scale-0")
+          }
+        >
+          <p className="rounded-lg hover:bg-slate-600 py-1 pl-2 cursor-pointer" onClick={()=>{
+            setShowRemoveModal({user:user.uid,type:Object.keys(metaInfo).includes(user.uid)?'dismiss':'admin'})
+          }}>{Object.keys(metaInfo).includes(user.uid)?'Dismiss as admin':'Make admin'}</p>
+          <p className="rounded-lg hover:bg-slate-600 py-1 pl-2 cursor-pointer" onClick={()=>{
+            setShowRemoveModal({user:user.uid,type:'remove'})
+          }}>Remove</p>
+        </div>
+        <div onClick={() => setShowDropdown(!showDropdown)}>
+          <FiChevronDown
+            className={
+              "text-white font-bold absolute right-5 hidden cursor-pointer" +
+              (user.uid !== userObj.uid &&
+              Object.keys(metaInfo).includes(userObj.uid)
+                ? " group-hover:block"
+                : "")
+            }
+            size={20}
+          />
+        </div>
+        <div
+          className={
+            "rounded-3xl w-10 h-10 flex items-center justify-center relative" +
+            getColorFromLetter(user.name[0].toUpperCase())
+          }
+        >
+          <p className="text-white">{user.name[0].toUpperCase()}</p>
+        </div>
+        <div>
+          <p className="text-white inline-block mr-1">{user.name}</p>
+          <p className={"text-sm text-subColor inline-block"}>
+            {user.uid == userObj.uid ? "(You)" : ""}
+          </p>
+          <span
+            className={
+              "flex gap-1 items-center" +
+              (Object.keys(metaInfo).includes(user.uid) ? "" : " hidden")
+            }
+          >
+            <p className={"text-sm text-gray-400"}>{"Group admin"}</p>
+            <VscVerifiedFilled className=" text-blue-500" />
+          </span>
+        </div>
+      </div>
+    );
+  }
 }

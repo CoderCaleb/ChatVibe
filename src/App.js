@@ -35,7 +35,7 @@ function App() {
   const [messages, setMessages] = useState({});
   const [userInfo, setUserinfo] = useState({});
   const [showCodeModal, setShowCodeModal] = useState(false);
-  const [showRemoveModal, setShowRemoveModal] = useState('')
+  const [showRemoveModal, setShowRemoveModal] = useState({})
 
   useEffect(() => {
     console.log("user:", getAuth().currentUser);
