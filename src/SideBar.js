@@ -235,7 +235,7 @@ function CreateForm({
   }
   if (formIndex == 1) {
     return (
-      <div className={"text-center bg-white rounded-lg p-5 w-96 relative"}>
+      <div className={"text-center bg-white rounded-lg p-5 w-96 relative animate-fade-up"}>
         <img
           src={cross}
           className="absolute w-4 right-5 cursor-pointer"
@@ -267,7 +267,7 @@ function CreateForm({
     );
   } else if (formIndex == 2) {
     return (
-      <div className={"text-center bg-white rounded-lg p-5 w-96 relative"}>
+      <div className={"text-center bg-white rounded-lg p-5 w-96 relative animate-fade-up"}>
         <img
           src={cross}
           className="absolute w-4 right-5 cursor-pointer"
@@ -439,7 +439,7 @@ function JoinModal({ setShowJoinModal, showJoinModal }) {
     userRef = user ? ref(getDatabase(), `/users/${user.uid}/chats`) : null;
   });
   return (
-    <div className={"text-center bg-white rounded-lg p-5 w-96 relative"}>
+    <div className={"text-center bg-white rounded-lg p-5 w-96 relative animate-jump-in"}>
       <img
         src={cross}
         className="absolute w-4 right-5 cursor-pointer"
@@ -533,7 +533,7 @@ const CodeModal = ({ setShowCodeModal, showCodeModal }) => {
   }, [showCodeModal]);
 
   return (
-    <div className={"text-center bg-white rounded-lg p-5 w-96 relative"}>
+    <div className={"text-center bg-white rounded-lg p-5 w-96 relative animate-fade-right"}>
       <img
         src={cross}
         className="absolute w-4 right-5 cursor-pointer"

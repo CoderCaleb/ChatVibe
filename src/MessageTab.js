@@ -1,5 +1,14 @@
 import React, { useState, useContext, useEffect, useRef } from "react";
-import { getDatabase, ref, update, push, get, set, onValue, off } from "firebase/database";
+import {
+  getDatabase,
+  ref,
+  update,
+  push,
+  get,
+  set,
+  onValue,
+  off,
+} from "firebase/database";
 import send from "./images/send-message.png";
 import { MessageContext } from "./App";
 import { Link, useParams } from "react-router-dom";
@@ -11,20 +20,23 @@ import EmojiPicker from "emoji-picker-react";
 import InfoTab from "./InfoTab";
 import { MdReply } from "react-icons/md";
 import cross from "./images/close.png";
+import {AiOutlineArrowDown} from 'react-icons/ai'
 export default function MessageTab() {
   const { messages, setMessages, showCodeModal, setShowCodeModal, userInfo } =
     useContext(MessageContext);
   const [text, setText] = useState("");
   const [names, setNames] = useState([]);
   const [screen, setScreen] = useState("message");
-  const [replyInfo, setReplyInfo] = useState({}); 
-  const [metaInfo, setMetaInfo] = useState({})
+  const [replyInfo, setReplyInfo] = useState({});
+  const [metaInfo, setMetaInfo] = useState({});
+  const [showDownArrow, setShowDownArrow] = useState(false)
   const containerRef = useRef();
   const { chatId } = useParams();
   const currentChat =
     Object.keys(messages).includes(chatId) && !!messages[chatId].messages
       ? messages[chatId].messages
       : {};
+  const replyRefs = useRef({});
   function handleSubmit() {
     const msgType = Object.keys(replyInfo).length !== 0 ? "reply" : "normal";
     if (text.trim() !== "") {
@@ -45,6 +57,43 @@ export default function MessageTab() {
       setText("");
     }
   }
+  function makeNewRef(uid, ref) {
+    replyRefs.current[uid] = ref;
+  }
+  function scrollToMsg(uid) {
+    if (containerRef.current && replyRefs.current) {
+      replyRefs.current[uid].scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+        inline: "center",
+      });
+      replyRefs.current[uid].classList.add('grey-animation')
+      setTimeout(() => {
+        replyRefs.current[uid].classList.remove('grey-animation');
+      }, 1000);
+    }
+  } useEffect(() => {
+    const scrollContainer = containerRef.current;
+if(containerRef.current){    
+  const handleScroll = () => {
+      if (
+        scrollContainer.scrollTop + scrollContainer.clientHeight <
+        scrollContainer.scrollHeight
+      ) {
+        setShowDownArrow(true);
+      } else {
+        setShowDownArrow(false);
+      }
+      
+    }
+    scrollContainer.addEventListener('scroll', handleScroll);
+
+    return () => {
+      scrollContainer.removeEventListener('scroll', handleScroll);
+    };}
+
+   
+  }, []);
   function formatDateTime(timestamp) {
     const date = new Date(timestamp);
 
@@ -82,23 +131,22 @@ export default function MessageTab() {
   useEffect(() => {
     setReplyInfo({});
   }, [chatId]);
-  useEffect(()=>{
-    const metaRef = ref(getDatabase(),'/chatMetaData/'+chatId+'/admin')
-    const callback = (snapshot)=>{
-      if(snapshot.exists()){
-        setMetaInfo(snapshot.val())
-        console.log('Snapshot meta data called',snapshot.val())
+  useEffect(() => {
+    const metaRef = ref(getDatabase(), "/chatMetaData/" + chatId + "/admin");
+    const callback = (snapshot) => {
+      if (snapshot.exists()) {
+        setMetaInfo(snapshot.val());
+        console.log("Snapshot meta data called", snapshot.val());
+      } else {
+        setMetaInfo({});
       }
-      else{
-        setMetaInfo({})
-      }
-    }
-    const unsubscribe = onValue(metaRef,callback)
-    return ()=>{
-      off(metaRef,'value',callback)
-      unsubscribe()
-    }
-  },[chatId])
+    };
+    const unsubscribe = onValue(metaRef, callback);
+    return () => {
+      off(metaRef, "value", callback);
+      unsubscribe();
+    };
+  }, [chatId]);
   useEffect(() => {
     let namesArr = [];
     if (Object.keys(messages).length !== 0) {
@@ -132,7 +180,15 @@ export default function MessageTab() {
     >
       {screen == "message" ? (
         <>
-          <div className="flex gap-2 h-24 min-h-20 items-center pl-5  bg-stone-900 mb-3 md:shadow-md shadow-slate-700">
+          <div className="flex gap-2 h-24 min-h-20 items-center pl-5  bg-stone-900 mb-3 md:shadow-md shadow-slate-700 text-white">
+            <div className='w-7 h-7 rounded-xl flex justify-center items-center bg-slate-700 absolute right-7 bottom-24 z-40 cursor-pointer' onClick={()=>{
+              if(!!containerRef.current) {
+                const container = containerRef.current;
+                container.scrollTo({top:container.scrollHeight,behavior:'smooth'});
+              }
+            }}>
+            <AiOutlineArrowDown className=''/>
+            </div>
             <Link to={"/homescreen/none"}>
               <FaAngleLeft className="md:hidden text-white text-2xl mr-3 cursor-pointer"></FaAngleLeft>
             </Link>
@@ -180,6 +236,7 @@ export default function MessageTab() {
           >
             {Object.values(!!messages.messages ? messages.messages : {}).map(
               (value, index) => {
+                console.log(Object.keys(messages.messages)[index]);
                 return (
                   <div key={index}>
                     {index > 0 ? (
@@ -200,21 +257,33 @@ export default function MessageTab() {
                           date={formatDateTime(value.timestamp)}
                           setReplyInfo={setReplyInfo}
                           msgType={value.replyInfo}
+                          chatUid={Object.keys(messages.messages)[index]}
+                          makeNewRef={makeNewRef}
+                          scrollToMsg={scrollToMsg}
                         />
                       ) : (
-                        <div className="relative hover:bg-stone-800 h-6 group flex items-center">
+                        <div className="relative hover:bg-slate-800 h-6 group flex items-center" ref={(ref) =>
+                          makeNewRef(
+                            Object.keys(messages.messages)[index],
+                            ref
+                          )
+                        }>
                           <div
                             className="absolute right-10 text-white hidden cursor-pointer group-hover:block"
                             onClick={() =>
                               setReplyInfo({
                                 name: value.sender,
                                 msg: value.content,
+                                msgUID: Object.keys(messages.messages)[index],
                               })
                             }
                           >
                             <MdReply size="22" />
                           </div>
-                          <p className="text-white pl-5 text-sm font-light ml-14">
+                          <p
+                            className="text-white pl-5 text-sm font-light ml-14"
+                          
+                          >
                             {value.content}
                           </p>
                         </div>
@@ -227,6 +296,9 @@ export default function MessageTab() {
                         date={formatDateTime(value.timestamp)}
                         setReplyInfo={setReplyInfo}
                         msgType={value.replyInfo}
+                        chatUid={Object.keys(messages.messages)[index]}
+                        makeNewRef={makeNewRef}
+                        scrollToMsg={scrollToMsg}
                       />
                     )}
                   </div>
@@ -236,7 +308,7 @@ export default function MessageTab() {
           </div>
           <div className=" bg-inputColor rounded-xl py-3 text-white pl-4 outline-none placeholder-borderColor absolute bottom-6 left-5 right-5 shadow-slate-600 shadow-lg flex flex-col">
             {Object.keys(replyInfo).length !== 0 ? (
-              <div className="bg-slate-800 py-2 rounded-lg mr-4 pl-4 mb-4 relative">
+              <div className="bg-slate-800 py-2 rounded-lg mr-4 pl-4 mb-4 relative animate-fade-up">
                 <img
                   src={cross}
                   className="w-3 h-3 absolute top-3 right-3 cursor-pointer"
@@ -295,7 +367,17 @@ export default function MessageTab() {
   );
 }
 
-const MessageBox = ({ pfp, name, msg, date, setReplyInfo, msgType }) => {
+const MessageBox = ({
+  pfp,
+  name,
+  msg,
+  date,
+  setReplyInfo,
+  msgType,
+  chatUid,
+  makeNewRef,
+  scrollToMsg,
+}) => {
   const getColorFromLetter = (letter) => {
     const colors = [
       " bg-red-500",
@@ -313,20 +395,27 @@ const MessageBox = ({ pfp, name, msg, date, setReplyInfo, msgType }) => {
     return colors[index];
   };
   return (
-    <div className="flex flex-col justify-center py-2 pl-5 relative group hover:bg-stone-800">
+    <div
+      className="flex flex-col justify-center py-2 pl-5 relative group hover:bg-slate-800"
+      ref={(ref) => makeNewRef(chatUid, ref)}
+    >
       <div
         className="absolute right-10 text-white hidden cursor-pointer group-hover:block"
         onClick={() => {
           setReplyInfo({
             name: name,
             msg: msg,
+            msgUID: chatUid,
           });
         }}
       >
         <MdReply size="25" />
       </div>
       {!!msgType ? (
-        <div className="flex ml-14 text-subColor gap-2 text-sm items-center">
+        <div
+          className="flex ml-14 text-subColor gap-2 text-sm items-center cursor-pointer"
+          onClick={() => scrollToMsg(!!msgType ? msgType.msgUID : null)}
+        >
           <div className="flex gap-2 items-center">
             <div
               className={

@@ -16,4 +16,18 @@
   .back-button {
     @apply flex-1 rounded-lg border-gray-200 hover:bg-gray-100 border h-10 text-stone-600 transition-all duration-200
   }
+  @keyframes colorChangeAnimation {
+  0% {
+    background-color: grey;
+  }
+  100% {
+    background-color: inherit;
+  }
+}
+
+.grey-animation {
+  animation-name: colorChangeAnimation;
+  animation-duration: 2s;
+  animation-fill-mode: forwards;
+}
 }
