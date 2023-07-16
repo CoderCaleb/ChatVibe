@@ -136,7 +136,6 @@ if(containerRef.current){
     const callback = (snapshot) => {
       if (snapshot.exists()) {
         setMetaInfo(snapshot.val());
-        console.log("Snapshot meta data called", snapshot.val());
       } else {
         setMetaInfo({});
       }
@@ -181,14 +180,14 @@ if(containerRef.current){
       {screen == "message" ? (
         <>
           <div className="flex gap-2 h-24 min-h-20 items-center pl-5  bg-stone-900 mb-3 md:shadow-md shadow-slate-700 text-white">
-            <div className='w-7 h-7 rounded-xl flex justify-center items-center bg-slate-700 absolute right-7 bottom-24 z-40 cursor-pointer' onClick={()=>{
+          {showDownArrow?<div className='w-7 h-7 rounded-xl flex justify-center items-center bg-slate-700 absolute right-7 bottom-24 z-40 cursor-pointer' onClick={()=>{
               if(!!containerRef.current) {
                 const container = containerRef.current;
                 container.scrollTo({top:container.scrollHeight,behavior:'smooth'});
               }
             }}>
             <AiOutlineArrowDown className=''/>
-            </div>
+            </div>:<></>}
             <Link to={"/homescreen/none"}>
               <FaAngleLeft className="md:hidden text-white text-2xl mr-3 cursor-pointer"></FaAngleLeft>
             </Link>
@@ -236,7 +235,6 @@ if(containerRef.current){
           >
             {Object.values(!!messages.messages ? messages.messages : {}).map(
               (value, index) => {
-                console.log(Object.keys(messages.messages)[index]);
                 return (
                   <div key={index}>
                     {index > 0 ? (
@@ -344,7 +342,6 @@ if(containerRef.current){
                   className="h-6 mr-4 hover:opacity-80 transition-all duration-200"
                   onClick={() => {
                     handleSubmit();
-                    console.log("clicked");
                   }}
                 ></img>
               </div>

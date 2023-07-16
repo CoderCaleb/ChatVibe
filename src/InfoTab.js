@@ -57,14 +57,28 @@ export default function InfoTab({
         })
       )
         .then((names) => {
-          const tempArr = names.map((snapshot, index) => {
-            console.log(snapshot.val());
-            console.log(Object.keys(messages.participants)[index]);
-            return {
-              name: snapshot.val(),
-              uid: Object.keys(messages.participants)[index],
-            };
-          });
+          let tempArr = []
+          Promise.all(
+            Object.keys(messages.participants).map((uid, index) => {
+              const codeRef = ref(getDatabase(), "/users/" + uid + "/userCode");
+              return get(codeRef);
+            })
+          )
+          .then((codes)=>{
+            tempArr = names.map((snapshot, index) => {
+              console.log(snapshot.val());
+              console.log(Object.keys(messages.participants)[index]);
+              return {
+                name: snapshot.val(),
+                uid: Object.keys(messages.participants)[index],
+              };
+            });
+            const finalArr = codes.map((snapshot,index)=>{
+              return({...tempArr[index],userCode:snapshot.val()})
+            })
+            setNames(finalArr)
+          })
+          
           setNames(tempArr);
         })
         .catch((err) => {
@@ -214,7 +228,7 @@ export default function InfoTab({
           <p className="text-white">{user.name[0].toUpperCase()}</p>
         </div>
         <div>
-          <p className="text-white inline-block mr-1">{user.name}</p>
+          <p className="text-white text-base inline-block mr-1">{user.name}<span className='text-sm'>{user.userCode?('#'+user.userCode):''}</span></p>
           <p className={"text-sm text-subColor inline-block"}>
             {user.uid == userObj.uid ? "(You)" : ""}
           </p>

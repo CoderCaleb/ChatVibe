@@ -98,7 +98,7 @@ export default function SideBar() {
       <div
         className="flex relative justify-between items-center w-full border border-slate-300 rounded-lg mt-3 px-3 hover:bg-slate-200 cursor-pointer transition-all duration-100 h-16"
         onClick={() => {
-          if (type == "duo") {
+          if (type == "group") {
             setFormIndex((prev) => (prev += 1));
           }
         }}

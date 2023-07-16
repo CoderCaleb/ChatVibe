@@ -8,7 +8,7 @@ import {
   getAuth,
   updateProfile,
 } from "firebase/auth";
-import { update, ref, getDatabase } from "firebase/database";
+import { update, ref, getDatabase, get } from "firebase/database";
 import { Link } from "react-router-dom";
 export default function SignUp() {
   const [username, setUsername] = useState("");
@@ -18,6 +18,11 @@ export default function SignUp() {
   const [emailError, setEmailError] = useState("");
   const [nameError, setNameError] = useState("");
   const [showError, setShowError] = useState(false);
+  function generateRandomCode() {
+    const code = Math.floor(Math.random() * 9000) + 1000;
+    return code.toString();
+  }
+
   function checkUsername() {
     console.log("Hello");
     if (!username.length > 0) {
@@ -64,6 +69,36 @@ export default function SignUp() {
     setShowError(false);
     console.log("input typed on");
   }, [username, password, email]);
+  function checkAndSaveCode(user,userCode) {
+    const codesRef = ref(
+      getDatabase(),
+      `userCodes/${user.displayName}/${userCode}`
+    );
+    const usersRef = ref(getDatabase(), "users");
+
+    get(codesRef).then((snapshot) => {
+      if (!snapshot.exists()) {
+        update(usersRef, {
+          [user.uid]: {
+            name: user.displayName,
+            email: user.email,
+            userCode: userCode,
+          },
+        }).then(() => {
+          const userCodesRef = ref(
+            getDatabase(),
+            `userCodes/${user.displayName}`
+          );
+          update(userCodesRef, {
+            [userCode]: user.uid,
+          });
+        });
+      }
+      else{
+        checkAndSaveCode(user,generateRandomCode())
+      }
+    });
+  }
   return (
     <div className="w-full h-full flex items-center justify-center bg-neutral-800 bg-gradient-to-r from-purpleGrad to-blueGrad">
       <div className="absolute top-5 right-10 flex gap-3">
@@ -78,115 +113,109 @@ export default function SignUp() {
           </button>
         </Link>
       </div>
-        <div className="flex max-w-si h-signUpHeight md:w-10/12 w-11/12 md:min-w-signUpMin max-w-maxSignUp rounded-lg overflow-hidden m-auto shadow-lg shadow-slate-600">
-          <div className="relative justify-center items-center flex-1 hidden md:flex">
-            <p className="absolute text-3xl z-50 font-bold text-blue-700 text-center">
-              Immerse Yourself in Interaction
-            </p>
-            <img src={abstractBg} className="h-full w-full"></img>
-          </div>
-          <div className=" md:w-96 w-full bg-neutral-900 px-5 py-7">
-            <p className="text-white text-xl mb-1">Sign up</p>
-            <p className="text-white text-xs font-light mb-3">
-              Discover a new way to communicate - sign up for our innovative
-              chat app
-            </p>
-            <p className="text-white text-xs font-light text-neutral-400 mt-4">
-              Your name
-            </p>
-            <input
-              placeholder="Kebob Tan"
-              className="w-full rounded-lg h-9 bg-stone-900 mt-1 placeholder-neutral-500 pl-2 text-xs text-white outline-none border-neutral-600 border"
-              onChange={(event) => {
-                setUsername(event.target.value);
-              }}
-              value={username}
-            ></input>
-            <p
-              className={
-                "text-red-400 text-xs" + (showError ? " block" : " hidden")
-              }
-            >
-              {nameError}
-            </p>
-            <p className="text-white text-xs font-light text-neutral-400 mt-4">
-              Your email
-            </p>
-            <input
-              placeholder="kebob@gmail.com"
-              className="w-full rounded-lg h-9 bg-stone-900 mt-1 placeholder-neutral-500 pl-2 text-xs text-white outline-none border-neutral-600 border"
-              onChange={(event) => {
-                setEmail(event.target.value);
-              }}
-              value={email}
-            ></input>
-            <p
-              className={
-                "text-red-400 text-xs" + (showError ? " block" : " hidden")
-              }
-            >
-              {emailError}
-            </p>
-            <p className="text-white text-xs font-light text-neutral-400 mt-4">
-              Your password
-            </p>
-            <input
-              placeholder="7+ characters"
-              className="w-full rounded-lg h-9 bg-stone-900 mt-1 placeholder-neutral-500 pl-2 text-xs text-white outline-none border-neutral-600 border"
-              onChange={(event) => {
-                setPassword(event.target.value);
-              }}
-              value={password}
-              type="password"
-            ></input>
-            <p
-              className={
-                "text-red-400 text-xs" + (showError ? " block" : " hidden")
-              }
-            >
-              {passwordError}
-            </p>
-
-            <button
-              className="w-full h-9 text-sm mt-3 mb-2 bg-btnColor rounded-lg cursor-pointer hover:opacity-80 transition:all duration-200"
-              onClick={() => {
-                console.log("clicked");
-                if (checkEmail() && checkPassword && checkUsername()) {
-                  const auth = getAuth();
-                  createUserWithEmailAndPassword(auth, email, password).then(
-                    (value) => {
-                      console.log("Sign Up Successful");
-                      const user = value.user;
-                      const usersRef = ref(getDatabase(), "users");
-                      updateProfile(user, {
-                        displayName: username,
-                        photoURL:
-                          "https://static.vecteezy.com/system/resources/thumbnails/002/534/006/small/social-media-chatting-online-blank-profile-picture-head-and-body-icon-people-standing-icon-grey-background-free-vector.jpg",
-                      }).then((value) => {
-                        update(usersRef, {
-                          [user.uid]: {
-                            name: user.displayName,
-                            email: user.email,
-                          },
-                        });
-                      });
-                    }
-                  );
-                } else {
-                  setShowError(true);
-                }
-              }}
-            >
-              Sign Up
-            </button>
-            <p className="text-xs text-white text-center">
-              Already have an account?{" "}
-              <Link to="/auth/signin">
-                <span className=" text-btnColor cursor-pointer">Sign In</span>
-              </Link>
-            </p>
-          </div>
+      <div className="flex max-w-si h-signUpHeight md:w-10/12 w-11/12 md:min-w-signUpMin max-w-maxSignUp rounded-lg overflow-hidden m-auto shadow-lg shadow-slate-600">
+        <div className="relative justify-center items-center flex-1 hidden md:flex">
+          <p className="absolute text-3xl z-50 font-bold text-blue-700 text-center">
+            Immerse Yourself in Interaction
+          </p>
+          <img src={abstractBg} className="h-full w-full"></img>
         </div>
+        <div className=" md:w-96 w-full bg-neutral-900 px-5 py-7">
+          <p className="text-white text-xl mb-1">Sign up</p>
+          <p className="text-white text-xs font-light mb-3">
+            Discover a new way to communicate - sign up for our innovative chat
+            app
+          </p>
+          <p className="text-white text-xs font-light text-neutral-400 mt-4">
+            Your name
+          </p>
+          <input
+            placeholder="Kebob Tan"
+            className="w-full rounded-lg h-9 bg-stone-900 mt-1 placeholder-neutral-500 pl-2 text-xs text-white outline-none border-neutral-600 border"
+            onChange={(event) => {
+              setUsername(event.target.value);
+            }}
+            value={username}
+          ></input>
+          <p
+            className={
+              "text-red-400 text-xs" + (showError ? " block" : " hidden")
+            }
+          >
+            {nameError}
+          </p>
+          <p className="text-white text-xs font-light text-neutral-400 mt-4">
+            Your email
+          </p>
+          <input
+            placeholder="kebob@gmail.com"
+            className="w-full rounded-lg h-9 bg-stone-900 mt-1 placeholder-neutral-500 pl-2 text-xs text-white outline-none border-neutral-600 border"
+            onChange={(event) => {
+              setEmail(event.target.value);
+            }}
+            value={email}
+          ></input>
+          <p
+            className={
+              "text-red-400 text-xs" + (showError ? " block" : " hidden")
+            }
+          >
+            {emailError}
+          </p>
+          <p className="text-white text-xs font-light text-neutral-400 mt-4">
+            Your password
+          </p>
+          <input
+            placeholder="7+ characters"
+            className="w-full rounded-lg h-9 bg-stone-900 mt-1 placeholder-neutral-500 pl-2 text-xs text-white outline-none border-neutral-600 border"
+            onChange={(event) => {
+              setPassword(event.target.value);
+            }}
+            value={password}
+            type="password"
+          ></input>
+          <p
+            className={
+              "text-red-400 text-xs" + (showError ? " block" : " hidden")
+            }
+          >
+            {passwordError}
+          </p>
+
+          <button
+            className="w-full h-9 text-sm mt-3 mb-2 bg-btnColor rounded-lg cursor-pointer hover:opacity-80 transition:all duration-200"
+            onClick={() => {
+              console.log("clicked");
+              if (checkEmail() && checkPassword && checkUsername()) {
+                const auth = getAuth();
+                createUserWithEmailAndPassword(auth, email, password)
+                  .then((value) => {
+                    console.log("Sign Up Successful");
+                    const user = value.user;
+                    updateProfile(user, {
+                      displayName: username,
+                      photoURL:
+                        "https://static.vecteezy.com/system/resources/thumbnails/002/534/006/small/social-media-chatting-online-blank-profile-picture-head-and-body-icon-people-standing-icon-grey-background-free-vector.jpg",
+                    }).then((value) => {
+                      checkAndSaveCode(user,generateRandomCode())
+                    });
+                  })
+                  .catch((err) => console.log(err));
+              } else {
+                setShowError(true);
+              }
+            }}
+          >
+            Sign Up
+          </button>
+          <p className="text-xs text-white text-center">
+            Already have an account?{" "}
+            <Link to="/auth/signin">
+              <span className=" text-btnColor cursor-pointer">Sign In</span>
+            </Link>
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
