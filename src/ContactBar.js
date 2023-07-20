@@ -5,7 +5,7 @@ import { MessageContext } from "./App";
 import { getDatabase, ref, get, onValue, off } from "firebase/database";
 import { Link, useParams } from "react-router-dom";
 export default function ContactBar() {
-  const { userInfo, messages } = useContext(MessageContext);
+  const { userInfo, messages, names, userState,isSignedIn } = useContext(MessageContext);
   const [lastMsg, setLastMsg] = useState("");
   const originalRef = useRef([]);
   const [filteredArr, setFilteredArr] = useState([]);
@@ -24,6 +24,7 @@ export default function ContactBar() {
           console.log("tempArr:", tempArr[0], "value", snapshot.key);
           originalRef.current = tempArr;
           setFilteredArr([...tempArr]);
+          console.log(tempArr);
         };
         const listenerRef = onValue(chatsRef, callback);
         listenerRefs.push({
@@ -76,13 +77,24 @@ export default function ContactBar() {
       {true ? (
         <div className="flex flex-col overflow-y-scroll">
           {filteredArr.map((value, index) => {
+            const userKeys = value.participants?Object.keys(value.participants):{}
+            const userValues = value.participants?Object.values(value.participants):{}
             return (
               <ContactBox
-                name={value.chatName}
+                name={value.type == "duo"
+                ? userValues[1] && userValues[0]
+                  ? userKeys[0] == isSignedIn.uid?userValues[1]:userValues[0]
+                  : ""
+                : value.chatName}
                 key={index}
                 lastMsg={value.lastMsg ? value.lastMsg : " "}
-                pfp={value.pfp}
+                pfp={value.type == "duo"
+?userValues[1]&&userValues[0]
+                  ? userKeys[0] == isSignedIn.uid?userValues[1][0].toUpperCase():userValues[0][0].toUpperCase()
+                  : ""
+                : value.pfp}
                 chatKey={value.chatId}
+                type={value.type}
               />
             );
           })}
@@ -92,8 +104,24 @@ export default function ContactBar() {
   );
 }
 
-const ContactBox = ({ name, pfp, lastMsg, chatKey }) => {
+const ContactBox = ({ name, pfp, lastMsg, chatKey, type }) => {
   const { chatId } = useParams();
+  const getColorFromLetter = (letter) => {
+    const colors = [
+      " bg-gradient-to-r from-red-500 to-pink-500",
+      " bg-gradient-to-r from-yellow-500 to-green-500",
+      " bg-gradient-to-r from-green-500 to-blue-500",
+      " bg-gradient-to-r from-blue-500 to-indigo-500",
+      " bg-gradient-to-r from-indigo-500 to-purple-500",
+      " bg-gradient-to-r from-purple-500 to-pink-500",
+      " bg-gradient-to-r from-pink-500 to-red-500",
+      " bg-gradient-to-r from-gray-500 to-gray-700",
+    ];
+
+    // Get the index based on the letter's char code
+    const index = letter.charCodeAt(0) % colors.length;
+    return colors[index];
+  };
   console.log(chatId, chatId);
   return (
     <Link to={`/homescreen/${chatKey}`}>
@@ -104,10 +132,13 @@ const ContactBox = ({ name, pfp, lastMsg, chatKey }) => {
         }
       >
         <button
-          className=" rounded-xl w-10 h-10 flex items-center justify-center bg-stone-800"
+          className={
+            "flex w-10 h-10 justify-center items-center rounded-xl bg-stone-800 text-2xl" +
+            (type == "duo" ? " text-base" + getColorFromLetter(name) : "")
+          }
           onClick={() => {}}
         >
-          {<p className=" text-2xl">{pfp}</p>}
+          {<p className={"text-white"}>{pfp}</p>}
         </button>
         <div>
           <p className="text-white">{name}</p>

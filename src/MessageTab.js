@@ -20,16 +20,20 @@ import EmojiPicker from "emoji-picker-react";
 import InfoTab from "./InfoTab";
 import { MdReply } from "react-icons/md";
 import cross from "./images/close.png";
-import {AiOutlineArrowDown} from 'react-icons/ai'
+import { AiOutlineArrowDown } from "react-icons/ai";
+import nochatimg from "./images/nochat-img.png";
 export default function MessageTab() {
-  const { messages, setMessages, showCodeModal, setShowCodeModal, userInfo } =
-    useContext(MessageContext);
+  const {
+    messages,
+    setShowCodeModal,
+    names,
+    userState,
+  } = useContext(MessageContext);
   const [text, setText] = useState("");
-  const [names, setNames] = useState([]);
   const [screen, setScreen] = useState("message");
   const [replyInfo, setReplyInfo] = useState({});
   const [metaInfo, setMetaInfo] = useState({});
-  const [showDownArrow, setShowDownArrow] = useState(false)
+  const [showDownArrow, setShowDownArrow] = useState(false);
   const containerRef = useRef();
   const { chatId } = useParams();
   const currentChat =
@@ -67,33 +71,32 @@ export default function MessageTab() {
         block: "center",
         inline: "center",
       });
-      replyRefs.current[uid].classList.add('grey-animation')
+      replyRefs.current[uid].classList.add("grey-animation");
       setTimeout(() => {
-        replyRefs.current[uid].classList.remove('grey-animation');
+        replyRefs.current[uid].classList.remove("grey-animation");
       }, 1000);
     }
-  } useEffect(() => {
+  }
+  useEffect(() => {
     const scrollContainer = containerRef.current;
-if(containerRef.current){    
-  const handleScroll = () => {
-      if (
-        scrollContainer.scrollTop + scrollContainer.clientHeight <
-        scrollContainer.scrollHeight
-      ) {
-        setShowDownArrow(true);
-      } else {
-        setShowDownArrow(false);
-      }
-      
+    if (containerRef.current) {
+      const handleScroll = () => {
+        if (
+          scrollContainer.scrollTop + scrollContainer.clientHeight <
+          scrollContainer.scrollHeight
+        ) {
+          setShowDownArrow(true);
+        } else {
+          setShowDownArrow(false);
+        }
+      };
+      scrollContainer.addEventListener("scroll", handleScroll);
+
+      return () => {
+        scrollContainer.removeEventListener("scroll", handleScroll);
+      };
     }
-    scrollContainer.addEventListener('scroll', handleScroll);
-
-    return () => {
-      scrollContainer.removeEventListener('scroll', handleScroll);
-    };}
-
-   
-  }, []);
+  }, [containerRef.current]);
   function formatDateTime(timestamp) {
     const date = new Date(timestamp);
 
@@ -146,29 +149,23 @@ if(containerRef.current){
       unsubscribe();
     };
   }, [chatId]);
-  useEffect(() => {
-    let namesArr = [];
-    if (Object.keys(messages).length !== 0) {
-      Promise.all(
-        Object.keys(messages.participants).map((uid, index) => {
-          const nameRef = ref(getDatabase(), "/users/" + uid + "/name");
-          return get(nameRef);
-        })
-      )
-        .then((names) => {
-          const tempArr = names.map((snapshot, index) => {
-            console.log(snapshot.val());
-            return snapshot.val();
-          });
-          namesArr = tempArr.slice();
-          console.log("NAME ARR:", tempArr);
-          setNames(tempArr);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    }
-  }, [messages.chatName, messages.participants]);
+
+  const getColorFromLetter = (letter) => {
+    const colors = [
+      " bg-gradient-to-r from-red-500 to-pink-500",
+      " bg-gradient-to-r from-yellow-500 to-green-500",
+      " bg-gradient-to-r from-green-500 to-blue-500",
+      " bg-gradient-to-r from-blue-500 to-indigo-500",
+      " bg-gradient-to-r from-indigo-500 to-purple-500",
+      " bg-gradient-to-r from-purple-500 to-pink-500",
+      " bg-gradient-to-r from-pink-500 to-red-500",
+      " bg-gradient-to-r from-gray-500 to-gray-700",
+    ];
+
+    // Get the index based on the letter's char code
+    const index = letter.charCodeAt(0) % colors.length;
+    return colors[index];
+  };
 
   return Object.keys(messages).length !== 0 && chatId !== "none" ? (
     <div
@@ -180,24 +177,55 @@ if(containerRef.current){
       {screen == "message" ? (
         <>
           <div className="flex gap-2 h-24 min-h-20 items-center pl-5  bg-stone-900 mb-3 md:shadow-md shadow-slate-700 text-white">
-          {showDownArrow?<div className='w-7 h-7 rounded-xl flex justify-center items-center bg-slate-700 absolute right-7 bottom-24 z-40 cursor-pointer' onClick={()=>{
-              if(!!containerRef.current) {
-                const container = containerRef.current;
-                container.scrollTo({top:container.scrollHeight,behavior:'smooth'});
-              }
-            }}>
-            <AiOutlineArrowDown className=''/>
-            </div>:<></>}
+            {showDownArrow ? (
+              <div
+                className="w-7 h-7 rounded-xl flex justify-center items-center bg-slate-700 absolute right-7 bottom-24 z-40 cursor-pointer"
+                onClick={() => {
+                  if (!!containerRef.current) {
+                    const container = containerRef.current;
+                    container.scrollTo({
+                      top: container.scrollHeight,
+                      behavior: "smooth",
+                    });
+                  }
+                }}
+              >
+                <AiOutlineArrowDown className="" />
+              </div>
+            ) : (
+              <></>
+            )}
             <Link to={"/homescreen/none"}>
               <FaAngleLeft className="md:hidden text-white text-2xl mr-3 cursor-pointer"></FaAngleLeft>
             </Link>
             <button
-              className=" rounded-xl w-10 h-10 flex items-center justify-center m-auto bg-stone-800"
+              className={
+                " rounded-xl w-10 h-10 flex items-center justify-center m-auto bg-stone-800 text-2xl" +
+                (messages.type == "duo"
+                  ? " text-base" +
+                    getColorFromLetter(
+                      messages.type == "duo"
+                        ? userState.name && userState.name.length > 0
+                          ? userState.name[0].toUpperCase()
+                          : ""
+                        : messages.pfp
+                    )
+                  : "")
+              }
               onClick={() => {
                 setScreen("info");
               }}
             >
-              {<p className=" text-2xl">{messages.pfp}</p>}
+              {
+                <p className="">
+                  {" "}
+                  {messages.type == "duo"
+                    ? userState.name && userState.name.length > 0
+                      ? userState.name[0].toUpperCase()
+                      : ""
+                    : messages.pfp}
+                </p>
+              }
             </button>
             <div className="flex items-center justify-between flex-1 mr-5">
               <div
@@ -206,20 +234,28 @@ if(containerRef.current){
                   setScreen("info");
                 }}
               >
-                <p className="text-white">{messages.chatName}</p>
-                <div className="flex flex-row">
-                  {names.map((name, index) => {
+                <p className="text-white">
+                  {" "}
+                  {messages.type == "duo" ? userState.name : messages.chatName}
+                </p>
+                {messages.type!=='duo'?<div className="flex flex-row">
+                  {names.map((username, index) => {
                     return (
                       <p className="text-xs text-subColor" key={index}>
-                        {names.length - 1 === index ? name : name + ", "}
+                        {names.length - 1 === index
+                          ? username.name
+                          : username.name + ",\u00A0"}
                       </p>
                     );
                   })}
-                </div>
+                </div>:<></>}
               </div>
               <FiLink
                 size={20}
-                className="text-white cursor-pointer"
+                className={
+                  "text-white cursor-pointer" +
+                  (messages.type == "duo" ? " hidden" : "")
+                }
                 onClick={() => {
                   setShowCodeModal(true);
                 }}
@@ -260,12 +296,15 @@ if(containerRef.current){
                           scrollToMsg={scrollToMsg}
                         />
                       ) : (
-                        <div className="relative hover:bg-slate-800 h-6 group flex items-center" ref={(ref) =>
-                          makeNewRef(
-                            Object.keys(messages.messages)[index],
-                            ref
-                          )
-                        }>
+                        <div
+                          className="relative hover:bg-slate-800 h-6 group flex items-center"
+                          ref={(ref) =>
+                            makeNewRef(
+                              Object.keys(messages.messages)[index],
+                              ref
+                            )
+                          }
+                        >
                           <div
                             className="absolute right-10 text-white hidden cursor-pointer group-hover:block"
                             onClick={() =>
@@ -278,10 +317,7 @@ if(containerRef.current){
                           >
                             <MdReply size="22" />
                           </div>
-                          <p
-                            className="text-white pl-5 text-sm font-light ml-14"
-                          
-                          >
+                          <p className="text-white pl-5 text-sm font-light ml-14">
                             {value.content}
                           </p>
                         </div>
@@ -339,7 +375,7 @@ if(containerRef.current){
               <div>
                 <img
                   src={send}
-                  className="h-6 mr-4 hover:opacity-80 transition-all duration-200"
+                  className="h-6 mr-4 hover:opacity-80 transition-all duration-200 cursor-pointer"
                   onClick={() => {
                     handleSubmit();
                   }}
@@ -358,7 +394,8 @@ if(containerRef.current){
       )}
     </div>
   ) : (
-    <div className="hidden items-center justify-center flex-1 md:flex">
+    <div className="hidden items-center justify-center flex-1 md:flex flex-col">
+      <img src={nochatimg} className="w-5/12 min-w-messageMin max-w-sm" />
       <h1 className="text-white text-xl">Start chatting with people!</h1>
     </div>
   );
@@ -377,14 +414,14 @@ const MessageBox = ({
 }) => {
   const getColorFromLetter = (letter) => {
     const colors = [
-      " bg-red-500",
-      " bg-yellow-500",
-      " bg-green-500",
-      " bg-blue-500",
-      " bg-indigo-500",
-      " bg-purple-500",
-      " bg-pink-500",
-      " bg-gray-500",
+      " bg-gradient-to-r from-red-500 to-pink-500",
+      " bg-gradient-to-r from-yellow-500 to-green-500",
+      " bg-gradient-to-r from-green-500 to-blue-500",
+      " bg-gradient-to-r from-blue-500 to-indigo-500",
+      " bg-gradient-to-r from-indigo-500 to-purple-500",
+      " bg-gradient-to-r from-purple-500 to-pink-500",
+      " bg-gradient-to-r from-pink-500 to-red-500",
+      " bg-gradient-to-r from-gray-500 to-gray-700",
     ];
 
     // Get the index based on the letter's char code

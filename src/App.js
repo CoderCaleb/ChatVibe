@@ -6,7 +6,7 @@ import MessageTab from "./MessageTab";
 import firebase from "firebase/compat/app";
 import { onValue, get, getDatabase, ref, off } from "firebase/database";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import React, { createContext, useState, useEffect } from "react";
+import React, { createContext, useState, useEffect, useMemo } from "react";
 import SignUp from "./SignUp";
 import {
   Route,
@@ -36,7 +36,74 @@ function App() {
   const [userInfo, setUserinfo] = useState({});
   const [showCodeModal, setShowCodeModal] = useState(false);
   const [showRemoveModal, setShowRemoveModal] = useState({})
+  const [userState, setUserState] = useState({});
+  const [names, setNames] = useState([]);
+  const [author, setAuthor] = useState("");
+  const [isSignedIn, setIsSignedIn] = useState(null)
+  useEffect(() => {
+    onAuthStateChanged(getAuth(), (user) => {
+      setIsSignedIn(user);
+    });
+  }, []);
+  useMemo(() => {
+    if (Object.keys(messages).length !== 0) {
+      Promise.all(
+        Object.keys(messages.participants).map((uid, index) => {
+          const nameRef = ref(getDatabase(), "/users/" + uid + "/name");
+          return get(nameRef);
+        })
+      )
+        .then((names) => {
+          let tempArr = [];
+          Promise.all(
+            Object.keys(messages.participants).map((uid, index) => {
+              const codeRef = ref(getDatabase(), "/users/" + uid + "/userCode");
+              return get(codeRef);
+            })
+          ).then((codes) => {
+            tempArr = names.map((snapshot, index) => {
+              console.log(snapshot.val());
+              console.log(Object.keys(messages.participants)[index]);
+              return {
+                name: snapshot.val(),
+                uid: Object.keys(messages.participants)[index],
+              };
+            });
+            const finalArr = codes.map((snapshot, index) => {
+              return { ...tempArr[index], userCode: snapshot.val() };
+            });
+            setNames(finalArr);
+            console.log("TEMP ARR NAMES", finalArr);
+          });
 
+          setNames(tempArr);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+      const authorRef = ref(
+        getDatabase(),
+        "/users/" + messages.author + "/name"
+      );
+      get(authorRef).then((snapshot) => {
+        setAuthor(snapshot.val());
+      });
+    }
+    console.log('CHAT INFO',messages.chatName, messages.participants)
+  }, [messages.chatName, messages.participants]);
+  useEffect(() => {
+    console.log("NAMES", !!names[1]);
+    setUserState(
+      isSignedIn && names[0] && names[1]
+        ? names[0].uid !== isSignedIn.uid
+          ? names[0]
+          : names[1]
+        : ""
+    );
+  }, [names]);
+  useEffect(()=>{
+console.log('namessssssijcsvoj',names)
+  },[names])
   useEffect(() => {
     console.log("user:", getAuth().currentUser);
   }, []);
@@ -52,7 +119,11 @@ function App() {
         setShowCodeModal,
         showRemoveModal,
         setShowRemoveModal,
-      }}
+        names,
+        author,
+        userState,
+        isSignedIn
+      }} 
     >
       <div className="flex bg-bgColor h-screen w-screen">
         <Routes>

@@ -28,6 +28,7 @@ import { useEffect, useState, useContext } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useParams } from "react-router-dom";
 import { MessageContext } from "./App";
+import tickgif from "./images/blue-tick.gif";
 import discordGroupIcon from "./images/discord-group-icon.png";
 import discordIcon2 from "./images/discordIcon2.png";
 export default function SideBar() {
@@ -35,6 +36,7 @@ export default function SideBar() {
   const [showModal, setShowModal] = useState(false);
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [formIndex, setFormIndex] = useState(1);
+  const [modalType, setModalType] = useState("duo");
   const [chatName, setChatName] = useState("");
   const {
     showCodeModal,
@@ -76,20 +78,21 @@ export default function SideBar() {
   }
   const getColorFromLetter = (letter) => {
     const colors = [
-      " bg-red-500",
-      " bg-yellow-500",
-      " bg-green-500",
-      " bg-blue-500",
-      " bg-indigo-500",
-      " bg-purple-500",
-      " bg-pink-500",
-      " bg-gray-500",
+      " bg-gradient-to-r from-red-500 to-pink-500",
+      " bg-gradient-to-r from-yellow-500 to-green-500",
+      " bg-gradient-to-r from-green-500 to-blue-500",
+      " bg-gradient-to-r from-blue-500 to-indigo-500",
+      " bg-gradient-to-r from-indigo-500 to-purple-500",
+      " bg-gradient-to-r from-purple-500 to-pink-500",
+      " bg-gradient-to-r from-pink-500 to-red-500",
+      " bg-gradient-to-r from-gray-500 to-gray-700",
     ];
 
     // Get the index based on the letter's char code
     const index = letter.charCodeAt(0) % colors.length;
     return colors[index];
   };
+
   useEffect(() => {
     console.log("REMOVE MODAL", showRemoveModal);
   }, [showRemoveModal]);
@@ -98,9 +101,8 @@ export default function SideBar() {
       <div
         className="flex relative justify-between items-center w-full border border-slate-300 rounded-lg mt-3 px-3 hover:bg-slate-200 cursor-pointer transition-all duration-100 h-16"
         onClick={() => {
-          if (type == "group") {
-            setFormIndex((prev) => (prev += 1));
-          }
+          setFormIndex((prev) => (prev += 1));
+          setModalType(type);
         }}
       >
         <div className="flex items-center gap-2">
@@ -128,6 +130,8 @@ export default function SideBar() {
           setFormIndex={setFormIndex}
           ChoiceBox={ChoiceBox}
           setCloseModal={setShowModal}
+          modalType={modalType}
+          user={user}
         />
       </div>
       <div
@@ -209,13 +213,18 @@ function CreateForm({
   setFormIndex,
   ChoiceBox,
   setCloseModal,
+  modalType,
+  user,
 }) {
   const auth = getAuth();
   const [uid, setUid] = useState("");
   const [showEmoji, setShowEmoji] = useState(false);
   const [selectedEmoji, setSelectedEmoji] = useState("");
   const [error, setError] = useState("");
+  const [username, setUsername] = useState("");
+  const [showTick, setShowTick] = useState(false);
   const { chatId } = useParams();
+  const [duoError, setDuoError] = useState('')
   function generateUID() {
     const string =
       "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890";
@@ -235,7 +244,11 @@ function CreateForm({
   }
   if (formIndex == 1) {
     return (
-      <div className={"text-center bg-white rounded-lg p-5 w-96 relative animate-fade-up"}>
+      <div
+        className={
+          "text-center bg-white rounded-lg p-5 w-96 relative animate-fade-up"
+        }
+      >
         <img
           src={cross}
           className="absolute w-4 right-5 cursor-pointer"
@@ -267,7 +280,637 @@ function CreateForm({
     );
   } else if (formIndex == 2) {
     return (
-      <div className={"text-center bg-white rounded-lg p-5 w-96 relative animate-fade-up"}>
+      <div
+        className={
+          "text-center bg-white rounded-lg p-5 w-96 relative animate-fade-up"
+        }
+      >
+        <img
+          src={cross}
+          className="absolute w-4 right-5 cursor-pointer"
+          onClick={() => {
+            handleClose();
+          }}
+        ></img>
+        {modalType == "group" ? (
+          <>
+            <div className="">
+              <img src={smileyFace} className="w-14 m-auto"></img>
+              <p className="font-semibold text-xl mb-2">Create your VibeChat</p>
+              <p className="font-normal text-neutral-500 text-sm mb-5">
+                Personalize your chat with a unique name and emoji profile
+                picture.
+              </p>
+            </div>
+            <div className="relative">
+              <div
+                className={
+                  "absolute min-h-emojiMin max-h-emojiMax h-halfHeight overflow-y-auto" +
+                  (showEmoji ? " right-64 bottom-1" : " hidden")
+                }
+              >
+                <EmojiPicker
+                  height={"100%"}
+                  onEmojiClick={(emojiData) => {
+                    setSelectedEmoji(emojiData.emoji);
+                    setShowEmoji(false);
+                  }}
+                  lazyLoadEmojis={true}
+                />
+              </div>
+              <button
+                className=" rounded-full w-20 h-20 flex items-center justify-center bg-gray-100 m-auto"
+                onClick={() => {
+                  setShowEmoji(!showEmoji);
+                }}
+              >
+                {selectedEmoji ? (
+                  <div className="flex items-center justify-center">
+                    <p className=" text-4xl">{selectedEmoji}</p>
+                  </div>
+                ) : !showEmoji ? (
+                  <MdOutlineEmojiEmotions size={30} className="text-subColor" />
+                ) : (
+                  <RxCross2 size={30} className="text-subColor" />
+                )}
+              </button>
+            </div>
+            <p className="text-start text-sm mb-2">Chat Name</p>
+            <input
+              className="w-full border border-gray-200 rounded-lg p-2 text-sm outline-none"
+              placeholder="John's chat"
+              onChange={(event) =>
+                event.target.value.length <= 25
+                  ? handleChange(event, setError)
+                  : null
+              }
+              value={chatName}
+            ></input>
+            <p className="text-sm text-red-500">{error}</p>
+          </>
+        ) : (
+          <>
+            <div className="">
+              <img src={smileyFace} className="w-14 m-auto"></img>
+              <p className="font-semibold text-xl mb-2">Create your VibeChat</p>
+              <p className="font-normal text-neutral-500 text-sm mb-5">
+                Connect with a friend using their username and create your
+                exclusive chat experience
+              </p>
+            </div>
+            <div>
+              <div className="w-full border border-gray-300 rounded-lg flex justify-between items-center">
+                <input
+                  placeholder="eg kelob#4838"
+                  className="w-full rounded-lg p-2 text-sm outline-none"
+                  value={username}
+                  onChange={(event) => {
+                    setUsername(event.target.value);
+                    setDuoError('')
+                    if (/^[a-zA-Z0-9]+\#[0-9]{4}$/.test(event.target.value)) {
+                      const splitName = event.target.value.split("#");
+                      const codeRef = ref(
+                        getDatabase(),
+                        `userCodes/${splitName[0]}/${splitName[1]}`
+                      );
+                      get(codeRef).then((snapshot) => {
+                        if (snapshot.exists()) {
+                          setShowTick(true);
+                        } else {
+                          setShowTick(false);
+                        }
+                      });
+                    } else {
+                      setShowTick(false);
+                    }
+                  }}
+                ></input>
+                {showTick ? (
+                  <div className="relative flex justify-center group">
+                    <img src={tickgif} className="w-5 h-5 mr-4" />
+                    <div className="absolute bottom-7 flex justify-center items-center w-28 h-5 rounded-md bg-stone-800 scale-0 group-hover:scale-100 transition-all duration-300">
+                      <p className="text-white text-sm">User is found</p>
+                    </div>
+                  </div>
+                ) : (
+                  <></>
+                )}
+              </div>
+              <p className='text-sm text-red-400'>{duoError}</p>
+
+            </div>
+          </>
+        )}
+        <div className="flex gap-2 mt-5">
+          <button
+            className="back-button"
+            onClick={() => {
+              setFormIndex((prev) => prev - 1);
+            }}
+          >
+            Previous
+          </button>
+          <button
+            className="done-button "
+            onClick={() => {
+              if (modalType == "group") {
+                if (
+                  chatName.trim().length !== 0 &&
+                  selectedEmoji.trim().length !== 0
+                ) {
+                  const chatRef = ref(getDatabase(), "/chats");
+                  setFormIndex((prev) => prev + 1);
+                  const userRef = ref(
+                    getDatabase(),
+                    `/users/${auth.currentUser.uid}/chats`
+                  );
+                  const codesRef = ref(getDatabase(), "/codes");
+                  const metaData = ref(getDatabase(), "/chatMetaData");
+                  setShowEmoji(false);
+                  push(chatRef, {
+                    author: auth.currentUser.uid,
+                    chatName: chatName,
+                    pfp: selectedEmoji,
+                    timeCreated: Date.now(),
+                    participants: {
+                      [auth.currentUser.uid]: true,
+                    },
+                  }).then((value) => {
+                    update(userRef, {
+                      [value.key]: true,
+                    }).then((result) => {
+                      const uid = generateUID();
+                      update(codesRef, {
+                        [uid]: value.key,
+                      }).then((result) => {
+                        update(metaData, {
+                          [value.key]: {
+                            chatName: chatName,
+                            pfp: selectedEmoji,
+                            admin: {
+                              [auth.currentUser.uid]: true,
+                            },
+                          },
+                        });
+                      });
+                    });
+                  });
+                } else if (selectedEmoji.trim().length == 0) {
+                  setError("Please choose an emoji for group pfp");
+                } else {
+                  setError("Please enter a valid chat name");
+                }
+              } else {
+                console.log("chat is duo");
+                if (showTick) {
+                   console.log('username ffpjvovejvo')
+                  const chatRef = ref(getDatabase(), "/chats");
+                  const userRef = ref(
+                    getDatabase(),
+                    `/users/${auth.currentUser.uid}/chats`
+                  );
+                  setFormIndex((prev) => prev + 1);
+                  if (/^[a-zA-Z0-9]+\#[0-9]{4}$/.test(username)) {
+                    const splitName = username.split("#");
+                    const codeRef = ref(
+                      getDatabase(),
+                      `userCodes/${splitName[0]}/${splitName[1]}`
+                    );
+                    get(codeRef).then((snapshot) => {
+                      if (snapshot.exists() && user) {
+                        const nameRef = ref(
+                          getDatabase(),
+                          `users/${snapshot.val()}/name`
+                        );
+                        const codeRef = ref(getDatabase(),`users/${snapshot.val()}/userCode`)
+                        const otherUserRef = ref(getDatabase(), `users/${snapshot.val()}/chats`)
+                        get(nameRef).then((name) => {
+                          if (name.exists()) {
+                            get(codeRef).then(code=>{
+                              if(code.exists()){
+                                const fullUsername = `${name.val()}#${code.val()}`
+                                push(chatRef, {
+                                  author: user.uid,
+                                  chatName: name.val(),
+                                  pfp:name.val()[0].toUpperCase(),
+                                  timeCreated: Date.now(),
+                                  type: "duo",
+                                  participants: {
+                                    [user.uid]: true,
+                                    [snapshot.val()]: true,
+                                  },
+                                }).then((value) => {
+                                  update(userRef, {
+                                    [value.key]: true,
+                                  }).then(()=>{
+                                    update(otherUserRef,{
+                                      [value.key]:true
+                                    }).then((result) => {
+                                      const metaData = ref(
+                                        getDatabase(),
+                                        "/chatMetaData"
+                                      );
+                                      update(metaData, {
+                                        [value.key]: {
+                                          chatName: name.val(),
+                                          pfp: name.val()[0].toUpperCase(),
+                                          type:'duo',
+                                          participants: {
+                                            [user.uid]: user.displayName,
+                                            [snapshot.val()]: name.val(),
+                                          }
+                                        },
+                                      });
+                                    })
+                                  });
+                                });
+                              }
+                              else{
+                                setDuoError('Oops! Username not found')
+                              }
+                            })
+                          }
+                          else{
+                            setDuoError('Oops! Username not found')
+                          }
+                        });
+                        
+                      } else {
+                        setDuoError('Oops! Something went wrong. Please try again')
+                      }
+                    });
+                  } else {
+                    setDuoError('Invalid username format. Use [username] + #[4-digit number]. For example: bob#5837.')
+                    console.log('Username not formatted correctly')
+                  }
+                }
+                else if(!/^[a-zA-Z0-9]+\#[0-9]{4}$/.test(username)){
+                  setDuoError('Invalid username format. Use [username] + #[4-digit number]. For example: bob#5837.')
+                }
+                else{
+                  setDuoError('Oops. User not found. Try double checking the username')
+                }
+              }
+            }}
+          >
+            Create
+          </button>
+        </div>
+        <div></div>
+      </div>
+    );
+  } else if (formIndex == 3) {
+    return (
+      <div className={"text-center bg-white rounded-lg p-5 w-96 relative"}>
+        <img
+          src={cross}
+          className="absolute w-4 right-5 cursor-pointer"
+          onClick={() => {
+            handleClose();
+          }}
+        ></img>
+        <div className="">
+          <img src={alien} className=" w-14 m-auto"></img>
+          <p className="font-semibold text-xl mb-2">Chat Code Unleashed!</p>
+          <p className="font-normal text-neutral-500 text-sm mb-5">
+            Share this code with friends to invite them to the chat
+          </p>
+        </div>
+        <div className="w-5/6 h-20 bg-gray-100 m-auto rounded-lg flex justify-center items-center">
+          <p className=" text-2xl tracking-widest font-light">{uid}</p>
+        </div>
+        <div className="flex gap-2 mt-5">
+          <button
+            className="done-button"
+            onClick={() => {
+              setFormIndex(1);
+              setShowModal(false);
+            }}
+          >
+            Done
+          </button>
+        </div>
+        <div></div>
+      </div>
+    );
+  }
+}
+function JoinModal({ setShowJoinModal, showJoinModal }) {
+  const [joinModalIndex, setJoinModalIndex] = useState(1);
+  const [code, setCode] = useState("");
+  const [error, setError] = useState("");
+  let userRef = null;
+  const { chatId } = useParams();
+  onAuthStateChanged(getAuth(), (user) => {
+    userRef = user ? ref(getDatabase(), `/users/${user.uid}/chats`) : null;
+  });
+  return (
+    <div
+      className={
+        "text-center bg-white rounded-lg p-5 w-96 relative animate-jump-in"
+      }
+    >
+      <img
+        src={cross}
+        className="absolute w-4 right-5 cursor-pointer"
+        onClick={() => {
+          setShowJoinModal(false);
+        }}
+      ></img>
+      <div className="">
+        <img src={yingyang} className="w-14 m-auto"></img>
+        <p className="font-semibold text-xl mb-2">Join Chat with Code</p>
+        <p className="font-normal text-neutral-500 text-sm mb-5">
+          Enter the unique code provided by the group participants to join the
+          chat and connect with others{" "}
+        </p>
+      </div>
+      <input
+        className="w-5/6 h-20 bg-gray-100 m-auto rounded-lg flex justify-center items-center text-2xl tracking-widest font-light text-center placeholder:tracking-normal"
+        placeholder="Enter your code"
+        value={code}
+        onChange={(event) => {
+          setCode(event.target.value);
+          setError("");
+        }}
+      ></input>
+      <div className="flex gap-2 mt-5">
+        <button
+          className="done-button"
+          onClick={() => {
+            if (code.trim().length !== 0 && !/[.$#[\]]/.test(code.trim())) {
+              const codesRef = ref(getDatabase(), `/codes/${code.trim()}`);
+              get(codesRef).then((snapshot) => {
+                if (snapshot.exists()) {
+                  console.log("Code", snapshot.val());
+                  const chatRef = ref(
+                    getDatabase(),
+                    `/chats/${snapshot.val()}/participants`
+                  );
+                  update(chatRef, {
+                    [getAuth().currentUser.uid]: true,
+                  }).then((value) => {
+                    update(userRef, {
+                      [snapshot.val()]: true,
+                    });
+                  });
+
+                  setJoinModalIndex(1);
+                  setShowJoinModal(false);
+                } else {
+                  console.log("Code does not exist");
+                  setError("Code does not exist. Try again");
+                }
+              });
+            } else {
+              setError("Please enter a valid code");
+            }
+          }}
+        >
+          Done
+        </button>
+      </div>
+      <div></div>
+    </div>
+  );
+}
+
+const CodeModal = ({ setShowCodeModal, showCodeModal }) => {
+  const [code, setCode] = useState("");
+  const { chatId } = useParams();
+  const codesRef = ref(getDatabase(), "/codes");
+  const queryRef = query(
+    codesRef,
+    orderByValue(), // 👈
+    equalTo(chatId)
+  );
+  useEffect(() => {
+    console.log(queryRef);
+    if (showCodeModal == true) {
+      setCode("");
+      get(queryRef).then((snapshot) => {
+        console.log(snapshot.val());
+
+        if (snapshot.exists()) {
+          setCode(Object.keys(snapshot.val())[0]);
+          console.log("snapshot:", snapshot.val());
+        } else {
+          setCode("Chat code failed");
+        }
+      });
+    }
+  }, [showCodeModal]);
+
+  return (
+    <div
+      className={
+        "text-center bg-white rounded-lg p-5 w-96 relative animate-fade-right"
+      }
+    >
+      <img
+        src={cross}
+        className="absolute w-4 right-5 cursor-pointer"
+        onClick={() => {
+          setShowCodeModal(false);
+        }}
+      ></img>
+      <div className="">
+        <img src={stero} className=" w-16 m-auto"></img>
+        <p className="font-semibold text-xl mb-2">The Chat Code Revealed</p>
+        <p className="font-normal text-neutral-500 text-sm mb-5">
+          Invite others to the chat by sharing this unique code{" "}
+        </p>
+      </div>
+      <div className="w-5/6 h-20 bg-gray-100 m-auto rounded-lg flex justify-center items-center">
+        <p className=" text-2xl tracking-widest font-light">
+          {code !== "" ? code : "Loading..."}
+        </p>
+      </div>
+      <div className="flex gap-2 mt-5">
+        <button
+          className="done-button"
+          onClick={() => {
+            setShowCodeModal(false);
+          }}
+        >
+          Done
+        </button>
+      </div>
+      <div></div>
+    </div>
+  );
+};
+
+const ConfirmModal = ({ setShowRemoveModal, showRemoveModal }) => {
+  const { chatId } = useParams();
+  const auth = getAuth();
+  return (
+    <div className={"text-center bg-white rounded-lg p-5 w-96 relative"}>
+      <img
+        src={cross}
+        className="absolute w-4 right-5 cursor-pointer"
+        onClick={() => {
+          setShowRemoveModal({});
+        }}
+      ></img>
+      <div className="">
+        <img src={peace} className="w-20 m-auto"></img>
+        <p className="font-semibold text-xl mb-2">
+          {showRemoveModal.type == "remove"
+            ? "Remove User"
+            : showRemoveModal.type == "dismiss"
+            ? "Dismiss as admin"
+            : "Make admin"}
+        </p>
+        <p className="font-normal text-neutral-500 text-sm mb-5">
+          {showRemoveModal.type == "remove"
+            ? "Are you sure you want to remove this user from the chat?"
+            : showRemoveModal.type == "dismiss"
+            ? "Are you sure you want to dismiss this user as admin"
+            : "Are you sure you want to make this user an admin"}
+        </p>
+      </div>
+      <div className="flex gap-2 mt-5">
+        <button
+          className="back-button"
+          onClick={() => {
+            setShowRemoveModal({});
+          }}
+        >
+          Cancel
+        </button>
+        <button
+          className=" done-button"
+          onClick={() => {
+            if (showRemoveModal.type == "remove") {
+              const chatRef = ref(
+                getDatabase(),
+                `chats/${chatId}/participants/${showRemoveModal.user}`
+              );
+              remove(chatRef)
+                .then(() => {
+                  setShowRemoveModal({});
+                  onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                      const userRef = ref(
+                        getDatabase(),
+                        `users/${showRemoveModal.user}/chats/${chatId}`
+                      );
+                      remove(userRef)
+                        .then(() => {
+                          console.log("success!");
+                        })
+                        .catch((err) => {
+                          console.log(err);
+                        });
+                    }
+                  });
+                })
+                .catch((err) => {
+                  console.log(err);
+                });
+            } else if (showRemoveModal.type == "admin") {
+              const adminRef = ref(
+                getDatabase(),
+                `chatMetaData/${chatId}/admin`
+              );
+              update(adminRef, {
+                [showRemoveModal.user]: true,
+              }).then(() => {
+                setShowRemoveModal({});
+              });
+            } else {
+              const adminRef = ref(
+                getDatabase(),
+                `chatMetaData/${chatId}/admin/${showRemoveModal.user}`
+              );
+              remove(adminRef).then(() => setShowRemoveModal({}));
+            }
+          }}
+        >
+          {showRemoveModal.type == "remove" ? "Remove" : "Confirm"}
+        </button>
+      </div>
+      <div></div>
+    </div>
+  );
+};
+
+function CreateDuo({
+  formIndex,
+  setShowModal,
+  handleChange,
+  chatName,
+  setFormIndex,
+  ChoiceBox,
+  setCloseModal,
+}) {
+  const auth = getAuth();
+  const [uid, setUid] = useState("");
+  const [showEmoji, setShowEmoji] = useState(false);
+  const [selectedEmoji, setSelectedEmoji] = useState("");
+  const [error, setError] = useState("");
+  const { chatId } = useParams();
+  function generateUID() {
+    const string =
+      "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890";
+    const uid = [];
+    for (let i = 0; i <= 8; i++) {
+      uid.push(string[Math.floor(Math.random() * string.length)]);
+    }
+    setUid(uid.join(""));
+    return uid.join("");
+  }
+  function handleClose() {
+    setShowModal(false);
+    setFormIndex(1);
+    setShowEmoji(false);
+    setSelectedEmoji("");
+    setError("");
+  }
+  if (formIndex == 1) {
+    return (
+      <div
+        className={
+          "text-center bg-white rounded-lg p-5 w-96 relative animate-fade-up"
+        }
+      >
+        <img
+          src={cross}
+          className="absolute w-4 right-5 cursor-pointer"
+          onClick={() => {
+            handleClose();
+          }}
+        ></img>
+        <div className="">
+          <img src={peace} className="w-20 m-auto"></img>
+          <p className="font-semibold text-xl mb-2">Create a VibeChat</p>
+          <p className="font-normal text-neutral-500 text-sm mb-5">
+            Create a VibeChat – Hangout with Friends! Start your chat for 2 or a
+            group and enjoy lively conversations.
+          </p>
+        </div>
+        <ChoiceBox
+          message="Initiate a Chat for Two"
+          img={discordIcon2}
+          type="duo"
+        />
+        <ChoiceBox
+          message="Start a Group Chat"
+          img={discordGroupIcon}
+          type="group"
+        />
+
+        <div></div>
+      </div>
+    );
+  } else if (formIndex == 2) {
+    return (
+      <div
+        className={
+          "text-center bg-white rounded-lg p-5 w-96 relative animate-fade-up"
+        }
+      >
         <img
           src={cross}
           className="absolute w-4 right-5 cursor-pointer"
@@ -429,236 +1072,3 @@ function CreateForm({
     );
   }
 }
-function JoinModal({ setShowJoinModal, showJoinModal }) {
-  const [joinModalIndex, setJoinModalIndex] = useState(1);
-  const [code, setCode] = useState("");
-  const [error, setError] = useState("");
-  let userRef = null;
-  const { chatId } = useParams();
-  onAuthStateChanged(getAuth(), (user) => {
-    userRef = user ? ref(getDatabase(), `/users/${user.uid}/chats`) : null;
-  });
-  return (
-    <div className={"text-center bg-white rounded-lg p-5 w-96 relative animate-jump-in"}>
-      <img
-        src={cross}
-        className="absolute w-4 right-5 cursor-pointer"
-        onClick={() => {
-          setShowJoinModal(false);
-        }}
-      ></img>
-      <div className="">
-        <img src={yingyang} className="w-14 m-auto"></img>
-        <p className="font-semibold text-xl mb-2">Join Chat with Code</p>
-        <p className="font-normal text-neutral-500 text-sm mb-5">
-          Enter the unique code provided by the group participants to join the
-          chat and connect with others{" "}
-        </p>
-      </div>
-      <input
-        className="w-5/6 h-20 bg-gray-100 m-auto rounded-lg flex justify-center items-center text-2xl tracking-widest font-light text-center placeholder:tracking-normal"
-        placeholder="Enter your code"
-        value={code}
-        onChange={(event) => {
-          setCode(event.target.value);
-          setError("");
-        }}
-      ></input>
-      <p className=" text-red-500 text-sm">{error}</p>
-      <div className="flex gap-2 mt-5">
-        <button
-          className="done-button"
-          onClick={() => {
-            if (code.trim().length !== 0 && !/[.$#[\]]/.test(code.trim())) {
-              const codesRef = ref(getDatabase(), `/codes/${code.trim()}`);
-              get(codesRef).then((snapshot) => {
-                if (snapshot.exists()) {
-                  console.log("Code", snapshot.val());
-                  const chatRef = ref(
-                    getDatabase(),
-                    `/chats/${snapshot.val()}/participants`
-                  );
-                  update(chatRef, {
-                    [getAuth().currentUser.uid]: true,
-                  }).then((value) => {
-                    update(userRef, {
-                      [snapshot.val()]: true,
-                    });
-                  });
-
-                  setJoinModalIndex(1);
-                  setShowJoinModal(false);
-                } else {
-                  console.log("Code does not exist");
-                  setError("Code does not exist. Try again");
-                }
-              });
-            } else {
-              setError("Please enter a valid code");
-            }
-          }}
-        >
-          Done
-        </button>
-      </div>
-      <div></div>
-    </div>
-  );
-}
-
-const CodeModal = ({ setShowCodeModal, showCodeModal }) => {
-  const [code, setCode] = useState("");
-  const { chatId } = useParams();
-  const codesRef = ref(getDatabase(), "/codes");
-  const queryRef = query(
-    codesRef,
-    orderByValue(), // 👈
-    equalTo(chatId)
-  );
-  useEffect(() => {
-    console.log(queryRef);
-    if (showCodeModal == true) {
-      setCode("");
-      get(queryRef).then((snapshot) => {
-        console.log(snapshot.val());
-
-        if (snapshot.exists()) {
-          setCode(Object.keys(snapshot.val())[0]);
-          console.log("snapshot:", snapshot.val());
-        } else {
-          setCode("Chat code failed");
-        }
-      });
-    }
-  }, [showCodeModal]);
-
-  return (
-    <div className={"text-center bg-white rounded-lg p-5 w-96 relative animate-fade-right"}>
-      <img
-        src={cross}
-        className="absolute w-4 right-5 cursor-pointer"
-        onClick={() => {
-          setShowCodeModal(false);
-        }}
-      ></img>
-      <div className="">
-        <img src={stero} className=" w-16 m-auto"></img>
-        <p className="font-semibold text-xl mb-2">The Chat Code Revealed</p>
-        <p className="font-normal text-neutral-500 text-sm mb-5">
-          Invite others to the chat by sharing this unique code{" "}
-        </p>
-      </div>
-      <div className="w-5/6 h-20 bg-gray-100 m-auto rounded-lg flex justify-center items-center">
-        <p className=" text-2xl tracking-widest font-light">
-          {code !== "" ? code : "Loading..."}
-        </p>
-      </div>
-      <div className="flex gap-2 mt-5">
-        <button
-          className="done-button"
-          onClick={() => {
-            setShowCodeModal(false);
-          }}
-        >
-          Done
-        </button>
-      </div>
-      <div></div>
-    </div>
-  );
-};
-
-const ConfirmModal = ({ setShowRemoveModal, showRemoveModal }) => {
-  const { chatId } = useParams();
-  const auth = getAuth();
-  return (
-    <div className={"text-center bg-white rounded-lg p-5 w-96 relative"}>
-      <img
-        src={cross}
-        className="absolute w-4 right-5 cursor-pointer"
-        onClick={() => {
-          setShowRemoveModal({});
-        }}
-      ></img>
-      <div className="">
-        <img src={peace} className="w-20 m-auto"></img>
-        <p className="font-semibold text-xl mb-2">
-          {showRemoveModal.type == "remove"
-            ? "Remove User"
-            : showRemoveModal.type == "dismiss"
-            ? "Dismiss as admin"
-            : "Make admin"}
-        </p>
-        <p className="font-normal text-neutral-500 text-sm mb-5">
-          {showRemoveModal.type == "remove"
-            ? "Are you sure you want to remove this user from the chat?"
-            : showRemoveModal.type == "dismiss"
-            ? "Are you sure you want to dismiss this user as admin"
-            : "Are you sure you want to make this user an admin"}
-        </p>
-      </div>
-      <div className="flex gap-2 mt-5">
-        <button
-          className="back-button"
-          onClick={() => {
-            setShowRemoveModal({});
-          }}
-        >
-          Cancel
-        </button>
-        <button
-          className=" done-button"
-          onClick={() => {
-            if (showRemoveModal.type == "remove") {
-              const chatRef = ref(
-                getDatabase(),
-                `chats/${chatId}/participants/${showRemoveModal.user}`
-              );
-              remove(chatRef)
-                .then(() => {
-                  setShowRemoveModal({});
-                  onAuthStateChanged(auth, (user) => {
-                    if (user) {
-                      const userRef = ref(
-                        getDatabase(),
-                        `users/${showRemoveModal.user}/chats/${chatId}`
-                      );
-                      remove(userRef)
-                        .then(() => {
-                          console.log("success!");
-                        })
-                        .catch((err) => {
-                          console.log(err);
-                        });
-                    }
-                  });
-                })
-                .catch((err) => {
-                  console.log(err);
-                });
-            } else if (showRemoveModal.type == "admin") {
-              const adminRef = ref(
-                getDatabase(),
-                `chatMetaData/${chatId}/admin`
-              );
-              update(adminRef, {
-                [showRemoveModal.user]: true,
-              }).then(() => {
-                setShowRemoveModal({});
-              });
-            } else {
-              const adminRef = ref(
-                getDatabase(),
-                `chatMetaData/${chatId}/admin/${showRemoveModal.user}`
-              );
-              remove(adminRef).then(() => setShowRemoveModal({}));
-            }
-          }}
-        >
-          {showRemoveModal.type == "remove" ? "Remove" : "Confirm"}
-        </button>
-      </div>
-      <div></div>
-    </div>
-  );
-};
