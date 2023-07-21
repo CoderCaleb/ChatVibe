@@ -6,7 +6,13 @@ import MessageTab from "./MessageTab";
 import firebase from "firebase/compat/app";
 import { onValue, get, getDatabase, ref, off } from "firebase/database";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import React, { createContext, useState, useEffect, useMemo } from "react";
+import React, {
+  createContext,
+  useState,
+  useEffect,
+  useMemo,
+  useRef,
+} from "react";
 import SignUp from "./SignUp";
 import {
   Route,
@@ -35,18 +41,22 @@ function App() {
   const [messages, setMessages] = useState({});
   const [userInfo, setUserinfo] = useState({});
   const [showCodeModal, setShowCodeModal] = useState(false);
-  const [showRemoveModal, setShowRemoveModal] = useState({})
+  const [showRemoveModal, setShowRemoveModal] = useState({});
   const [userState, setUserState] = useState({});
   const [names, setNames] = useState([]);
   const [author, setAuthor] = useState("");
-  const [isSignedIn, setIsSignedIn] = useState(null)
+  const [isSignedIn, setIsSignedIn] = useState(null);
+  const previousState = useRef(messages);
+  const firstRender = useRef(true)
   useEffect(() => {
     onAuthStateChanged(getAuth(), (user) => {
       setIsSignedIn(user);
     });
   }, []);
-  useMemo(() => {
-    if (Object.keys(messages).length !== 0) {
+  useEffect(() => {
+    if (Object.keys(messages).length !== 0&&(JSON.stringify(messages.participants)!==JSON.stringify(previousState.current.participants)||JSON.stringify(messages.chatName)!==JSON.stringify(previousState.current.chatName)||firstRender.current)) {
+      firstRender.current=false
+
       Promise.all(
         Object.keys(messages.participants).map((uid, index) => {
           const nameRef = ref(getDatabase(), "/users/" + uid + "/name");
@@ -89,7 +99,8 @@ function App() {
         setAuthor(snapshot.val());
       });
     }
-    console.log('CHAT INFO',messages.chatName, messages.participants)
+    console.log("CHAT INFO", messages.chatName, previousState.current.chatName);
+    console.log("CHAT INFO", messages.participants, previousState.current.participants);
   }, [messages.chatName, messages.participants]);
   useEffect(() => {
     console.log("NAMES", !!names[1]);
@@ -101,9 +112,9 @@ function App() {
         : ""
     );
   }, [names]);
-  useEffect(()=>{
-console.log('namessssssijcsvoj',names)
-  },[names])
+  useEffect(() => {
+    console.log("namessssssijcsvoj", names);
+  }, [names]);
   useEffect(() => {
     console.log("user:", getAuth().currentUser);
   }, []);
@@ -122,8 +133,8 @@ console.log('namessssssijcsvoj',names)
         names,
         author,
         userState,
-        isSignedIn
-      }} 
+        isSignedIn,
+      }}
     >
       <div className="flex bg-bgColor h-screen w-screen">
         <Routes>
@@ -139,6 +150,7 @@ console.log('namessssssijcsvoj',names)
                 setMessages={setMessages}
                 setUserinfo={setUserinfo}
                 messages={messages}
+                previousState={previousState}
               >
                 <DashBoard />
               </ProtectedRoute>
@@ -150,7 +162,13 @@ console.log('namessssssijcsvoj',names)
     </MessageContext.Provider>
   );
 }
-function ProtectedRoute({ setMessages, setUserinfo, messages, children }) {
+function ProtectedRoute({
+  setMessages,
+  setUserinfo,
+  messages,
+  previousState,
+  children,
+}) {
   const navigate = useNavigate();
   const { chatId } = useParams();
   const [isSignedIn, setIsSignedIn] = useState(false);
@@ -184,7 +202,10 @@ function ProtectedRoute({ setMessages, setUserinfo, messages, children }) {
           console.log("data pulled");
           if (snapshot.exists()) {
             console.log("SNAPSHOT:", snapshot.val().messages);
-            setMessages(snapshot.val());
+            setMessages((prev) => {
+              previousState.current = prev;
+              return snapshot.val();
+            });
           } else {
             setMessages({});
             console.log("Data doesnt exist");
