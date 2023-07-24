@@ -192,8 +192,7 @@ export default function InfoTab({
           )}`}
         </p>
       </div>
-      <div className="bg-zinc-900 w-full py-6 flex flex-col pl-7 gap-2 mb-8">
-        {messages.type !== "duo" ? (
+      {messages.type!=='duo'?<div className="bg-zinc-900 w-full py-6 flex flex-col pl-7 gap-2">
           <>
             <p className="text-subColor mb-3">
               {Object.keys(messages.participants).length + " participants"}
@@ -204,12 +203,22 @@ export default function InfoTab({
               })}
             </div>
           </>
-        ) : (
-          <div className="flex gap-2 text-red-400 h-10 items-center hover:bg-slate-800 cursor-pointer">
+        
+      </div>:<></>}
+      <div className="bg-zinc-900 w-full py-6 flex flex-col pl-7 gap-2 mb-8">
+
+          <div className="flex gap-2 text-red-400 h-10 items-center hover:bg-slate-800 cursor-pointer" onClick={()=>{
+            if(messages.type!=='duo'){
+              setShowRemoveModal({ user: userObj.uid,chat:chatId, type: "leave", chatType:'group' });
+            }
+            else{
+              setShowRemoveModal({ user: userObj.uid,chat:chatId, type: "leave",chatType:'duo',username:userState.name+userState.userCode });
+            }
+          }}>
             <MdDelete className="" size={22} />
-            <p>Delete chat</p>
+            <p>Leave chat</p>
           </div>
-        )}
+        
       </div>
     </div>
   );

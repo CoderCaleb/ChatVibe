@@ -31,7 +31,7 @@ import { MessageContext } from "./App";
 import tickgif from "./images/blue-tick.gif";
 import discordGroupIcon from "./images/discord-group-icon.png";
 import discordIcon2 from "./images/discordIcon2.png";
-import loadingAni from './images/loading-animation.gif'
+import loadingAni from "./images/loading-croppered.gif";
 export default function SideBar() {
   const [hover, setHover] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -45,6 +45,7 @@ export default function SideBar() {
     setShowRemoveModal,
     showRemoveModal,
     userInfo,
+    messages,
   } = useContext(MessageContext);
   const [user, setUser] = useState(null);
   const auth = getAuth();
@@ -168,6 +169,7 @@ export default function SideBar() {
         <ConfirmModal
           setShowRemoveModal={setShowRemoveModal}
           showRemoveModal={showRemoveModal}
+          participants={messages.participants}
         />
       </div>
       <div className="flex flex-col h-screen bg-bgColor w-16 top-0 m-0 shadow-lg text-white justify-center gap-1 relative ">
@@ -303,111 +305,136 @@ function CreateForm({
         ></img>
         {modalType == "group" ? (
           <>
-            {!isLoading?<><div className="">
-              <img src={smileyFace} className="w-14 m-auto"></img>
-              <p className="font-semibold text-xl mb-2">Create your VibeChat</p>
-              <p className="font-normal text-neutral-500 text-sm mb-5">
-                Personalize your chat with a unique name and emoji profile
-                picture.
-              </p>
-            </div>
-            <div className="relative">
-              <div
-                className={
-                  "absolute min-h-emojiMin max-h-emojiMax h-halfHeight overflow-y-auto" +
-                  (showEmoji ? " right-64 bottom-1" : " hidden")
-                }
-              >
-                <EmojiPicker
-                  height={"100%"}
-                  onEmojiClick={(emojiData) => {
-                    setSelectedEmoji(emojiData.emoji);
-                    setShowEmoji(false);
-                  }}
-                  lazyLoadEmojis={true}
-                />
-              </div>
-              <button
-                className=" rounded-full w-20 h-20 flex items-center justify-center bg-gray-100 m-auto"
-                onClick={() => {
-                  setShowEmoji(!showEmoji);
-                }}
-              >
-                {selectedEmoji ? (
-                  <div className="flex items-center justify-center">
-                    <p className=" text-4xl">{selectedEmoji}</p>
+            {!isLoading ? (
+              <>
+                <div className="">
+                  <img src={smileyFace} className="w-14 m-auto"></img>
+                  <p className="font-semibold text-xl mb-2">
+                    Create your VibeChat
+                  </p>
+                  <p className="font-normal text-neutral-500 text-sm mb-5">
+                    Personalize your chat with a unique name and emoji profile
+                    picture.
+                  </p>
+                </div>
+                <div className="relative">
+                  <div
+                    className={
+                      "absolute min-h-emojiMin max-h-emojiMax h-halfHeight overflow-y-auto" +
+                      (showEmoji ? " right-64 bottom-1" : " hidden")
+                    }
+                  >
+                    <EmojiPicker
+                      height={"100%"}
+                      onEmojiClick={(emojiData) => {
+                        setSelectedEmoji(emojiData.emoji);
+                        setShowEmoji(false);
+                      }}
+                      lazyLoadEmojis={true}
+                    />
                   </div>
-                ) : !showEmoji ? (
-                  <MdOutlineEmojiEmotions size={30} className="text-subColor" />
-                ) : (
-                  <RxCross2 size={30} className="text-subColor" />
-                )}
-              </button>
-            </div>
-            <p className="text-start text-sm mb-2">Chat Name</p>
-            <input
-              className="w-full border border-gray-200 rounded-lg p-2 text-sm outline-none"
-              placeholder="John's chat"
-              onChange={(event) =>
-                event.target.value.length <= 25
-                  ? handleChange(event, setError)
-                  : null
-              }
-              value={chatName}
-            ></input>
-            <p className="text-sm text-red-500">{error}</p></>:<div className=' w-5/12 m-auto'><img src={'https://im2.ezgif.com/tmp/ezgif-2-b30b8f98e7.gif'}/></div>}
+                  <button
+                    className=" rounded-full w-20 h-20 flex items-center justify-center bg-gray-100 m-auto"
+                    onClick={() => {
+                      setShowEmoji(!showEmoji);
+                    }}
+                  >
+                    {selectedEmoji ? (
+                      <div className="flex items-center justify-center">
+                        <p className=" text-4xl">{selectedEmoji}</p>
+                      </div>
+                    ) : !showEmoji ? (
+                      <MdOutlineEmojiEmotions
+                        size={30}
+                        className="text-subColor"
+                      />
+                    ) : (
+                      <RxCross2 size={30} className="text-subColor" />
+                    )}
+                  </button>
+                </div>
+                <p className="text-start text-sm mb-2">Chat Name</p>
+                <input
+                  className="w-full border border-gray-200 rounded-lg p-2 text-sm outline-none"
+                  placeholder="John's chat"
+                  onChange={(event) =>
+                    event.target.value.length <= 25
+                      ? handleChange(event, setError)
+                      : null
+                  }
+                  value={chatName}
+                ></input>
+                <p className="text-sm text-red-500">{error}</p>
+              </>
+            ) : (
+              <div className=" w-6/12 m-auto">
+                <img src={loadingAni} />
+              </div>
+            )}
           </>
         ) : (
           <>
-            {!isLoading?<><div className="">
-              <img src={smileyFace} className="w-14 m-auto"></img>
-              <p className="font-semibold text-xl mb-2">Create your VibeChat</p>
-              <p className="font-normal text-neutral-500 text-sm mb-5">
-                Connect with a friend using their username and create your
-                exclusive chat experience
-              </p>
-            </div>
-            <div>
-              <p className="text-start text-sm mb-2">Friend's username</p>
-              <div className="w-full border border-gray-300 rounded-lg flex justify-between items-center">
-                <input
-                  placeholder="eg kelob#4838"
-                  className="w-full rounded-lg p-2 text-sm outline-none"
-                  value={username}
-                  onChange={(event) => {
-                    setUsername(event.target.value);
-                    setDuoError("");
-                    if (/^[a-zA-Z0-9]+\#[0-9]{4}$/.test(event.target.value)) {
-                      const splitName = event.target.value.split("#");
-                      const codeRef = ref(
-                        getDatabase(),
-                        `userCodes/${splitName[0]}/${splitName[1]}`
-                      );
-                      get(codeRef).then((snapshot) => {
-                        if (snapshot.exists()) {
-                          setShowTick(true);
+            {!isLoading ? (
+              <>
+                <div className="">
+                  <img src={smileyFace} className="w-14 m-auto"></img>
+                  <p className="font-semibold text-xl mb-2">
+                    Create your VibeChat
+                  </p>
+                  <p className="font-normal text-neutral-500 text-sm mb-5">
+                    Connect with a friend using their username and create your
+                    exclusive chat experience
+                  </p>
+                </div>
+                <div>
+                  <p className="text-start text-sm mb-2">Friend's username</p>
+                  <div className="w-full border border-gray-300 rounded-lg flex justify-between items-center">
+                    <input
+                      placeholder="eg kelob#4838"
+                      className="w-full rounded-lg p-2 text-sm outline-none"
+                      value={username}
+                      onChange={(event) => {
+                        setUsername(event.target.value);
+                        setDuoError("");
+                        if (
+                          /^[a-zA-Z0-9]+\#[0-9]{4}$/.test(event.target.value)
+                        ) {
+                          const splitName = event.target.value.split("#");
+                          const codeRef = ref(
+                            getDatabase(),
+                            `userCodes/${splitName[0]}/${splitName[1]}`
+                          );
+                          get(codeRef).then((snapshot) => {
+                            if (snapshot.exists()) {
+                              setShowTick(true);
+                            } else {
+                              setShowTick(false);
+                            }
+                          });
                         } else {
                           setShowTick(false);
                         }
-                      });
-                    } else {
-                      setShowTick(false);
-                    }
-                  }}
-                ></input>
-                {showTick ? (
-                  <div className="relative flex justify-center group">
-                    <img src={tickgif} className="w-5 h-5 mr-4" />
-                    <div className="absolute bottom-7 flex justify-center items-center w-28 h-5 rounded-md bg-stone-800 scale-0 group-hover:scale-100 transition-all duration-300">
-                      <p className="text-white text-sm">User is found</p>
-                    </div>
+                      }}
+                    ></input>
+                    {showTick ? (
+                      <div className="relative flex justify-center group">
+                        <img src={tickgif} className="w-5 h-5 mr-4" />
+                        <div className="absolute bottom-7 flex justify-center items-center w-28 h-5 rounded-md bg-stone-800 scale-0 group-hover:scale-100 transition-all duration-300">
+                          <p className="text-white text-sm">User is found</p>
+                        </div>
+                      </div>
+                    ) : (
+                      <></>
+                    )}
                   </div>
-                ) : (
-                  <></>
-                )}
+                  <p className="text-sm text-red-400">{duoError}</p>
+                </div>
+              </>
+            ) : (
+              <div className=" w-6/12 m-auto">
+                <img src={loadingAni} />
               </div>
-              <p className="text-sm text-red-400">{duoError}</p>
-            </div></>:<div className=' w-5/12 m-auto'><img src={'https://im2.ezgif.com/tmp/ezgif-2-b30b8f98e7.gif'}/></div>}
+            )}
           </>
         )}
         <div className="flex gap-2 mt-5">
@@ -429,7 +456,7 @@ function CreateForm({
                   chatName.trim().length !== 0 &&
                   selectedEmoji.trim().length !== 0
                 ) {
-                  setIsLoading(true)
+                  setIsLoading(true);
                   const chatRef = ref(getDatabase(), "/chats");
 
                   const userRef = ref(
@@ -463,10 +490,9 @@ function CreateForm({
                               [auth.currentUser.uid]: true,
                             },
                           },
-                        })
-                        .then(()=>{
+                        }).then(() => {
                           setFormIndex((prev) => prev + 1);
-                          setIsLoading(false)
+                          setIsLoading(false);
                         });
                       });
                     });
@@ -483,7 +509,7 @@ function CreateForm({
                   const chatRef = ref(getDatabase(), "/chats");
                   const userRef = ref(
                     getDatabase(),
-                    `/users/${auth.currentUser.uid}/chats`
+                    `/users/${user.uid}/chats`
                   );
                   if (/^[a-zA-Z0-9]+\#[0-9]{4}$/.test(username)) {
                     const splitName = username.split("#");
@@ -508,93 +534,154 @@ function CreateForm({
                         );
                         const contactRef = ref(
                           getDatabase(),
-                          `/users/${auth.currentUser.uid}/contacts`
+                          `/users/${user.uid}/contacts`
                         );
+                        const cleanedUsername = username ? username.replace(/#/g, "") : "";
+
                         const checkContactRef = ref(
                           getDatabase(),
                           `/users/${
-                            auth.currentUser.uid
-                          }/contacts/${username.replace(/#/g, "")}`
+                            user.uid
+                          }/contacts/${cleanedUsername}`
                         );
                         const otherContactRef = ref(
                           getDatabase(),
                           `/users/${snapshot.val()}/contacts`
                         );
+
                         get(checkContactRef).then((contact) => {
                           if (!contact.exists()) {
                             get(nameRef).then((name) => {
                               if (name.exists()) {
                                 get(codeRef).then((code) => {
-                                  if (code.exists()&&username.replace(/#/g, "")!==userInfo.name+userInfo.userCode) {
-                                    const fullUsername = `${name.val()}#${code.val()}`;
-                                    push(chatRef, {
-                                      author: user.uid,
-                                      timeCreated: Date.now(),
-                                      type: "duo",
-                                      participants: {
-                                        [user.uid]: true,
-                                        [snapshot.val()]: true,
-                                      },
-                                    }).then((value) => {
-                                      update(userRef, {
-                                        [value.key]: true,
-                                      }).then(() => {
-                                        update(otherUserRef, {
-                                          [value.key]: true,
-                                        }).then((result) => {
-                                          const metaData = ref(
-                                            getDatabase(),
-                                            "/chatMetaData"
-                                          );
-                                          update(metaData, {
-                                            [value.key]: {
-                                              chatName: name.val(),
-                                              pfp: name.val()[0].toUpperCase(),
-                                              type: "duo",
-                                              participants: {
-                                                [user.uid]: user.displayName,
-                                                [snapshot.val()]: name.val(),
-                                              },
-                                            },
-                                          }).then(() => {
-                                            update(contactRef, {
-                                              [username.replace(/#/g, "")]:
-                                                value.key,
+                                  if (
+                                    code.exists() &&
+                                    username.replace(/#/g, "") !==
+                                      userInfo.name + userInfo.userCode
+                                  ) {
+                                    get(otherContactRef).then(
+                                      (targetContact) => {
+                                        const contactArr =
+                                        targetContact.val()?Object.keys(targetContact.val()):null;
+                                        const completeUsername =
+                                          userInfo.name + userInfo.userCode;
+                                        console.log('contactArr',contactArr)
+                                        console.log('completeUsername',completeUsername)
+
+                                        if (
+                                          contactArr&&contactArr.includes(completeUsername)
+                                        ) {
+                                          console.log('chat already exists. no need to make new one')
+                                          update(contactRef, {
+                                            [username.replace(/#/g, "")]:
+                                              targetContact.val()[completeUsername],
+                                          })
+                                            .then(() => {
+                                              update(userRef, {
+                                                [targetContact.val()[
+                                                  completeUsername
+                                                ]]: true,
+                                              });
                                             })
-                                              .then(() => {
-                                                update(otherContactRef, {
-                                                  [(
-                                                    userInfo.name +
-                                                    "#" +
-                                                    userInfo.userCode
-                                                  ).replace(/#/g, "")]:
-                                                    value.key,
-                                                });
+                                            .then(() => {
+                                              const participantRef = ref(
+                                                getDatabase(),
+                                                `/chats/${targetContact.val()[completeUsername]}/participants`
+                                              );
+                                              update(participantRef, {
+                                                [user.uid]: true,
                                               })
-                                              .then(() => {
+                                              .then(()=>{
                                                 setFormIndex(
                                                   (prev) => prev + 1
                                                 );
-                                                setIsLoading(false)
+                                                setIsLoading(false);
                                               });
+                                            });
+                                        } else {
+                                          console.log('chat doesnt exist. need to make new one')
+                                          const fullUsername = `${name.val()}#${code.val()}`;
+                                          push(chatRef, {
+                                            author: user.uid,
+                                            timeCreated: Date.now(),
+                                            type: "duo",
+                                            participants: {
+                                              [user.uid]: true,
+                                              [snapshot.val()]: true,
+                                            },
+                                            originalParticipants: {
+                                              [user.uid]: true,
+                                              [snapshot.val()]: true,
+                                            },
+                                          }).then((value) => {
+                                            update(userRef, {
+                                              [value.key]: true,
+                                            }).then(() => {
+                                              update(otherUserRef, {
+                                                [value.key]: true,
+                                              }).then((result) => {
+                                                const metaData = ref(
+                                                  getDatabase(),
+                                                  "/chatMetaData"
+                                                );
+                                                update(metaData, {
+                                                  [value.key]: {
+                                                    chatName: name.val(),
+                                                    pfp: name
+                                                      .val()[0]
+                                                      .toUpperCase(),
+                                                    type: "duo",
+                                                    participants: {
+                                                      [user.uid]:
+                                                        user.displayName,
+                                                      [snapshot.val()]:
+                                                        name.val(),
+                                                    },
+                                                  },
+                                                }).then(() => {
+                                                  update(contactRef, {
+                                                    [username.replace(
+                                                      /#/g,
+                                                      ""
+                                                    )]: value.key,
+                                                  })
+                                                    .then(() => {
+                                                      update(otherContactRef, {
+                                                        [(
+                                                          userInfo.name +
+                                                          "#" +
+                                                          userInfo.userCode
+                                                        ).replace(/#/g, "")]:
+                                                          value.key,
+                                                      });
+                                                    })
+                                                    .then(() => {
+                                                      setFormIndex(
+                                                        (prev) => prev + 1
+                                                      );
+                                                      setIsLoading(false);
+                                                    });
+                                                });
+                                              });
+                                            });
                                           });
-                                        });
-                                      });
-                                    });
+                                        }
+                                      }
+                                    );
                                   } else {
                                     setDuoError("Oops! Username not found");
-                                    setIsLoading(false)
+                                    setIsLoading(false);
                                   }
                                 });
                               } else {
                                 setDuoError("Oops! Username not found");
-                                setIsLoading(false)
+                                setIsLoading(false);
                               }
                             });
                           } else {
-                            setDuoError("Oops! You already added this user")
+                            setDuoError("Oops! You already added this user");
                             setShowTick(false);
-                            setIsLoading(false)
+                            setIsLoading(false);
                           }
                         });
                       } else {
@@ -820,7 +907,11 @@ const CodeModal = ({ setShowCodeModal, showCodeModal }) => {
   );
 };
 
-const ConfirmModal = ({ setShowRemoveModal, showRemoveModal }) => {
+const ConfirmModal = ({
+  setShowRemoveModal,
+  showRemoveModal,
+  participants,
+}) => {
   const { chatId } = useParams();
   const auth = getAuth();
   return (
@@ -835,17 +926,21 @@ const ConfirmModal = ({ setShowRemoveModal, showRemoveModal }) => {
       <div className="">
         <img src={peace} className="w-20 m-auto"></img>
         <p className="font-semibold text-xl mb-2">
-          {showRemoveModal.type == "remove"
+          {showRemoveModal.type === "remove"
             ? "Remove User"
-            : showRemoveModal.type == "dismiss"
+            : showRemoveModal.type === "dismiss"
             ? "Dismiss as admin"
+            : showRemoveModal.type === "leave"
+            ? "Leave Chat"
             : "Make admin"}
         </p>
         <p className="font-normal text-neutral-500 text-sm mb-5">
-          {showRemoveModal.type == "remove"
+          {showRemoveModal.type === "remove"
             ? "Are you sure you want to remove this user from the chat?"
-            : showRemoveModal.type == "dismiss"
+            : showRemoveModal.type === "dismiss"
             ? "Are you sure you want to dismiss this user as admin"
+            : showRemoveModal.type === "leave"
+            ? "Are you sure you want to leave this chat?"
             : "Are you sure you want to make this user an admin"}
         </p>
       </div>
@@ -898,6 +993,78 @@ const ConfirmModal = ({ setShowRemoveModal, showRemoveModal }) => {
               }).then(() => {
                 setShowRemoveModal({});
               });
+            } else if (showRemoveModal.type == "leave") {
+              const chatRef = ref(
+                getDatabase(),
+                `/chats/${showRemoveModal.chat}/participants/${showRemoveModal.user}`
+              );
+              const originalChatRef = ref(
+                getDatabase(),
+                `/chats/${showRemoveModal.chat}/originalParticipants/${showRemoveModal.user}`
+              );
+              const mainChatRef = ref(
+                getDatabase(),
+                `/chats/${showRemoveModal.chat}`
+              );
+              const userRef = ref(
+                getDatabase(),
+                `/users/${auth.currentUser.uid}/chats/${showRemoveModal.chat}`
+              );
+              const codesRef = ref(getDatabase(), "/codes");
+              const metaData = ref(
+                getDatabase(),
+                `/chatMetaData/${showRemoveModal.chat}`
+              );
+              const queryRef = query(
+                codesRef,
+                orderByValue(), // 👈
+                equalTo(showRemoveModal.chat)
+              );
+              const groupSize = Object.keys(participants).length;
+              const contactRef = ref(
+                getDatabase(),
+                `/users/${auth.currentUser.uid}/contacts/${showRemoveModal.username}`
+              );
+              if (showRemoveModal.chatType == "group") {
+                remove(userRef).then(() => {
+                  if (groupSize > 1) {
+                    remove(chatRef).then(() => {
+                      setShowRemoveModal({});
+                    });
+                  } else {
+                    remove(mainChatRef).then(() => {
+                      remove(chatRef).then(() => {
+                        remove(metaData).then(() => {
+                          setShowRemoveModal({});
+                        });
+                      });
+                    });
+                  }
+                });
+              } else {
+
+                  remove(userRef).then(() => {
+                    remove(contactRef).then(() => {
+                      console.log(`/users/${auth.currentUser.uid}/contacts/${showRemoveModal.username}`)
+                        if (groupSize <= 1) {
+                          remove(mainChatRef).then(()=>{
+                            remove(metaData).then(()=>{
+                              setShowRemoveModal({});
+                            })
+                          })
+                          console.log('group size is below/equal 1')
+                        }
+                        else{
+                          remove(chatRef).then(() => {
+                            setShowRemoveModal({});
+                          })
+                          console.log('group size is above 1')
+                        }
+                      ;
+                    });
+                  });
+                
+              }
             } else {
               const adminRef = ref(
                 getDatabase(),

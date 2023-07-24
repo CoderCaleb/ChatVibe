@@ -5,43 +5,11 @@ import { MessageContext } from "./App";
 import { getDatabase, ref, get, onValue, off } from "firebase/database";
 import { Link, useParams } from "react-router-dom";
 export default function ContactBar() {
-  const { userInfo, messages, names, userState,isSignedIn } = useContext(MessageContext);
+  const { userInfo, messages, names, userState,isSignedIn,filteredArr,setFilteredArr,originalRef } = useContext(MessageContext);
   const [lastMsg, setLastMsg] = useState("");
-  const originalRef = useRef([]);
-  const [filteredArr, setFilteredArr] = useState([]);
   const tempArr = [];
 
-  useEffect(() => {
-    const listenerRefs = []; // Array to store the listener references
 
-    if (userInfo.chats) {
-      Object.keys(userInfo.chats).forEach((value, index) => {
-        const chatsRef = ref(getDatabase(), `/chatMetaData/${value}`);
-        const callback = (snapshot) => {
-          tempArr.some((obj) => Object.values(obj).includes(value))
-            ? (tempArr[index] = { ...snapshot.val(), chatId: snapshot.key })
-            : tempArr.push({ ...snapshot.val(), chatId: value });
-          console.log("tempArr:", tempArr[0], "value", snapshot.key);
-          originalRef.current = tempArr;
-          setFilteredArr([...tempArr]);
-          console.log(tempArr);
-        };
-        const listenerRef = onValue(chatsRef, callback);
-        listenerRefs.push({
-          ref: chatsRef,
-          callback: callback,
-          unsubscribe: listenerRef,
-        }); // Add the listener reference to the array
-      });
-    }
-    // Cleanup function to unsubscribe the listeners
-    return () => {
-      listenerRefs.forEach((listenerRef) => {
-        off(listenerRef.ref, "value", listenerRef.callback);
-        listenerRef.unsubscribe();
-      });
-    };
-  }, [userInfo]);
 
   return (
     <div

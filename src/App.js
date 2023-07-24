@@ -46,8 +46,11 @@ function App() {
   const [names, setNames] = useState([]);
   const [author, setAuthor] = useState("");
   const [isSignedIn, setIsSignedIn] = useState(null);
+  const [filteredArr,setFilteredArr] = useState([])
   const previousState = useRef(messages);
   const firstRender = useRef(true)
+  const originalRef = useRef([]);
+
   useEffect(() => {
     onAuthStateChanged(getAuth(), (user) => {
       setIsSignedIn(user);
@@ -56,41 +59,51 @@ function App() {
   useEffect(() => {
     if (Object.keys(messages).length !== 0&&(JSON.stringify(messages.participants)!==JSON.stringify(previousState.current.participants)||JSON.stringify(messages.chatName)!==JSON.stringify(previousState.current.chatName)||firstRender.current)) {
       firstRender.current=false
-
-      Promise.all(
-        Object.keys(messages.participants).map((uid, index) => {
-          const nameRef = ref(getDatabase(), "/users/" + uid + "/name");
-          return get(nameRef);
-        })
-      )
-        .then((names) => {
-          let tempArr = [];
-          Promise.all(
-            Object.keys(messages.participants).map((uid, index) => {
-              const codeRef = ref(getDatabase(), "/users/" + uid + "/userCode");
-              return get(codeRef);
-            })
-          ).then((codes) => {
-            tempArr = names.map((snapshot, index) => {
-              console.log(snapshot.val());
-              console.log(Object.keys(messages.participants)[index]);
-              return {
-                name: snapshot.val(),
-                uid: Object.keys(messages.participants)[index],
-              };
+      function participantMap(mapData){
+        Promise.all(
+          Object.keys(mapData).map((uid, index) => {
+            const nameRef = ref(getDatabase(), "/users/" + uid + "/name");
+            return get(nameRef);
+          })
+        )
+          .then((names) => {
+            let tempArr = [];
+            Promise.all(
+              Object.keys(mapData).map((uid, index) => {
+                const codeRef = ref(getDatabase(), "/users/" + uid + "/userCode");
+                return get(codeRef);
+              })
+            ).then((codes) => {
+              tempArr = names.map((snapshot, index) => {
+                console.log(snapshot.val());
+                console.log(Object.keys(mapData)[index]);
+                return {
+                  name: snapshot.val(),
+                  uid: Object.keys(mapData)[index],
+                };
+              });
+              const finalArr = codes.map((snapshot, index) => {
+                return { ...tempArr[index], userCode: snapshot.val() };
+              });
+              setNames(finalArr);
+              console.log("TEMP ARR NAMES", finalArr);
             });
-            const finalArr = codes.map((snapshot, index) => {
-              return { ...tempArr[index], userCode: snapshot.val() };
-            });
-            setNames(finalArr);
-            console.log("TEMP ARR NAMES", finalArr);
+  
+            setNames(tempArr);
+          })
+          .catch((err) => {
+            console.log(err);
           });
-
-          setNames(tempArr);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
+      }
+      if(messages.type=='duo'){
+        participantMap(messages.originalParticipants)
+        console.log('MAPPING OUT DUO CHAT PARTICIPANTAS',messages.originalParticipants)
+      }
+      else{
+        participantMap(messages.participants)
+        console.log('MAPPING OUT GROUP CHAT PARTICIPANTAS')
+      }
+      
       const authorRef = ref(
         getDatabase(),
         "/users/" + messages.author + "/name"
@@ -134,6 +147,9 @@ function App() {
         author,
         userState,
         isSignedIn,
+        filteredArr,
+        setFilteredArr,
+        originalRef
       }}
     >
       <div className="flex bg-bgColor h-screen w-screen">
@@ -151,6 +167,9 @@ function App() {
                 setUserinfo={setUserinfo}
                 messages={messages}
                 previousState={previousState}
+                setFilteredArr={setFilteredArr}
+                userInfo={userInfo}
+                originalRef={originalRef}
               >
                 <DashBoard />
               </ProtectedRoute>
@@ -168,6 +187,9 @@ function ProtectedRoute({
   messages,
   previousState,
   children,
+  setFilteredArr,
+  userInfo,
+  originalRef
 }) {
   const navigate = useNavigate();
   const { chatId } = useParams();
@@ -235,7 +257,41 @@ function ProtectedRoute({
     });
     return () => unsubscribe();
   }, []);
+  const tempArr = [];
 
+
+  useEffect(() => {
+    
+    const listenerRefs = []; // Array to store the listener references
+
+    if (userInfo.chats) {
+      Object.keys(userInfo.chats).forEach((value, index) => {
+        const chatsRef = ref(getDatabase(), `/chatMetaData/${value}`);
+        const callback = (snapshot) => {
+          tempArr.some((obj) => Object.values(obj).includes(value))
+            ? (tempArr[index] = { ...snapshot.val(), chatId: snapshot.key })
+            : tempArr.push({ ...snapshot.val(), chatId: value });
+          console.log("tempArr:", tempArr[0], "value", snapshot.key);
+          originalRef.current = tempArr;
+          setFilteredArr([...tempArr]);
+          console.log(tempArr);
+        };
+        const listenerRef = onValue(chatsRef, callback);
+        listenerRefs.push({
+          ref: chatsRef,
+          callback: callback,
+          unsubscribe: listenerRef,
+        }); // Add the listener reference to the array
+      });
+    }
+    // Cleanup function to unsubscribe the listeners
+    return () => {
+      listenerRefs.forEach((listenerRef) => {
+        off(listenerRef.ref, "value", listenerRef.callback);
+        listenerRef.unsubscribe();
+      });
+    };
+  }, [userInfo]);
   return children;
 }
 export default App;
