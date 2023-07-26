@@ -43,6 +43,7 @@ function App() {
   const [showCodeModal, setShowCodeModal] = useState(false);
   const [showRemoveModal, setShowRemoveModal] = useState({});
   const [userState, setUserState] = useState({});
+  const [profileScreen, setProfileScreen] = useState(true)
   const [names, setNames] = useState([]);
   const [author, setAuthor] = useState("");
   const [isSignedIn, setIsSignedIn] = useState(null);
@@ -82,14 +83,26 @@ function App() {
                   uid: Object.keys(mapData)[index],
                 };
               });
-              const finalArr = codes.map((snapshot, index) => {
-                return { ...tempArr[index], userCode: snapshot.val() };
-              });
-              setNames(finalArr);
-              console.log("TEMP ARR NAMES", finalArr);
+              const codeArr = codes.map((code,index)=>{
+                return {
+                  userCode: code.val()
+                }
+              }) 
+              Promise.all(
+                Object.keys(mapData).map((uid, index) => {
+                  const aboutRef = ref(getDatabase(), "/users/" + uid + "/about");
+                  return get(aboutRef);
+                })
+              )
+              .then((aboutInfo)=>{
+                const finalArr = aboutInfo.map((aboutSnapshot, index) => {
+                  return { ...tempArr[index], ...codeArr[index],about:aboutSnapshot.val() };
+                });
+                setNames(finalArr);
+                console.log("TEMP ARR NAMES", finalArr);
+              })
             });
   
-            setNames(tempArr);
           })
           .catch((err) => {
             console.log(err);
@@ -149,7 +162,9 @@ function App() {
         isSignedIn,
         filteredArr,
         setFilteredArr,
-        originalRef
+        originalRef,
+        profileScreen,
+        setProfileScreen
       }}
     >
       <div className="flex bg-bgColor h-screen w-screen">

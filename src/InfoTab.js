@@ -183,7 +183,7 @@ export default function InfoTab({
         ) : (
           <div className="text-white">
             <p className="text-subColor text-sm mb-1">About</p>
-            <p>It is what it is</p>
+            <p>{userState.about}</p>
           </div>
         )}
         <p className="text-subColor text-sm">

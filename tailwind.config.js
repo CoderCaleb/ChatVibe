@@ -28,10 +28,11 @@ module.exports = {
       },
       height:{
         halfHeight:'55vh',
-        signUpHeight:'400px'
+        signUpHeight:'400px',
+        onePixel:'1px'
       },
       width:{
-        signUpWidth:'700px'
+        signUpWidth:'700px',
       },
       maxWidth:{
         maxSignUp:'1200px'

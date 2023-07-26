@@ -46,6 +46,7 @@ export default function SideBar() {
     showRemoveModal,
     userInfo,
     messages,
+    setProfileScreen,
   } = useContext(MessageContext);
   const [user, setUser] = useState(null);
   const auth = getAuth();
@@ -185,6 +186,9 @@ export default function SideBar() {
                 "w-11 h-11 flex items-center justify-center cursor-pointer rounded-3xl hover:rounded-xl transition-all duration-300" +
                 getColorFromLetter(user.displayName[0].toUpperCase())
               }
+              onClick={()=>{
+                setProfileScreen(true)
+              }}
             >
               <p className="text-white">{user.displayName[0].toUpperCase()}</p>
             </div>
