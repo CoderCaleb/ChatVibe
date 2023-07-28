@@ -4,11 +4,11 @@ import { useState, useEffect, useContext, useRef } from "react";
 import { MessageContext } from "./App";
 import { getDatabase, ref, get, onValue, off } from "firebase/database";
 import { Link, useParams } from "react-router-dom";
+import nocontact from './images/no-contact-img.png'
 export default function ContactBar() {
   const { userInfo, messages, names, userState,isSignedIn,filteredArr,setFilteredArr,originalRef } = useContext(MessageContext);
   const [lastMsg, setLastMsg] = useState("");
   const tempArr = [];
-
 
 
   return (
@@ -42,7 +42,7 @@ export default function ContactBar() {
           }}
         ></input>
       </div>
-      {true ? (
+      {filteredArr.length>0 ? (
         <div className="flex flex-col overflow-y-scroll">
           {filteredArr.map((value, index) => {
             const userKeys = value.participants?Object.keys(value.participants):{}
@@ -67,7 +67,13 @@ export default function ContactBar() {
             );
           })}
         </div>
-      ) : null}
+      ) : <div className='flex flex-col items-center text-white justify-center gap-4 mt-16'>
+        <img src={nocontact} className=' w-36'></img>
+        <div className='m-auto text-center'>
+        <p className='text-xl'>No chats available</p>
+        <p className='text-subColor text-sm'>Create contacts and chats by clicking on the plus button at the side</p>
+        </div>
+        </div>}
     </div>
   );
 }

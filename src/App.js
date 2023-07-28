@@ -43,7 +43,7 @@ function App() {
   const [showCodeModal, setShowCodeModal] = useState(false);
   const [showRemoveModal, setShowRemoveModal] = useState({});
   const [userState, setUserState] = useState({});
-  const [profileScreen, setProfileScreen] = useState(true)
+  const [profileScreen, setProfileScreen] = useState(false)
   const [names, setNames] = useState([]);
   const [author, setAuthor] = useState("");
   const [isSignedIn, setIsSignedIn] = useState(null);

@@ -3,7 +3,12 @@ import { useState, useEffect, useContext, useRef } from "react";
 import { MessageContext } from "./App";
 import { MdOutlineCancel } from "react-icons/md";
 import { ref, getDatabase, get, update } from "firebase/database";
-
+import { FaUserSecret } from "react-icons/fa";
+import {FiLogOut} from 'react-icons/fi'
+import { ToastContainer, toast } from 'react-toastify';
+import {getAuth,signOut} from 'firebase/auth'
+import {useNavigate} from 'react-router-dom'
+  import 'react-toastify/dist/ReactToastify.css';
 export default function ProfileScreen() {
   const {
     userInfo,
@@ -18,6 +23,11 @@ export default function ProfileScreen() {
     setProfileScreen,
   } = useContext(MessageContext);
   const [aboutMe,setAboutMe] = useState('')
+  useEffect(()=>{
+    if(userInfo.about){
+        setAboutMe(userInfo.about)
+    }
+  },[userInfo.about])
   const getColorFromLetter = (letter) => {
     const colors = [
       " bg-gradient-to-r from-red-500 to-pink-500",
@@ -34,6 +44,7 @@ export default function ProfileScreen() {
     const index = letter.charCodeAt(0) % colors.length;
     return colors[index];
   };
+  const navigate = useNavigate()
   return (
     <div className=" m-8 text-white flex-1 relative overflow-scroll">
       <MdOutlineCancel
@@ -61,6 +72,18 @@ export default function ProfileScreen() {
           <p className="text-subColor">
             {isSignedIn.displayName + "#" + userInfo.userCode}
           </p>
+        </div>
+        <div className='group relative'>
+        <FiLogOut className='text-gray-400 text-lg cursor-pointer ml-2'/>
+        <div className='flex justify-center items-center bg-slate-800 px-2 py-1 rounded-md absolute w-max top-6 scale-0 group-hover:scale-100 transition-all duration-300 cursor-pointer' onClick={()=>{
+            signOut(getAuth())
+            .then(()=>{navigate('/auth/signin')
+                        }).catch(()=>{
+                            toast.error('Failed in sign out. Please try again...')
+                        })
+        }}>
+          <p>Log Out</p>
+        </div>
         </div>
       </div>
       <div className="mt-6 mb-5">
@@ -99,21 +122,24 @@ export default function ProfileScreen() {
         </div>
         <div>
             <div>
-          <textarea className="bg-primary resize-none w-80 h-28 rounded-lg outline-none p-3 mb-4" placeholder="Tell us a bit about yourself..." onChange={(event)=>{
+          <textarea className="bg-primary resize-none w-80 h-28 rounded-lg outline-none p-3 mb-4" placeholder="Tell us a bit about yourself..." value={aboutMe} onChange={(event)=>{
             setAboutMe(event.target.value)
           }}/>
           </div>
-          <button className={"done-button w-20 h-9"+(aboutMe.length>0&&aboutMe.length<=180?'':' bg-gray-600 pointer-events-none')} onClick={()=>{
+          <button className={"done-button w-20 h-9"+(aboutMe.length>0&&aboutMe.length<=180&&aboutMe!==userInfo.about?'':' bg-gray-600 pointer-events-none')} onClick={()=>{
             const userRef = ref(getDatabase(),`users/${isSignedIn.uid}`)
             const aboutLength = aboutMe.length
             if(aboutLength>0&&aboutLength<=180){
                 update(userRef,{
                     about:aboutMe
                 })
+                .then(()=>toast('About me successfully updated!'))
+                .catch(()=>toast('Failed in update about me. Try again'))
             }
           }}>Submit</button>
         </div>
       </div>
+      <ToastContainer theme={'dark'} position={'top-center'}/>
     </div>
   );
 }

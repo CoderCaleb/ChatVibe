@@ -10,6 +10,7 @@ import {
 } from "firebase/auth";
 import { update, ref, getDatabase, get } from "firebase/database";
 import { Link } from "react-router-dom";
+import { ToastContainer, toast } from 'react-toastify';
 export default function SignUp() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -92,7 +93,11 @@ export default function SignUp() {
           update(userCodesRef, {
             [userCode]: user.uid,
           });
-        });
+        }).then(()=>{
+          toast.success('Sign up successful!. Try signing in.')
+        }).catch(()=>{
+          toast.error('Failed to sign up. Try again...')
+        })
       }
       else{
         checkAndSaveCode(user,generateRandomCode())
@@ -200,7 +205,16 @@ export default function SignUp() {
                       checkAndSaveCode(user,generateRandomCode())
                     });
                   })
-                  .catch((err) => console.log(err));
+                  .catch((err) => {
+                    console.log(err)
+                    if(err=='FirebaseError: Firebase: Error (auth/email-already-in-use).'
+                    ){
+                      toast.error('Email already in use. Try another one.')
+                    }
+                    else{
+                      toast.error('Something went wrong. Try again...')
+                    }
+                  });
               } else {
                 setShowError(true);
               }
@@ -216,6 +230,7 @@ export default function SignUp() {
           </p>
         </div>
       </div>
+      <ToastContainer theme={'dark'} position={'top-center'}/>
     </div>
   );
 }

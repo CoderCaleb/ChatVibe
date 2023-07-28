@@ -180,10 +180,12 @@ export default function SideBar() {
           onMouseEnter={() => setHover(true)}
           onMouseLeave={() => setHover(false)}
         >
-          {user && (
+
+        </div>
+        {user && (
             <div
               className={
-                "w-11 h-11 flex items-center justify-center cursor-pointer rounded-3xl hover:rounded-xl transition-all duration-300" +
+                "w-12 h-12 mx-auto my-3 flex items-center justify-center cursor-pointer rounded-3xl hover:rounded-xl transition-all duration-300" +
                 getColorFromLetter(user.displayName[0].toUpperCase())
               }
               onClick={()=>{
@@ -193,8 +195,6 @@ export default function SideBar() {
               <p className="text-white">{user.displayName[0].toUpperCase()}</p>
             </div>
           )}
-        </div>
-        <SidebarIcon icon={<FaFire size="28" />} text="toolip💡"></SidebarIcon>
         <SidebarIcon
           icon={<FaKey size="28" />}
           text="Join chat 🚀"
@@ -205,10 +205,7 @@ export default function SideBar() {
           text={"Create chat 💬"}
           type="plus"
         ></SidebarIcon>
-        <SidebarIcon
-          icon={<BsFillLightningFill size="28" />}
-          text={"toolip💡"}
-        ></SidebarIcon>
+
       </div>
     </>
   );
