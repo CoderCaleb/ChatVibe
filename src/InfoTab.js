@@ -13,7 +13,7 @@ import { BsFillPersonCheckFill } from "react-icons/bs";
 import { FiChevronDown } from "react-icons/fi";
 import { FiLink } from "react-icons/fi";
 import { MdDelete } from "react-icons/md";
-import {AiOutlineUserAdd} from 'react-icons/ai'
+import { AiOutlineUserAdd } from "react-icons/ai";
 import cross from "./images/close.png";
 import peace from "./images/peace-sign.png";
 export default function InfoTab({
@@ -29,7 +29,7 @@ export default function InfoTab({
   const [showDropdown, setShowDropdown] = useState(false);
   const [userObj, setUserObj] = useState(null);
   const [nameEditMode, setNameEditMode] = useState(false);
-  const [nameDesc,setNameDesc] = useState('')
+  const [nameDesc, setNameDesc] = useState("");
   const { setShowCodeModal, setShowRemoveModal, names, author, userState } =
     useContext(MessageContext);
   const getColorFromLetter = (letter) => {
@@ -98,31 +98,61 @@ export default function InfoTab({
               : messages.pfp}
           </p>
         </div>
-        <div className={"flex items-center gap-2"+(nameEditMode?' border-b-2 border-subColor':'')}>
-          <div className={''+(nameEditMode?'  w-40':'')}>
-          {nameEditMode?<input className={"text-white text-xl bg-transparent border-none outline-none w-full"+(!nameEditMode?' w-min':'')} value={nameDesc} onChange={(event)=>{
-            setNameDesc(event.target.value)
-          }}>
-          </input>:<p className="text-white text-xl">{messages.type == "duo" ? userState.name : messages.chatName}</p>}
+        <div
+          className={
+            "flex items-center gap-2" +
+            (nameEditMode ? " border-b-2 border-subColor" : "")
+          }
+        >
+          <div className={"" + (nameEditMode ? "  w-40" : "")}>
+            {nameEditMode ? (
+              <input
+                className={
+                  "text-white text-xl bg-transparent border-none outline-none w-full" +
+                  (!nameEditMode ? " w-min" : "")
+                }
+                value={nameDesc}
+                onChange={(event) => {
+                  setNameDesc(event.target.value);
+                }}
+              ></input>
+            ) : (
+              <p className="text-white text-xl">
+                {messages.type == "duo" ? userState.name : messages.chatName}
+              </p>
+            )}
           </div>
-          {!nameEditMode?<FiEdit3 className="text-subColor cursor-pointer" size="20" onClick={()=>{
-            setNameEditMode(true)
-          }}/>:<BsCheck2 className="text-subColor cursor-pointer"
-          size="20" onClick={()=>{
-            setNameEditMode(false)
-            if(nameDesc.length!==0){
-              const groupNameRef = ref(getDatabase(),`/chats/${chatId}`)
-              const metaDataRef = ref(getDatabase(),`/chatMetaData/${chatId}`)
-              update(groupNameRef,{
-                chatName:nameDesc
-              }).then(()=>{
-                update(metaDataRef,{
-                  chatName:nameDesc
-                })
-              })
-            }
-            
-          }}/>}
+          {messages.type!=='duo'?(!nameEditMode ? (
+            <FiEdit3
+              className="text-subColor cursor-pointer"
+              size="20"
+              onClick={() => {
+                setNameEditMode(true);
+              }}
+            />
+          ) : (
+            <BsCheck2
+              className="text-subColor cursor-pointer"
+              size="20"
+              onClick={() => {
+                setNameEditMode(false);
+                if (nameDesc.length !== 0) {
+                  const groupNameRef = ref(getDatabase(), `/chats/${chatId}`);
+                  const metaDataRef = ref(
+                    getDatabase(),
+                    `/chatMetaData/${chatId}`
+                  );
+                  update(groupNameRef, {
+                    chatName: nameDesc,
+                  }).then(() => {
+                    update(metaDataRef, {
+                      chatName: nameDesc,
+                    });
+                  });
+                }
+              }}
+            />
+          )):<></>}
         </div>
         <div>
           <p
@@ -133,7 +163,7 @@ export default function InfoTab({
           >
             {Object.keys(messages.participants).length + " participants"}
           </p>
-          
+
           <p
             className={
               "text-subColor text-sm" +
@@ -210,21 +240,21 @@ export default function InfoTab({
       {messages.type !== "duo" ? (
         <div className="bg-zinc-900 w-full py-6 flex flex-col pl-7 gap-2">
           <>
-          <div className='flex gap-2 items-center mb-3'>
-            <p className="text-subColor">
-              {Object.keys(messages.participants).length + " participants"}
-            </p>
-            <AiOutlineUserAdd
-            size={20}
-            className={
-              "cursor-pointer text-green-600" +
-              (messages.type == "duo" ? " hidden" : "")
-            }
-            onClick={() => {
-              setShowCodeModal(true);
-            }}
-          />
-          </div>
+            <div className="flex gap-2 items-center mb-3">
+              <p className="text-subColor">
+                {Object.keys(messages.participants).length + " participants"}
+              </p>
+              <AiOutlineUserAdd
+                size={20}
+                className={
+                  "cursor-pointer text-green-600" +
+                  (messages.type == "duo" ? " hidden" : "")
+                }
+                onClick={() => {
+                  setShowCodeModal(true);
+                }}
+              />
+            </div>
             <div className="flex flex-col gap-6">
               {names.map((user, index) => {
                 return <ContactBar index={index} user={user} />;

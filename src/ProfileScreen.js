@@ -153,7 +153,9 @@ export default function ProfileScreen() {
                   about: aboutMe,
                 })
                   .then(() => toast.success("About me successfully updated!"))
-                  .catch(() => toast.error("Failed in update about me. Try again"));
+                  .catch(() =>
+                    toast.error("Failed in update about me. Try again")
+                  );
               }
             }}
           >

@@ -4,12 +4,19 @@ import { useState, useEffect, useContext, useRef } from "react";
 import { MessageContext } from "./App";
 import { getDatabase, ref, get, onValue, off } from "firebase/database";
 import { Link, useParams } from "react-router-dom";
-import nocontact from './images/no-contact-img.png'
+import nocontact from "./images/no-contact-img.png";
 export default function ContactBar() {
-  const { userInfo, messages, names, userState,isSignedIn,filteredArr,setFilteredArr,originalRef } = useContext(MessageContext);
+  const {
+    messages,
+    isSignedIn,
+    filteredArr,
+    setFilteredArr,
+    originalRef,
+    unreadData,
+    setUnreadData,
+  } = useContext(MessageContext);
   const [lastMsg, setLastMsg] = useState("");
   const tempArr = [];
-
 
   return (
     <div
@@ -42,43 +49,63 @@ export default function ContactBar() {
           }}
         ></input>
       </div>
-      {filteredArr.length>0 ? (
+      {filteredArr.length > 0 ? (
         <div className="flex flex-col overflow-y-scroll">
           {filteredArr.map((value, index) => {
-            const userKeys = value.participants?Object.keys(value.participants):{}
-            const userValues = value.participants?Object.values(value.participants):{}
+            const userKeys = value.participants
+              ? Object.keys(value.participants)
+              : {};
+            const userValues = value.participants
+              ? Object.values(value.participants)
+              : {};
+            console.log("unread data", unreadData[value.chatId]);
+            console.log("chat keys", value.chatId);
             return (
               <ContactBox
-                name={value.type == "duo"
-                ? userValues[1] && userValues[0]
-                  ? userKeys[0] == isSignedIn.uid?userValues[1]:userValues[0]
-                  : ""
-                : value.chatName}
+                name={
+                  value.type == "duo"
+                    ? userValues[1] && userValues[0]
+                      ? userKeys[0] == isSignedIn.uid
+                        ? userValues[1]
+                        : userValues[0]
+                      : ""
+                    : value.chatName
+                }
                 key={index}
                 lastMsg={value.lastMsg ? value.lastMsg : " "}
-                pfp={value.type == "duo"
-?userValues[1]&&userValues[0]
-                  ? userKeys[0] == isSignedIn.uid?userValues[1][0].toUpperCase():userValues[0][0].toUpperCase()
-                  : ""
-                : value.pfp}
+                pfp={
+                  value.type == "duo"
+                    ? userValues[1] && userValues[0]
+                      ? userKeys[0] == isSignedIn.uid
+                        ? userValues[1][0].toUpperCase()
+                        : userValues[0][0].toUpperCase()
+                      : ""
+                    : value.pfp
+                }
                 chatKey={value.chatId}
                 type={value.type}
+                unreadData={unreadData[value.chatId]}
               />
             );
           })}
         </div>
-      ) : <div className='flex flex-col items-center text-white justify-center gap-4 mt-16'>
-        <img src={nocontact} className=' w-36'></img>
-        <div className='m-auto text-center'>
-        <p className='text-xl'>No chats available</p>
-        <p className='text-subColor text-sm'>Create contacts and chats by clicking on the plus button at the side</p>
+      ) : (
+        <div className="flex flex-col items-center text-white justify-center gap-4 mt-16">
+          <img src={nocontact} className=" w-36"></img>
+          <div className="m-auto text-center">
+            <p className="text-xl">No chats available</p>
+            <p className="text-subColor text-sm">
+              Create contacts and chats by clicking on the plus button at the
+              side
+            </p>
+          </div>
         </div>
-        </div>}
+      )}
     </div>
   );
 }
 
-const ContactBox = ({ name, pfp, lastMsg, chatKey, type }) => {
+const ContactBox = ({ name, pfp, lastMsg, chatKey, type, unreadData }) => {
   const { chatId } = useParams();
   const getColorFromLetter = (letter) => {
     const colors = [
@@ -101,10 +128,11 @@ const ContactBox = ({ name, pfp, lastMsg, chatKey, type }) => {
     <Link to={`/homescreen/${chatKey}`}>
       <div
         className={
-          "flex gap-2 h-16 items-center pl-5 border-t border-borderColor cursor-pointer hover:bg-slate-700" +
+          "flex gap-2 h-16 items-center pl-5 border-t border-borderColor cursor-pointer hover:bg-slate-700 relative" +
           (chatId == chatKey ? " bg-slate-800" : "")
         }
       >
+        <div></div>
         <button
           className={
             "flex w-10 h-10 justify-center items-center rounded-xl bg-stone-800 text-2xl" +
@@ -115,10 +143,25 @@ const ContactBox = ({ name, pfp, lastMsg, chatKey, type }) => {
           {<p className={"text-white"}>{pfp}</p>}
         </button>
         <div>
-          <p className="text-white">{name}</p>
-          <p className=" text-subColor text-xs">
+          <p className={"text-white" + (unreadData ? " font-semibold" : "")}>
+            {name}
+          </p>
+          <p
+            className={
+              " text-subColor text-xs" +
+              (unreadData ? " font-semibold text-sm text-white" : "")
+            }
+          >
             {lastMsg.length >= 27 ? lastMsg.slice(0, 27) + "..." : lastMsg}
           </p>
+        </div>
+        <div
+          className={
+            "w-5 h-5 flex justify-center items-center rounded-3xl bg-secondary text-white ml-20  absolute right-3" +
+            (unreadData&&unreadData!==0 ? "" : " hidden")
+          }
+        >
+          <p>{unreadData ? unreadData : ""}</p>
         </div>
       </div>
     </Link>

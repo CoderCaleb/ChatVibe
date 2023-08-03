@@ -23,12 +23,8 @@ import cross from "./images/close.png";
 import { AiOutlineArrowDown } from "react-icons/ai";
 import nochatimg from "./images/nochat-img.png";
 export default function MessageTab() {
-  const {
-    messages,
-    setShowCodeModal,
-    names,
-    userState,
-  } = useContext(MessageContext);
+  const { messages, setShowCodeModal, names, userState } =
+    useContext(MessageContext);
   const [text, setText] = useState("");
   const [screen, setScreen] = useState("message");
   const [replyInfo, setReplyInfo] = useState({});
@@ -53,9 +49,22 @@ export default function MessageTab() {
       };
       const chatRef = ref(getDatabase(), `/chats/${chatId}/messages`);
       const metaDataRef = ref(getDatabase(), `/chatMetaData/${chatId}`);
+      const unreadRef = ref(
+        getDatabase(),
+        `unreadData/${userState.uid}/${chatId}`
+      );
+      const mainUnreadRef = ref(getDatabase(), `unreadData/${userState.uid}`);
       push(chatRef, tempObj).then((value) => {
         update(metaDataRef, {
           lastMsg: text,
+        }).then(() => {
+          get(mainUnreadRef).then((snapshot) => {
+            console.log('unread ref data',snapshot.val());
+              update(mainUnreadRef, {
+                [chatId]: snapshot.exists()?snapshot.val()[chatId] + 1:1,
+              });
+            console.log("unread ref updated");
+          });
         });
       });
       setText("");
@@ -238,17 +247,21 @@ export default function MessageTab() {
                   {" "}
                   {messages.type == "duo" ? userState.name : messages.chatName}
                 </p>
-                {messages.type!=='duo'?<div className="flex flex-row">
-                  {names.map((username, index) => {
-                    return (
-                      <p className="text-xs text-subColor" key={index}>
-                        {names.length - 1 === index
-                          ? username.name
-                          : username.name + ",\u00A0"}
-                      </p>
-                    );
-                  })}
-                </div>:<></>}
+                {messages.type !== "duo" ? (
+                  <div className="flex flex-row">
+                    {names.map((username, index) => {
+                      return (
+                        <p className="text-xs text-subColor" key={index}>
+                          {names.length - 1 === index
+                            ? username.name
+                            : username.name + ",\u00A0"}
+                        </p>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <></>
+                )}
               </div>
               <FiLink
                 size={20}
