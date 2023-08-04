@@ -23,7 +23,7 @@ import cross from "./images/close.png";
 import { AiOutlineArrowDown } from "react-icons/ai";
 import nochatimg from "./images/nochat-img.png";
 export default function MessageTab() {
-  const { messages, setShowCodeModal, names, userState } =
+  const { messages, setShowCodeModal, names, userState, isSignedIn } =
     useContext(MessageContext);
   const [text, setText] = useState("");
   const [screen, setScreen] = useState("message");
@@ -58,13 +58,27 @@ export default function MessageTab() {
         update(metaDataRef, {
           lastMsg: text,
         }).then(() => {
-          get(mainUnreadRef).then((snapshot) => {
-            console.log('unread ref data',snapshot.val());
-              update(mainUnreadRef, {
-                [chatId]: snapshot.exists()?snapshot.val()[chatId] + 1:1,
-              });
-            console.log("unread ref updated");
-          });
+          if(messages.type=='duo'){
+            get(mainUnreadRef).then((snapshot) => {
+              console.log('unread ref data',snapshot.val());
+                update(mainUnreadRef, {
+                  [chatId]: snapshot.exists()?snapshot.val()[chatId] + 1:1,
+                });
+              console.log("unread ref updated");
+            });
+          }
+          else{
+            names.map((userInfo,index)=>{
+              if(isSignedIn&&userInfo.uid!==isSignedIn.uid){
+                const groupUnreadRef = ref(getDatabase(),`/unreadData/${userInfo.uid}`)
+                get(groupUnreadRef).then((snapshot)=>{
+                  update(groupUnreadRef,{
+                    [chatId]: snapshot.exists()?snapshot.val()[chatId] + 1:1,
+                  })
+                })
+              }
+            })
+          }
         });
       });
       setText("");

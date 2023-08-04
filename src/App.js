@@ -143,15 +143,22 @@ function App() {
         setAuthor(snapshot.val());
       });
     }
+    let unreadListenerInfo = {}
     if (isSignedIn) {
       const unreadRef = ref(getDatabase(), `unreadData/${isSignedIn.uid}`);
-      onValue(unreadRef, (unreadChats) => {
+      const callback=(unreadChats) => {
         if (unreadChats.exists()) {
           setUnreadData(unreadChats.val());
         } else {
           setUnreadData({});
         }
-      });
+      }
+      const listener = onValue(unreadRef, callback);
+      unreadListenerInfo = {
+        ref:unreadRef,
+        callback:callback,
+        listener:listener
+      }
     }
 
     console.log("CHAT INFO", messages.chatName, previousState.current.chatName);
@@ -160,6 +167,10 @@ function App() {
       messages.participants,
       previousState.current.participants
     );
+    return ()=>{
+      if(Object.keys(unreadListenerInfo).length!==0){}
+      //off(unreadListenerInfo.ref,'value',unreadListenerInfo.callback)
+    }
   }, [messages.chatName, messages.participants]);
   useEffect(() => {
     console.log("NAMES", !!names[1]);
@@ -336,18 +347,26 @@ function ProtectedRoute({
   }, [chatId]);
 
   useEffect(() => {
+    let userListenerInfo = {}
     const unsubscribe = onAuthStateChanged(getAuth(), (user) => {
       if (!user) {
         navigate("/auth");
       } else {
         const auth = getAuth();
         const userRef = ref(getDatabase(), `users/${auth.currentUser.uid}`);
-        onValue(userRef, (snapshot) => {
+        const callback=(snapshot) => {
           setUserinfo(snapshot.val());
-        });
+        }
+        const listener = onValue(userRef, callback);
+        userListenerInfo={
+          ref:userRef,
+          callback:callback,
+          listener:listener
+        }
       }
+
     });
-    return () => unsubscribe();
+    return () => {unsubscribe();if(Object.keys(userListenerInfo).length!==0){off(userListenerInfo.ref,'value',userListenerInfo.callback)}};
   }, []);
   const tempArr = [];
 
