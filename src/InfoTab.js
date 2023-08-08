@@ -4,7 +4,7 @@ import { FiEdit3 } from "react-icons/fi";
 import { BsCheck2 } from "react-icons/bs";
 import { useParams } from "react-router-dom";
 import { useEffect, useState, useContext } from "react";
-import { ref, getDatabase, get, update } from "firebase/database";
+import { ref, getDatabase, get, update,push } from "firebase/database";
 import { onAuthStateChanged, getAuth } from "firebase/auth";
 import { FaUserTimes } from "react-icons/fa";
 import { MessageContext } from "./App";
@@ -137,7 +137,7 @@ export default function InfoTab({
                 size="20"
                 onClick={() => {
                   setNameEditMode(false);
-                  if (nameDesc.length !== 0) {
+                  if (nameDesc.length !== 0&&messages.chatName!==nameDesc) {
                     const groupNameRef = ref(getDatabase(), `/chats/${chatId}`);
                     const metaDataRef = ref(
                       getDatabase(),
@@ -148,6 +148,14 @@ export default function InfoTab({
                     }).then(() => {
                       update(metaDataRef, {
                         chatName: nameDesc,
+                      }).then(()=>{
+                        const messageRef = ref(getDatabase(), `/chats/${chatId}/messages`);
+                        console.log('updating message info')
+                        push(messageRef, {
+                          causeUser:userObj.displayName,
+                          type:'info',
+                          infoType:'nameEdit'
+                        })
                       });
                     });
                   }
@@ -216,11 +224,17 @@ export default function InfoTab({
                 onClick={() => {
                   setEditMode(false);
                   const chatRef = ref(getDatabase(), "/chats/" + chatId);
-                  const aboutRef = ref(getDatabase(), "/");
+                  const messageRef = ref(getDatabase(), `/chats/${chatId}/messages`);
                   if (messages.type !== "duo") {
                     if (descInput.trim().length !== 0) {
                       update(chatRef, {
                         chatDesc: descInput,
+                      }).then(()=>{
+                        push(messageRef, {
+                          causeUser:userObj.displayName,
+                          type:'info',
+                          infoType:'descEdit'
+                        })
                       });
                     }
                   } else {

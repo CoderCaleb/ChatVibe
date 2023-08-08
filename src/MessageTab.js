@@ -21,10 +21,11 @@ import EmojiPicker from "emoji-picker-react";
 import InfoTab from "./InfoTab";
 import { MdReply } from "react-icons/md";
 import cross from "./images/close.png";
-import { AiOutlineArrowDown } from "react-icons/ai";import { IoMdExit } from "react-icons/io";
+import { AiOutlineArrowDown } from "react-icons/ai";
+import { IoMdExit } from "react-icons/io";
 import { RiAdminLine } from "react-icons/ri";
-import {HiOutlineArrowNarrowRight} from 'react-icons/hi'
-
+import { HiOutlineArrowNarrowRight } from "react-icons/hi";
+import {FiEdit2} from 'react-icons/fi'
 import nochatimg from "./images/nochat-img.png";
 export default function MessageTab() {
   const { messages, setShowCodeModal, names, userState, isSignedIn } =
@@ -555,37 +556,48 @@ const MessageBox = ({
       content="the admin"
       icon={<RiAdminLine className="text-green-600" size={22} />}
     />
+  ) : data.infoType == "descEdit" ? (
+    <InfoMsg
+      causeUser={data.causeUser}
+      affectUser={data.affectUser}
+      actionType="edited"
+      content="the group description"
+      icon={<FiEdit2 className="text-green-600" size={22} />}
+    />
   ) : (
     <InfoMsg
       causeUser={data.causeUser}
       affectUser={data.affectUser}
-      actionType="joined"
-      content="the group"
-      icon={<HiOutlineArrowNarrowRight className="text-green-600" size={22} />}
+      actionType="edited"
+      content="the chat name"
+      icon={<FiEdit2 className="text-green-600" size={22} />}
     />
   );
 };
 
 const InfoMsg = ({ causeUser, affectUser, actionType, content, icon }) => {
   return (
-    <div className="flex gap-7 py-2 pl-6 mt-3">
-      {causeUser?
-     (<>{icon}
-      <p className="text-subColor font-light">
-        <span className="text-white">{causeUser + " "}</span>
-        {actionType + " "}
-        <span className="text-white">{affectUser + " "}</span>
-        {content}
-      </p></>):
-      <>
-        {icon}
-        <p className="text-subColor font-light">
-        <span className="text-white">{affectUser + " "}</span>
-          {actionType + " "}
-          {content}
-        </p>
+    <div className="flex gap-7 py-2 pl-6 mt-3 items-center">
+      {causeUser ? (
+        <>
+          {icon}
+          <p className="text-subColor font-light">
+            <span className="text-white">{causeUser + " "}</span>
+            {actionType + " "}
+            <span className="text-white">{affectUser?(affectUser + " "):''}</span>
+            {content}
+          </p>
         </>
-      }
+      ) : (
+        <>
+          {icon}
+          <p className="text-subColor font-light">
+            <span className="text-white">{affectUser + " "}</span>
+            {actionType + " "}
+            {content}
+          </p>
+        </>
+      )}
     </div>
   );
 };
