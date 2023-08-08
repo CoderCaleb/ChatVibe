@@ -565,6 +565,14 @@ const MessageBox = ({
       icon={<FiEdit2 className="text-green-600" size={22} />}
     />
   ) : (
+    data.infoType == "join"? 
+    <InfoMsg
+      causeUser={data.causeUser}
+      affectUser={data.affectUser}
+      actionType="joined"
+      content="the chat!"
+      icon={<HiOutlineArrowNarrowRight className="text-green-600" size={22} />}
+    />:
     <InfoMsg
       causeUser={data.causeUser}
       affectUser={data.affectUser}

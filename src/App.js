@@ -24,13 +24,23 @@ import {
 import SignIn from "./SignIn";
 import DashBoard from "./Dashboard";
 const firebaseConfig = {
-  apiKey: "AIzaSyDnsU3f1fH9jPcTHniNrqJJnnV4Gb9pM7U",
-  authDomain: "chatvibe-ddfac.firebaseapp.com",
-  projectId: "chatvibe-ddfac",
-  storageBucket: "chatvibe-ddfac.appspot.com",
-  messagingSenderId: "650779234388",
-  appId: "1:650779234388:web:11230a932f23837908ddc1",
+
+  apiKey: "AIzaSyBxq_SSjr5HtQij-x3l-sk2CBzELvRrI7w",
+
+  authDomain: "main-chatvibe.firebaseapp.com",
+
+  projectId: "main-chatvibe",
+
+  storageBucket: "main-chatvibe.appspot.com",
+
+  messagingSenderId: "792588917670",
+
+  appId: "1:792588917670:web:9700b17f58d2801a508d67",
+
+  measurementId: "G-4MP9D1K7XV"
+
 };
+
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
