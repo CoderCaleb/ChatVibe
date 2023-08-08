@@ -24,21 +24,7 @@ import {
 import SignIn from "./SignIn";
 import DashBoard from "./Dashboard";
 const firebaseConfig = {
-
-  apiKey: "AIzaSyBxq_SSjr5HtQij-x3l-sk2CBzELvRrI7w",
-
-  authDomain: "main-chatvibe.firebaseapp.com",
-
-  projectId: "main-chatvibe",
-
-  storageBucket: "main-chatvibe.appspot.com",
-
-  messagingSenderId: "792588917670",
-
-  appId: "1:792588917670:web:9700b17f58d2801a508d67",
-
-  measurementId: "G-4MP9D1K7XV"
-
+  //Add your firebase config here
 };
 
 if (!firebase.apps.length) {
@@ -134,7 +120,7 @@ function App() {
             console.log(err);
           });
       }
-      if(messages.participants){
+      if (messages.participants) {
         if (messages.type == "duo") {
           participantMap(messages.originalParticipants);
           console.log(
@@ -145,9 +131,8 @@ function App() {
           participantMap(messages.participants);
           console.log("MAPPING OUT GROUP CHAT PARTICIPANTAS");
         }
-  
       }
-      
+
       const authorRef = ref(
         getDatabase(),
         "/users/" + messages.author + "/name"
@@ -156,22 +141,22 @@ function App() {
         setAuthor(snapshot.val());
       });
     }
-    let unreadListenerInfo = {}
+    let unreadListenerInfo = {};
     if (isSignedIn) {
       const unreadRef = ref(getDatabase(), `unreadData/${isSignedIn.uid}`);
-      const callback=(unreadChats) => {
+      const callback = (unreadChats) => {
         if (unreadChats.exists()) {
           setUnreadData(unreadChats.val());
         } else {
           setUnreadData({});
         }
-      }
+      };
       const listener = onValue(unreadRef, callback);
       unreadListenerInfo = {
-        ref:unreadRef,
-        callback:callback,
-        listener:listener
-      }
+        ref: unreadRef,
+        callback: callback,
+        listener: listener,
+      };
     }
 
     console.log("CHAT INFO", messages.chatName, previousState.current.chatName);
@@ -180,11 +165,11 @@ function App() {
       messages.participants,
       previousState.current.participants
     );
-    return ()=>{
-      if(Object.keys(unreadListenerInfo).length!==0){
-        off(unreadListenerInfo.ref,'value',unreadListenerInfo.callback)
+    return () => {
+      if (Object.keys(unreadListenerInfo).length !== 0) {
+        off(unreadListenerInfo.ref, "value", unreadListenerInfo.callback);
       }
-    }
+    };
   }, [messages.chatName, messages.participants]);
   useEffect(() => {
     console.log("NAMES", !!names[1]);
@@ -355,67 +340,68 @@ function ProtectedRoute({
       unsubscribe();
       if (Object.keys(listenerInfo).length !== 0) {
         off(listenerInfo.ref, "value", listenerInfo.callback);
-        console.log('listener detached.')
+        console.log("listener detached.");
       }
     };
   }, [chatId]);
 
   useEffect(() => {
-    let userListenerInfo = {}
+    let userListenerInfo = {};
     const unsubscribe = onAuthStateChanged(getAuth(), (user) => {
       if (!user) {
         navigate("/auth");
       } else {
         const auth = getAuth();
         const userRef = ref(getDatabase(), `users/${auth.currentUser.uid}`);
-        const callback=(snapshot) => {
+        const callback = (snapshot) => {
           setUserinfo(snapshot.val());
-        }
+        };
         const listener = onValue(userRef, callback);
-        userListenerInfo={
-          ref:userRef,
-          callback:callback,
-          listener:listener
-        }
+        userListenerInfo = {
+          ref: userRef,
+          callback: callback,
+          listener: listener,
+        };
       }
-
     });
-    return () => {unsubscribe();if(Object.keys(userListenerInfo).length!==0){off(userListenerInfo.ref,'value',userListenerInfo.callback)}};
+    return () => {
+      unsubscribe();
+      if (Object.keys(userListenerInfo).length !== 0) {
+        off(userListenerInfo.ref, "value", userListenerInfo.callback);
+      }
+    };
   }, []);
   const tempArr = [];
 
   useEffect(() => {
     const listenerRefs = []; // Array to store the listener references
-if(userInfo.chats){
-  Object.keys(userInfo.chats).forEach((value, index) => {
-    const chatsRef = ref(getDatabase(), `/chatMetaData/${value}`);
-    const callback = (snapshot) => {
-      if(snapshot.exists()){
-        tempArr.some((obj) => Object.values(obj).includes(value))
-        ? (tempArr[index] = { ...snapshot.val(), chatId: snapshot.key })
-        : tempArr.push({ ...snapshot.val(), chatId: value });
-      console.log("tempArr:", tempArr[0], "value", snapshot.key);
-      originalRef.current = tempArr;
-      setFilteredArr([...tempArr]);
-      console.log(tempArr);
-      }
-      else{
-        setFilteredArr([])
-      }
-    };
-    const listenerRef = onValue(chatsRef, callback);
-    listenerRefs.push({
-      ref: chatsRef,
-      callback: callback,
-      unsubscribe: listenerRef,
-    }); // Add the listener reference to the array
-  });
-}
-else{
-  setFilteredArr([])
-}
-      
-    
+    if (userInfo.chats) {
+      Object.keys(userInfo.chats).forEach((value, index) => {
+        const chatsRef = ref(getDatabase(), `/chatMetaData/${value}`);
+        const callback = (snapshot) => {
+          if (snapshot.exists()) {
+            tempArr.some((obj) => Object.values(obj).includes(value))
+              ? (tempArr[index] = { ...snapshot.val(), chatId: snapshot.key })
+              : tempArr.push({ ...snapshot.val(), chatId: value });
+            console.log("tempArr:", tempArr[0], "value", snapshot.key);
+            originalRef.current = tempArr;
+            setFilteredArr([...tempArr]);
+            console.log(tempArr);
+          } else {
+            setFilteredArr([]);
+          }
+        };
+        const listenerRef = onValue(chatsRef, callback);
+        listenerRefs.push({
+          ref: chatsRef,
+          callback: callback,
+          unsubscribe: listenerRef,
+        }); // Add the listener reference to the array
+      });
+    } else {
+      setFilteredArr([]);
+    }
+
     // Cleanup function to unsubscribe the listeners
     return () => {
       listenerRefs.forEach((listenerRef) => {
