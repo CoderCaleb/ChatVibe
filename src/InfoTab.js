@@ -122,37 +122,41 @@ export default function InfoTab({
               </p>
             )}
           </div>
-          {messages.type!=='duo'?(!nameEditMode ? (
-            <FiEdit3
-              className="text-subColor cursor-pointer"
-              size="20"
-              onClick={() => {
-                setNameEditMode(true);
-              }}
-            />
-          ) : (
-            <BsCheck2
-              className="text-subColor cursor-pointer"
-              size="20"
-              onClick={() => {
-                setNameEditMode(false);
-                if (nameDesc.length !== 0) {
-                  const groupNameRef = ref(getDatabase(), `/chats/${chatId}`);
-                  const metaDataRef = ref(
-                    getDatabase(),
-                    `/chatMetaData/${chatId}`
-                  );
-                  update(groupNameRef, {
-                    chatName: nameDesc,
-                  }).then(() => {
-                    update(metaDataRef, {
+          {messages.type !== "duo" ? (
+            !nameEditMode ? (
+              <FiEdit3
+                className="text-subColor cursor-pointer"
+                size="20"
+                onClick={() => {
+                  setNameEditMode(true);
+                }}
+              />
+            ) : (
+              <BsCheck2
+                className="text-subColor cursor-pointer"
+                size="20"
+                onClick={() => {
+                  setNameEditMode(false);
+                  if (nameDesc.length !== 0) {
+                    const groupNameRef = ref(getDatabase(), `/chats/${chatId}`);
+                    const metaDataRef = ref(
+                      getDatabase(),
+                      `/chatMetaData/${chatId}`
+                    );
+                    update(groupNameRef, {
                       chatName: nameDesc,
+                    }).then(() => {
+                      update(metaDataRef, {
+                        chatName: nameDesc,
+                      });
                     });
-                  });
-                }
-              }}
-            />
-          )):<></>}
+                  }
+                }}
+              />
+            )
+          ) : (
+            <></>
+          )}
         </div>
         <div>
           <p
@@ -161,7 +165,7 @@ export default function InfoTab({
               (messages.type == "duo" ? " hidden" : "")
             }
           >
-            {Object.keys(messages.participants).length + " participants"}
+            {messages.participants?(Object.keys(messages.participants).length + " participants"):'Loading...'}
           </p>
 
           <p
@@ -275,6 +279,7 @@ export default function InfoTab({
                 chat: chatId,
                 type: "leave",
                 chatType: "group",
+                affectUser:userObj.displayName,
               });
             } else {
               setShowRemoveModal({
@@ -283,6 +288,7 @@ export default function InfoTab({
                 type: "leave",
                 chatType: "duo",
                 username: userState.name + userState.userCode,
+                affectUser:userObj.displayName,
               });
             }
           }}
@@ -308,6 +314,8 @@ export default function InfoTab({
             onClick={() => {
               setShowRemoveModal({
                 user: user.uid,
+                affectUser: user.name,
+                causeUser: userObj.displayName,
                 type: Object.keys(metaInfo).includes(user.uid)
                   ? "dismiss"
                   : "admin",
@@ -321,7 +329,12 @@ export default function InfoTab({
           <p
             className="rounded-lg hover:bg-slate-600 py-1 pl-2 cursor-pointer"
             onClick={() => {
-              setShowRemoveModal({ user: user.uid, type: "remove" });
+              setShowRemoveModal({
+                user: user.uid,
+                type: "remove",
+                affectUser: user.name,
+                causeUser: userObj.displayName,
+              });
             }}
           >
             Remove

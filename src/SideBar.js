@@ -148,6 +148,7 @@ export default function SideBar() {
         <JoinModal
           showJoinModal={showJoinModal}
           setShowJoinModal={setShowJoinModal}
+          userInfo={userInfo}
         />
       </div>
       <div
@@ -179,22 +180,20 @@ export default function SideBar() {
           top-5"
           onMouseEnter={() => setHover(true)}
           onMouseLeave={() => setHover(false)}
-        >
-
-        </div>
+        ></div>
         {user && (
-            <div
-              className={
-                "w-12 h-12 mx-auto my-3 flex items-center justify-center cursor-pointer rounded-3xl hover:rounded-xl transition-all duration-300" +
-                getColorFromLetter(user.displayName[0].toUpperCase())
-              }
-              onClick={()=>{
-                setProfileScreen(true)
-              }}
-            >
-              <p className="text-white">{user.displayName[0].toUpperCase()}</p>
-            </div>
-          )}
+          <div
+            className={
+              "w-12 h-12 mx-auto my-3 flex items-center justify-center cursor-pointer rounded-3xl hover:rounded-xl transition-all duration-300" +
+              getColorFromLetter(user.displayName[0].toUpperCase())
+            }
+            onClick={() => {
+              setProfileScreen(true);
+            }}
+          >
+            <p className="text-white">{user.displayName[0].toUpperCase()}</p>
+          </div>
+        )}
         <SidebarIcon
           icon={<FaKey size="28" />}
           text="Join chat 🚀"
@@ -205,7 +204,6 @@ export default function SideBar() {
           text={"Create chat 💬"}
           type="plus"
         ></SidebarIcon>
-
       </div>
     </>
   );
@@ -537,13 +535,13 @@ function CreateForm({
                           getDatabase(),
                           `/users/${user.uid}/contacts`
                         );
-                        const cleanedUsername = username ? username.replace(/#/g, "") : "";
+                        const cleanedUsername = username
+                          ? username.replace(/#/g, "")
+                          : "";
 
                         const checkContactRef = ref(
                           getDatabase(),
-                          `/users/${
-                            user.uid
-                          }/contacts/${cleanedUsername}`
+                          `/users/${user.uid}/contacts/${cleanedUsername}`
                         );
                         const otherContactRef = ref(
                           getDatabase(),
@@ -562,20 +560,29 @@ function CreateForm({
                                   ) {
                                     get(otherContactRef).then(
                                       (targetContact) => {
-                                        const contactArr =
-                                        targetContact.val()?Object.keys(targetContact.val()):null;
+                                        const contactArr = targetContact.val()
+                                          ? Object.keys(targetContact.val())
+                                          : null;
                                         const completeUsername =
                                           userInfo.name + userInfo.userCode;
-                                        console.log('contactArr',contactArr)
-                                        console.log('completeUsername',completeUsername)
+                                        console.log("contactArr", contactArr);
+                                        console.log(
+                                          "completeUsername",
+                                          completeUsername
+                                        );
 
                                         if (
-                                          contactArr&&contactArr.includes(completeUsername)
+                                          contactArr &&
+                                          contactArr.includes(completeUsername)
                                         ) {
-                                          console.log('chat already exists. no need to make new one')
+                                          console.log(
+                                            "chat already exists. no need to make new one"
+                                          );
                                           update(contactRef, {
                                             [username.replace(/#/g, "")]:
-                                              targetContact.val()[completeUsername],
+                                              targetContact.val()[
+                                                completeUsername
+                                              ],
                                           })
                                             .then(() => {
                                               update(userRef, {
@@ -587,12 +594,15 @@ function CreateForm({
                                             .then(() => {
                                               const participantRef = ref(
                                                 getDatabase(),
-                                                `/chats/${targetContact.val()[completeUsername]}/participants`
+                                                `/chats/${
+                                                  targetContact.val()[
+                                                    completeUsername
+                                                  ]
+                                                }/participants`
                                               );
                                               update(participantRef, {
                                                 [user.uid]: true,
-                                              })
-                                              .then(()=>{
+                                              }).then(() => {
                                                 setFormIndex(
                                                   (prev) => prev + 1
                                                 );
@@ -600,7 +610,9 @@ function CreateForm({
                                               });
                                             });
                                         } else {
-                                          console.log('chat doesnt exist. need to make new one')
+                                          console.log(
+                                            "chat doesnt exist. need to make new one"
+                                          );
                                           const fullUsername = `${name.val()}#${code.val()}`;
                                           push(chatRef, {
                                             author: user.uid,
@@ -761,7 +773,7 @@ function CreateForm({
     );
   }
 }
-function JoinModal({ setShowJoinModal, showJoinModal }) {
+function JoinModal({ setShowJoinModal, showJoinModal,userInfo }) {
   const [joinModalIndex, setJoinModalIndex] = useState(1);
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
@@ -809,21 +821,38 @@ function JoinModal({ setShowJoinModal, showJoinModal }) {
               const codesRef = ref(getDatabase(), `/codes/${code.trim()}`);
               get(codesRef).then((snapshot) => {
                 if (snapshot.exists()) {
-                  console.log("Code", snapshot.val());
-                  const chatRef = ref(
-                    getDatabase(),
-                    `/chats/${snapshot.val()}/participants`
-                  );
-                  update(chatRef, {
-                    [getAuth().currentUser.uid]: true,
-                  }).then((value) => {
-                    update(userRef, {
-                      [snapshot.val()]: true,
+                  if(snapshot.val()&&(userInfo.chats||!Object.keys(userInfo.chats?userInfo.chats:{}).includes(snapshot.val()))){
+                    console.log("Code", snapshot.val());
+                    const chatRef = ref(
+                      getDatabase(),
+                      `/chats/${snapshot.val()}/participants`
+                    );
+                    update(chatRef, {
+                      [getAuth().currentUser.uid]: true,
+                    }).then((value) => {
+                      update(userRef, {
+                        [snapshot.val()]: true,
+                      }).then((value) => {
+                        const messageRef = ref(
+                          getDatabase(),
+                          `/chats/${snapshot.val()}/messages`
+                        );
+                        console.log('user joined chat')
+                        push(messageRef, {
+                          type: "info",
+                          infoType: "join",
+                          affectUser: getAuth().currentUser.displayName,
+                        });
+                      });
                     });
-                  });
-
-                  setJoinModalIndex(1);
-                  setShowJoinModal(false);
+  
+                    setJoinModalIndex(1);
+                    setShowJoinModal(false);
+                  }
+                  else{
+                    setError('You have already joined this chat. Please check your contacts')
+                  }
+                  
                 } else {
                   console.log("Code does not exist");
                   setError("Code does not exist. Try again");
@@ -957,6 +986,16 @@ const ConfirmModal = ({
         <button
           className=" done-button"
           onClick={() => {
+            const messageRef = ref(getDatabase(), `/chats/${chatId}/messages`);
+            const tempObj = {
+              type: "info",
+              infoType: showRemoveModal.type,
+              ...(showRemoveModal.causeUser
+                ? { causeUser: showRemoveModal.causeUser }
+                : {}),
+              affectUser: showRemoveModal.affectUser,
+            };
+            console.log("tempobjj", tempObj);
             if (showRemoveModal.type == "remove") {
               const chatRef = ref(
                 getDatabase(),
@@ -974,6 +1013,7 @@ const ConfirmModal = ({
                       remove(userRef)
                         .then(() => {
                           console.log("success!");
+                          push(messageRef, tempObj);
                         })
                         .catch((err) => {
                           console.log(err);
@@ -992,7 +1032,9 @@ const ConfirmModal = ({
               update(adminRef, {
                 [showRemoveModal.user]: true,
               }).then(() => {
-                setShowRemoveModal({});
+                push(messageRef, tempObj).then(() => {
+                  setShowRemoveModal({});
+                });
               });
             } else if (showRemoveModal.type == "leave") {
               const chatRef = ref(
@@ -1030,48 +1072,58 @@ const ConfirmModal = ({
                 remove(userRef).then(() => {
                   if (groupSize > 1) {
                     remove(chatRef).then(() => {
-                      setShowRemoveModal({});
+                      push(messageRef, tempObj).then(() => {
+                        setShowRemoveModal({});
+                      });
                     });
                   } else {
                     remove(mainChatRef).then(() => {
                       remove(chatRef).then(() => {
                         remove(metaData).then(() => {
-                          setShowRemoveModal({});
+                          push(messageRef, tempObj).then(() => {
+                            setShowRemoveModal({});
+                          });
                         });
                       });
                     });
                   }
                 });
               } else {
-
-                  remove(userRef).then(() => {
-                    remove(contactRef).then(() => {
-                      console.log(`/users/${auth.currentUser.uid}/contacts/${showRemoveModal.username}`)
-                        if (groupSize <= 1) {
-                          remove(mainChatRef).then(()=>{
-                            remove(metaData).then(()=>{
-                              setShowRemoveModal({});
-                            })
-                          })
-                          console.log('group size is below/equal 1')
-                        }
-                        else{
-                          remove(chatRef).then(() => {
+                remove(userRef).then(() => {
+                  remove(contactRef).then(() => {
+                    console.log(
+                      `/users/${auth.currentUser.uid}/contacts/${showRemoveModal.username}`
+                    );
+                    if (groupSize <= 1) {
+                      remove(mainChatRef).then(() => {
+                        remove(metaData).then(() => {
+                          push(messageRef, tempObj).then(() => {
                             setShowRemoveModal({});
-                          })
-                          console.log('group size is above 1')
-                        }
-                      ;
-                    });
+                          });
+                        });
+                      });
+                      console.log("group size is below/equal 1");
+                    } else {
+                      remove(chatRef).then(() => {
+                        push(messageRef, tempObj).then(() => {
+                          setShowRemoveModal({});
+                        });
+                      });
+                      console.log("group size is above 1");
+                    }
                   });
-                
+                });
               }
             } else {
               const adminRef = ref(
                 getDatabase(),
                 `chatMetaData/${chatId}/admin/${showRemoveModal.user}`
               );
-              remove(adminRef).then(() => setShowRemoveModal({}));
+              remove(adminRef).then(() =>
+                push(messageRef, tempObj).then(() => {
+                  setShowRemoveModal({});
+                })
+              );
             }
           }}
         >

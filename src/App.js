@@ -124,17 +124,20 @@ function App() {
             console.log(err);
           });
       }
-      if (messages.type == "duo") {
-        participantMap(messages.originalParticipants);
-        console.log(
-          "MAPPING OUT DUO CHAT PARTICIPANTAS",
-          messages.originalParticipants
-        );
-      } else {
-        participantMap(messages.participants);
-        console.log("MAPPING OUT GROUP CHAT PARTICIPANTAS");
+      if(messages.participants){
+        if (messages.type == "duo") {
+          participantMap(messages.originalParticipants);
+          console.log(
+            "MAPPING OUT DUO CHAT PARTICIPANTAS",
+            messages.originalParticipants
+          );
+        } else {
+          participantMap(messages.participants);
+          console.log("MAPPING OUT GROUP CHAT PARTICIPANTAS");
+        }
+  
       }
-
+      
       const authorRef = ref(
         getDatabase(),
         "/users/" + messages.author + "/name"
@@ -168,8 +171,9 @@ function App() {
       previousState.current.participants
     );
     return ()=>{
-      if(Object.keys(unreadListenerInfo).length!==0){}
-      //off(unreadListenerInfo.ref,'value',unreadListenerInfo.callback)
+      if(Object.keys(unreadListenerInfo).length!==0){
+        off(unreadListenerInfo.ref,'value',unreadListenerInfo.callback)
+      }
     }
   }, [messages.chatName, messages.participants]);
   useEffect(() => {
@@ -372,27 +376,36 @@ function ProtectedRoute({
 
   useEffect(() => {
     const listenerRefs = []; // Array to store the listener references
-
-    if (userInfo.chats) {
-      Object.keys(userInfo.chats).forEach((value, index) => {
-        const chatsRef = ref(getDatabase(), `/chatMetaData/${value}`);
-        const callback = (snapshot) => {
-          tempArr.some((obj) => Object.values(obj).includes(value))
-            ? (tempArr[index] = { ...snapshot.val(), chatId: snapshot.key })
-            : tempArr.push({ ...snapshot.val(), chatId: value });
-          console.log("tempArr:", tempArr[0], "value", snapshot.key);
-          originalRef.current = tempArr;
-          setFilteredArr([...tempArr]);
-          console.log(tempArr);
-        };
-        const listenerRef = onValue(chatsRef, callback);
-        listenerRefs.push({
-          ref: chatsRef,
-          callback: callback,
-          unsubscribe: listenerRef,
-        }); // Add the listener reference to the array
-      });
-    }
+if(userInfo.chats){
+  Object.keys(userInfo.chats).forEach((value, index) => {
+    const chatsRef = ref(getDatabase(), `/chatMetaData/${value}`);
+    const callback = (snapshot) => {
+      if(snapshot.exists()){
+        tempArr.some((obj) => Object.values(obj).includes(value))
+        ? (tempArr[index] = { ...snapshot.val(), chatId: snapshot.key })
+        : tempArr.push({ ...snapshot.val(), chatId: value });
+      console.log("tempArr:", tempArr[0], "value", snapshot.key);
+      originalRef.current = tempArr;
+      setFilteredArr([...tempArr]);
+      console.log(tempArr);
+      }
+      else{
+        setFilteredArr([])
+      }
+    };
+    const listenerRef = onValue(chatsRef, callback);
+    listenerRefs.push({
+      ref: chatsRef,
+      callback: callback,
+      unsubscribe: listenerRef,
+    }); // Add the listener reference to the array
+  });
+}
+else{
+  setFilteredArr([])
+}
+      
+    
     // Cleanup function to unsubscribe the listeners
     return () => {
       listenerRefs.forEach((listenerRef) => {

@@ -14,13 +14,17 @@ import { MessageContext } from "./App";
 import { Link, useParams } from "react-router-dom";
 import { getAuth } from "firebase/auth";
 import { HiOutlineUserGroup } from "react-icons/hi";
+import { AiOutlineUserDelete } from "react-icons/ai";
 import { FiLink } from "react-icons/fi";
 import { FaAngleLeft } from "react-icons/fa";
 import EmojiPicker from "emoji-picker-react";
 import InfoTab from "./InfoTab";
 import { MdReply } from "react-icons/md";
 import cross from "./images/close.png";
-import { AiOutlineArrowDown } from "react-icons/ai";
+import { AiOutlineArrowDown } from "react-icons/ai";import { IoMdExit } from "react-icons/io";
+import { RiAdminLine } from "react-icons/ri";
+import {HiOutlineArrowNarrowRight} from 'react-icons/hi'
+
 import nochatimg from "./images/nochat-img.png";
 export default function MessageTab() {
   const { messages, setShowCodeModal, names, userState, isSignedIn } =
@@ -58,26 +62,30 @@ export default function MessageTab() {
         update(metaDataRef, {
           lastMsg: text,
         }).then(() => {
-          if(messages.type=='duo'){
+          if (messages.type == "duo") {
             get(mainUnreadRef).then((snapshot) => {
-              console.log('unread ref data',snapshot.val());
-                update(mainUnreadRef, {
-                  [chatId]: snapshot.exists()?snapshot.val()[chatId] + 1:1,
-                });
+              console.log("unread ref data", snapshot.val());
+              update(mainUnreadRef, {
+                [chatId]: snapshot.exists() ? snapshot.val()[chatId] + 1 : 1,
+              });
               console.log("unread ref updated");
             });
-          }
-          else{
-            names.map((userInfo,index)=>{
-              if(isSignedIn&&userInfo.uid!==isSignedIn.uid){
-                const groupUnreadRef = ref(getDatabase(),`/unreadData/${userInfo.uid}`)
-                get(groupUnreadRef).then((snapshot)=>{
-                  update(groupUnreadRef,{
-                    [chatId]: snapshot.exists()?snapshot.val()[chatId] + 1:1,
-                  })
-                })
+          } else {
+            names.map((userInfo, index) => {
+              if (isSignedIn && userInfo.uid !== isSignedIn.uid) {
+                const groupUnreadRef = ref(
+                  getDatabase(),
+                  `/unreadData/${userInfo.uid}`
+                );
+                get(groupUnreadRef).then((snapshot) => {
+                  update(groupUnreadRef, {
+                    [chatId]: snapshot.exists()
+                      ? snapshot.val()[chatId] + 1
+                      : 1,
+                  });
+                });
               }
-            })
+            });
           }
         });
       });
@@ -310,7 +318,8 @@ export default function MessageTab() {
                           Object.keys(messages.messages)[index - 1]
                         ].timestamp >
                         60000 ||
-                      value.replyInfo ? (
+                      value.replyInfo ||
+                      !value.content ? (
                         <MessageBox
                           pfp="https://wallpapers.com/images/hd/shadow-boy-white-eyes-unique-cool-pfp-nft-13yuypusuweug9xn.jpg"
                           name={value.sender}
@@ -321,6 +330,7 @@ export default function MessageTab() {
                           chatUid={Object.keys(messages.messages)[index]}
                           makeNewRef={makeNewRef}
                           scrollToMsg={scrollToMsg}
+                          data={value}
                         />
                       ) : (
                         <div
@@ -360,6 +370,7 @@ export default function MessageTab() {
                         chatUid={Object.keys(messages.messages)[index]}
                         makeNewRef={makeNewRef}
                         scrollToMsg={scrollToMsg}
+                        data={value}
                       />
                     )}
                   </div>
@@ -438,6 +449,7 @@ const MessageBox = ({
   chatUid,
   makeNewRef,
   scrollToMsg,
+  data,
 }) => {
   const getColorFromLetter = (letter) => {
     const colors = [
@@ -455,7 +467,7 @@ const MessageBox = ({
     const index = letter.charCodeAt(0) % colors.length;
     return colors[index];
   };
-  return (
+  return !data.type ? (
     <div
       className="flex flex-col justify-center py-2 pl-5 relative group hover:bg-slate-800"
       ref={(ref) => makeNewRef(chatUid, ref)}
@@ -510,6 +522,70 @@ const MessageBox = ({
           <p className="text-white text-sm font-light">{msg}</p>
         </div>
       </div>
+    </div>
+  ) : data.infoType == "remove" ? (
+    <InfoMsg
+      causeUser={data.causeUser}
+      affectUser={data.affectUser}
+      actionType="removed"
+      content="from the group"
+      icon={<AiOutlineUserDelete className="text-slate-400" size={22} />}
+    />
+  ) : data.infoType == "leave" ? (
+    <InfoMsg
+      causeUser={data.causeUser}
+      affectUser={data.affectUser}
+      actionType="left"
+      content="the group"
+      icon={<HiOutlineArrowNarrowRight className="text-slate-400" size={22} />}
+    />
+  ) : data.infoType == "dismiss" ? (
+    <InfoMsg
+      causeUser={data.causeUser}
+      affectUser={data.affectUser}
+      actionType="dismissed"
+      content="as admin"
+      icon={<HiOutlineArrowNarrowRight className="text-slate-400" size={22} />}
+    />
+  ) : data.infoType == "admin" ? (
+    <InfoMsg
+      causeUser={data.causeUser}
+      affectUser={data.affectUser}
+      actionType="made"
+      content="the admin"
+      icon={<RiAdminLine className="text-green-600" size={22} />}
+    />
+  ) : (
+    <InfoMsg
+      causeUser={data.causeUser}
+      affectUser={data.affectUser}
+      actionType="joined"
+      content="the group"
+      icon={<HiOutlineArrowNarrowRight className="text-green-600" size={22} />}
+    />
+  );
+};
+
+const InfoMsg = ({ causeUser, affectUser, actionType, content, icon }) => {
+  return (
+    <div className="flex gap-7 py-2 pl-6 mt-3">
+      {causeUser?
+     (<>{icon}
+      <p className="text-subColor font-light">
+        <span className="text-white">{causeUser + " "}</span>
+        {actionType + " "}
+        <span className="text-white">{affectUser + " "}</span>
+        {content}
+      </p></>):
+      <>
+        {icon}
+        <p className="text-subColor font-light">
+        <span className="text-white">{affectUser + " "}</span>
+          {actionType + " "}
+          {content}
+        </p>
+        </>
+      }
     </div>
   );
 };
