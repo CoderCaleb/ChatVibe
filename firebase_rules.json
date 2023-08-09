@@ -1,0 +1,22 @@
+{
+    "rules": {
+      ".read": "auth != null",
+      ".write": "auth != null",
+      "codes": {
+        ".indexOn": ".value"
+      },
+      "chats": {
+        "$chatId": {
+          ".read": "data.child('participants').hasChild(auth.uid)",
+          ".write": "data.child('participants').hasChild(auth.uid)",
+  
+          "messages": {
+            "$messageId": {
+              ".read": "data.child('participants').hasChild(auth.uid)",
+              ".write": "data.child('participants').hasChild(auth.uid)"
+            }
+          }
+        }
+      }
+    }
+  }
