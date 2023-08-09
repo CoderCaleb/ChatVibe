@@ -24,7 +24,7 @@ import {
 import SignIn from "./SignIn";
 import DashBoard from "./Dashboard";
 const firebaseConfig = {
-  //Add your firebase config here
+  //Enter your firebase config sdk here
 };
 
 if (!firebase.apps.length) {

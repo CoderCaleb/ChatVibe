@@ -10,6 +10,7 @@ import {
 } from "firebase/auth";
 import { update, ref, getDatabase, get } from "firebase/database";
 import { Link } from "react-router-dom";
+import loadingAni from './images/spinner-loader.gif'
 import { ToastContainer, toast } from 'react-toastify';
 export default function SignUp() {
   const [username, setUsername] = useState("");
@@ -19,6 +20,7 @@ export default function SignUp() {
   const [emailError, setEmailError] = useState("");
   const [nameError, setNameError] = useState("");
   const [showError, setShowError] = useState(false);
+  const [isSigningUp,setIsSigningUp] = useState(false)
   function generateRandomCode() {
     const code = Math.floor(Math.random() * 9000) + 1000;
     return code.toString();
@@ -188,10 +190,12 @@ export default function SignUp() {
           </p>
 
           <button
-            className="w-full h-9 text-sm mt-3 mb-2 bg-btnColor rounded-lg cursor-pointer hover:opacity-80 transition:all duration-200"
+            className="w-full h-9 text-sm mt-3 mb-2 bg-btnColor rounded-lg hover:opacity-80 transition:all duration-200"
+            disabled={isSigningUp}
             onClick={() => {
               console.log("clicked");
               if (checkEmail() && checkPassword && checkUsername()) {
+                setIsSigningUp(true)
                 const auth = getAuth();
                 createUserWithEmailAndPassword(auth, email, password)
                   .then((value) => {
@@ -214,13 +218,15 @@ export default function SignUp() {
                     else{
                       toast.error('Something went wrong. Try again...')
                     }
+                  }).finally((value)=>{
+                    setIsSigningUp(false)
                   });
               } else {
                 setShowError(true);
               }
             }}
           >
-            Sign Up
+            {!isSigningUp?<p>Sign Up</p>:<img src={loadingAni} className='w-6 h-6 m-auto'/>}
           </button>
           <p className="text-xs text-white text-center">
             Already have an account?{" "}

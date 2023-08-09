@@ -12,10 +12,12 @@ import {
 import { update, ref, getDatabase } from "firebase/database";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import loadingAni from './images/spinner-loader.gif'
 export default function SignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showError, setShowError] = useState(false);
+  const [isSigningIn, setIsSigningIn] = useState(false)
   const navigate = useNavigate();
   useEffect(() => {
     setShowError(false);
@@ -81,9 +83,11 @@ export default function SignUp() {
               </p>
             </div>
             <button
-              className="w-full h-9 text-sm mt-5 mb-3 bg-btnColor rounded-lg cursor-pointer hover:opacity-80 transition:all duration-200"
+              className="w-full h-9 text-sm mt-5 mb-3 bg-btnColor rounded-lg hover:opacity-80 transition:all duration-200"
+              disabled={isSigningIn}
               onClick={() => {
                 const auth = getAuth();
+                setIsSigningIn(true)
                 signInWithEmailAndPassword(auth, email, password)
                   .then((value) => {
                     const user = value.user;
@@ -91,10 +95,13 @@ export default function SignUp() {
                   })
                   .catch((err) => {
                     setShowError(true);
+                  })
+                  .finally(()=>{
+                    setIsSigningIn(false)
                   });
               }}
             >
-              Login
+            {!isSigningIn?<p>Login</p>:<img src={loadingAni} className='w-6 h-6 m-auto'/>}
             </button>
 
             <p className="text-xs text-white text-center">
