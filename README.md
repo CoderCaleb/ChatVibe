@@ -3,6 +3,12 @@ ChatVibe ⭐️
 
 Discover a dynamic realm of real-time communication with our Chat Web App. Seamlessly join conversations, connect with others, and engage in interactive messaging like never before. This platform enables users to effortlessly join chats using unique chat codes, fostering a sense of community and ease of communication.
 
+## Table of Contents
+
+- [About](#about)
+- [Features](#features)
+- [Technologies Used](#technologies-used)
+
 ## Screenshots 
 
 ![Screenshot of Vibe Chat Interface](https://imgur.com/J6IBIGQ.png)
@@ -45,6 +51,20 @@ Discover a dynamic realm of real-time communication with our Chat Web App. Seaml
 - **Tailwind CSS:** Utility-first CSS framework for styling the user interface.
 - **Firebase Realtime Database:** Backend service for real-time data synchronization and user authentication.
 
+
+## Communication
+
+Feel free to reach out if you have any questions, suggestions, or feedback regarding the **ChatVibe** project. We value your input and are eager to engage in meaningful conversations.
+
+- **Issue Tracker:** If you come across any bugs, issues, or feature requests, please open an issue on our [GitHub repository](https://github.com/CoderCaleb/ChatVibe/issues). This allows us to track and address your concerns promptly.
+
+- **Discussions:** Join the conversation on our [Discussions board](https://github.com/CoderCaleb/ChatVibe/discussions). Feel free to ask questions, share your thoughts, or engage with the community.
+
+We believe that effective communication is essential for the growth and success of the project. We're excited to hear from you!
+
+⚠️ **Note:** The codebase of this project is currently quite messy, as it was developed over a short period and only by one person :( We appreciate your understanding and patience as we work towards improving its structure and readability.
+
 Feel free to explore the features and start chatting with other users!
 
 Any contributions, large or small, major features, bug fixes, are welcomed and appreciated
+

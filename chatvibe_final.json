@@ -1,0 +1,66 @@
+{
+  "chatMetaData": {
+    "-NaRruJaPpOSG7jHO0AI": {
+      "admin": {
+        "mzXuYIHjVGR1O7wnJj3Ww6NP8ED3": true
+      },
+      "chatName": "History project :)",
+      "lastMsg": "hi",
+      "pfp": "🤗"
+    }
+  },
+  "chats": {
+    "-NaRruJaPpOSG7jHO0AI": {
+      "author": "mzXuYIHjVGR1O7wnJj3Ww6NP8ED3",
+      "chatDesc": ":OOO",
+      "chatName": "History project :)",
+      "messages": {
+        "-NbJjw8w3yYu15_6r9_5": {
+          "content": "hi",
+          "replyInfo": false,
+          "sender": "caleb",
+          "senderUID": "mzXuYIHjVGR1O7wnJj3Ww6NP8ED3",
+          "timestamp": 1691491484355
+        }
+      },
+      "participants": {
+        "mzXuYIHjVGR1O7wnJj3Ww6NP8ED3": true
+      },
+      "pfp": "🤗",
+      "timeCreated": 1690554047931
+    }
+  },
+  "codes": {
+    "VpgNNh7XZ": "-NaRruJaPpOSG7jHO0AI",
+    "tKBO6Yk4L": "-NZQVxLiOi5RsoP6re0d"
+  },
+  "unreadData": {
+    "mzXuYIHjVGR1O7wnJj3Ww6NP8ED3": {
+      "-NZKb2JXmHVh9Wi-5s8h": 0,
+      "-NaRruJaPpOSG7jHO0AI": 0
+    },
+    "nX0sbJSARKbsjSAugvFrhxLH4C53": {
+      "-NaRruJaPpOSG7jHO0AI": 0
+    }
+  },
+  "userCodes": {
+    "caleb": {
+      "2132": "MEB4E9q0TBejsX3MAJaQ7cnk7d03",
+      "4620": "mzXuYIHjVGR1O7wnJj3Ww6NP8ED3"
+    }
+  },
+  "users": {
+    "mzXuYIHjVGR1O7wnJj3Ww6NP8ED3": {
+      "about": "bruhh",
+      "chats": {
+        "-NaRruJaPpOSG7jHO0AI": true
+      },
+      "contacts": {
+        "kebobby1234": "-NaUmEFRmDjC9M-LHLED"
+      },
+      "email": "caleb@gmail.com",
+      "name": "caleb",
+      "userCode": "4620"
+    }
+  }
+}
