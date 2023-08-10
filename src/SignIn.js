@@ -36,14 +36,14 @@ export default function SignUp() {
           </button>
         </Link>
       </div>
-        <div className="flex max-w-maxSignUp h-96 md:w-10/12 w-full md:min-w-signUpMin rounded-lg overflow-hidden m-auto shadow-lg shadow-slate-600">
+        <div className="flex max-w-maxSignUp h-96 w-10/12 md:min-w-signUpMin rounded-lg overflow-hidden m-auto shadow-lg shadow-slate-600">
           <div className="relative justify-center items-center flex-1 hidden md:flex">
             <p className="absolute text-3xl z-50 font-bold text-blue-700 text-center mx-5">
               Immerse Yourself in Interaction
             </p>
             <img src={abstractBg} className="h-full w-full"></img>
           </div>
-          <div className=" bg-neutral-900 w-96 px-5 py-7 flex flex-col justify-center md:w-96">
+          <div className=" bg-neutral-900 w-full px-5 py-7 flex flex-col justify-center md:w-96">
             <p className="text-white text-xl mb-1">Login to your account</p>
             <p className="text-white text-xs font-light text-neutral-400 mb-3">
               Welcome back! Please enter your details

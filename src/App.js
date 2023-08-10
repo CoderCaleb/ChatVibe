@@ -33,8 +33,6 @@ const firebaseConfig = {
   appId: process.env.REACT_APP_APP_ID,
   measurementId: process.env.REACT_APP_MEASUREMENT_ID,
 };
-console.log('PROCESS ENV',process.env)
-console.log('FIREBASE CONFIG:',firebaseConfig)
 
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
@@ -42,7 +40,6 @@ if (!firebase.apps.length) {
 export const MessageContext = createContext();
 
 function App() {
-  const navigate = useNavigate();
   const [messages, setMessages] = useState({});
   const [userInfo, setUserinfo] = useState({});
   const [showCodeModal, setShowCodeModal] = useState(false);

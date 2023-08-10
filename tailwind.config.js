@@ -35,7 +35,7 @@ module.exports = {
         signUpWidth:'700px',
       },
       maxWidth:{
-        maxSignUp:'1200px'
+        maxSignUp:'1050px'
       }
     },
   },
