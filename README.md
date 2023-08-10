@@ -3,10 +3,12 @@ ChatVibe ⭐️
 
 Discover a dynamic realm of real-time communication with our Chat Web App. Seamlessly join conversations, connect with others, and engage in interactive messaging like never before. This platform enables users to effortlessly join chats using unique chat codes, fostering a sense of community and ease of communication.
 
+Check out the live version of ChatVibe: [ChatVibe Web App](https://chatvibe-app.netlify.app)
+
 ## Table of Contents
 
 - [About](#screenshots)
-- [Features](#features-🚀)
+- [Features](#features)
 - [Getting Started](#getting-started)
 - [Technologies Used](#technologies-used)
 - [Communication](#communication)
@@ -25,7 +27,7 @@ Discover a dynamic realm of real-time communication with our Chat Web App. Seaml
 
 ![Screenshot of Vibe Chat Interface](https://imgur.com/QSyk7gd.png)
 
-## Features 🚀
+## Features
 
 - **Real-time Messaging:** Enjoy seamless communication with other users through real-time messaging.
 
@@ -68,8 +70,8 @@ npm install
 
 - **Configure Firebase:**
     - Create a Realtime Database and set up User Authentication (choose email and password) in your Firebase project.
-    - Download the template JSON file provided [here]('https://github.com/CoderCaleb/ChatVibe/blob/main/chatvibe_final.json') and import it into your Firebase Realtime Database.
-    - Copy the template for the Firebase Realtime Database rules [here]('https://github.com/CoderCaleb/ChatVibe/blob/main/firebase_rules.json') and paste it into your Firebase Realtime Database Rules.
+    - Download the template JSON file provided in ./chatvibe_final.json and import it into your Firebase Realtime Database.
+    - Copy the template for the Firebase Realtime Database rules in ./firebase_rules.json and paste it into your Firebase Realtime Database Rules.
 
 - **Add Firebase Config:**
     - Get the Firebase configuration object (SDK config) from your Firebase project.

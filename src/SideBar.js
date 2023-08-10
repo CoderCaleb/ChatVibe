@@ -63,7 +63,6 @@ export default function SideBar() {
         onClick={() => {
           if (type == "plus") {
             setShowModal(true);
-            console.log("plus");
           } else if (type == "join") {
             setShowJoinModal(true);
           }
@@ -98,7 +97,6 @@ export default function SideBar() {
   };
 
   useEffect(() => {
-    console.log("REMOVE MODAL", showRemoveModal);
   }, [showRemoveModal]);
   function ChoiceBox({ message, img, type }) {
     return (
@@ -502,9 +500,7 @@ function CreateForm({
                   setError("Please enter a valid chat name");
                 }
               } else {
-                console.log("chat is duo");
                 if (showTick) {
-                  console.log("username ffpjvovejvo");
                   const chatRef = ref(getDatabase(), "/chats");
                   const userRef = ref(
                     getDatabase(),
@@ -565,19 +561,11 @@ function CreateForm({
                                           : null;
                                         const completeUsername =
                                           userInfo.name + userInfo.userCode;
-                                        console.log("contactArr", contactArr);
-                                        console.log(
-                                          "completeUsername",
-                                          completeUsername
-                                        );
-
+                                       
                                         if (
                                           contactArr &&
                                           contactArr.includes(completeUsername)
                                         ) {
-                                          console.log(
-                                            "chat already exists. no need to make new one"
-                                          );
                                           update(contactRef, {
                                             [username.replace(/#/g, "")]:
                                               targetContact.val()[
@@ -610,9 +598,7 @@ function CreateForm({
                                               });
                                             });
                                         } else {
-                                          console.log(
-                                            "chat doesnt exist. need to make new one"
-                                          );
+
                                           const fullUsername = `${name.val()}#${code.val()}`;
                                           push(chatRef, {
                                             author: user.uid,
@@ -707,7 +693,6 @@ function CreateForm({
                     setDuoError(
                       "Invalid username format. Use [username] + #[4-digit number]. For example: bob#5837."
                     );
-                    console.log("Username not formatted correctly");
                   }
                 } else if (!/^[a-zA-Z0-9]+\#[0-9]{4}$/.test(username)) {
                   setDuoError(
@@ -822,7 +807,6 @@ function JoinModal({ setShowJoinModal, showJoinModal,userInfo }) {
               get(codesRef).then((snapshot) => {
                 if (snapshot.exists()) {
                   if(snapshot.val()&&(userInfo.chats||!Object.keys(userInfo.chats?userInfo.chats:{}).includes(snapshot.val()))){
-                    console.log("Code", snapshot.val());
                     const chatRef = ref(
                       getDatabase(),
                       `/chats/${snapshot.val()}/participants`
@@ -837,7 +821,6 @@ function JoinModal({ setShowJoinModal, showJoinModal,userInfo }) {
                           getDatabase(),
                           `/chats/${snapshot.val()}/messages`
                         );
-                        console.log('user joined chat')
                         push(messageRef, {
                           type: "info",
                           infoType: "join",
@@ -854,7 +837,6 @@ function JoinModal({ setShowJoinModal, showJoinModal,userInfo }) {
                   }
                   
                 } else {
-                  console.log("Code does not exist");
                   setError("Code does not exist. Try again");
                 }
               });
@@ -881,15 +863,12 @@ const CodeModal = ({ setShowCodeModal, showCodeModal }) => {
     equalTo(chatId)
   );
   useEffect(() => {
-    console.log(queryRef);
     if (showCodeModal == true) {
       setCode("");
       get(queryRef).then((snapshot) => {
-        console.log(snapshot.val());
 
         if (snapshot.exists()) {
           setCode(Object.keys(snapshot.val())[0]);
-          console.log("snapshot:", snapshot.val());
         } else {
           setCode("Chat code failed");
         }
@@ -995,7 +974,6 @@ const ConfirmModal = ({
                 : {}),
               affectUser: showRemoveModal.affectUser,
             };
-            console.log("tempobjj", tempObj);
             if (showRemoveModal.type == "remove") {
               const chatRef = ref(
                 getDatabase(),
@@ -1012,17 +990,14 @@ const ConfirmModal = ({
                       );
                       remove(userRef)
                         .then(() => {
-                          console.log("success!");
                           push(messageRef, tempObj);
                         })
                         .catch((err) => {
-                          console.log(err);
                         });
                     }
                   });
                 })
                 .catch((err) => {
-                  console.log(err);
                 });
             } else if (showRemoveModal.type == "admin") {
               const adminRef = ref(
@@ -1091,9 +1066,7 @@ const ConfirmModal = ({
               } else {
                 remove(userRef).then(() => {
                   remove(contactRef).then(() => {
-                    console.log(
-                      `/users/${auth.currentUser.uid}/contacts/${showRemoveModal.username}`
-                    );
+
                     if (groupSize <= 1) {
                       remove(mainChatRef).then(() => {
                         remove(metaData).then(() => {
@@ -1102,14 +1075,12 @@ const ConfirmModal = ({
                           });
                         });
                       });
-                      console.log("group size is below/equal 1");
                     } else {
                       remove(chatRef).then(() => {
                         push(messageRef, tempObj).then(() => {
                           setShowRemoveModal({});
                         });
                       });
-                      console.log("group size is above 1");
                     }
                   });
                 });

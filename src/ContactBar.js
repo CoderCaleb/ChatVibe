@@ -30,17 +30,11 @@ export default function ContactBar() {
           placeholder="Search"
           className=" z-50 w-full my-5 bg-inputColor rounded py-2 text-white pl-2 outline-none placeholder-borderColor shadow-sm shadow-slate-500"
           onChange={(event) => {
-            console.log(event.target.value);
             if (event.target.value !== "") {
               const filteredResult = originalRef.current.filter(
                 (value, index) => {
-                  console.log(value.chatName);
                   return value.chatName.includes(event.target.value);
                 }
-              );
-              console.log(
-                "🚀 ~ file: ContactBar.js:46 ~ ContactBar ~ console.log(filteredArr):",
-                filteredArr
               );
               setFilteredArr([...filteredResult]);
             } else {
@@ -58,8 +52,6 @@ export default function ContactBar() {
             const userValues = value.participants
               ? Object.values(value.participants)
               : {};
-            console.log("unread data", unreadData[value.chatId]);
-            console.log("chat keys", value.chatId);
             return (
               <ContactBox
                 name={
@@ -123,7 +115,6 @@ const ContactBox = ({ name, pfp, lastMsg, chatKey, type, unreadData }) => {
     const index = letter.charCodeAt(0) % colors.length;
     return colors[index];
   };
-  console.log(chatId, chatId);
   return (
     <Link to={`/homescreen/${chatKey}`}>
       <div

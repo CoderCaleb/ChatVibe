@@ -50,19 +50,12 @@ export default function InfoTab({
       return colors[index];
     }
   };
-  useEffect(() => {
-    console.log("metaInfo:", Object.keys(metaInfo));
-  }, []);
 
   useEffect(() => {
     onAuthStateChanged(getAuth(), (user) => {
       setUserObj(user);
     });
   }, []);
-
-  useEffect(() => {
-    console.log("userState:", userState);
-  }, [userState]);
   useEffect(() => {}, [messages]);
   return (
     <div className="flex flex-col gap-3 overflow-y-scroll relative">
@@ -150,7 +143,6 @@ export default function InfoTab({
                         chatName: nameDesc,
                       }).then(()=>{
                         const messageRef = ref(getDatabase(), `/chats/${chatId}/messages`);
-                        console.log('updating message info')
                         push(messageRef, {
                           causeUser:userObj.displayName,
                           type:'info',

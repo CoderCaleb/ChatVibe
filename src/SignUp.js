@@ -27,7 +27,6 @@ export default function SignUp() {
   }
 
   function checkUsername() {
-    console.log("Hello");
     if (!username.length > 0) {
       setNameError("Please enter your name");
       return false;
@@ -42,13 +41,11 @@ export default function SignUp() {
       return false;
     } else {
       setEmailError("");
-      console.log(emailError);
       return true;
     }
   }
   function checkPassword() {
     const hasNumber = /\d/;
-    console.log(password);
     if (password.length == 0) {
       setPasswordError("Password cannot be empty");
     } else if (password.length <= 7 && password.length > 0) {
@@ -70,7 +67,6 @@ export default function SignUp() {
     checkEmail();
     checkUsername();
     setShowError(false);
-    console.log("input typed on");
   }, [username, password, email]);
   function checkAndSaveCode(user,userCode) {
     const codesRef = ref(
@@ -193,13 +189,11 @@ export default function SignUp() {
             className="w-full h-9 text-sm mt-3 mb-2 bg-btnColor rounded-lg hover:opacity-80 transition:all duration-200"
             disabled={isSigningUp}
             onClick={() => {
-              console.log("clicked");
               if (checkEmail() && checkPassword && checkUsername()) {
                 setIsSigningUp(true)
                 const auth = getAuth();
                 createUserWithEmailAndPassword(auth, email, password)
                   .then((value) => {
-                    console.log("Sign Up Successful");
                     const user = value.user;
                     updateProfile(user, {
                       displayName: username,
@@ -210,7 +204,6 @@ export default function SignUp() {
                     });
                   })
                   .catch((err) => {
-                    console.log(err)
                     if(err=='FirebaseError: Firebase: Error (auth/email-already-in-use).'
                     ){
                       toast.error('Email already in use. Try another one.')

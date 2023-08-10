@@ -65,11 +65,9 @@ export default function MessageTab() {
         }).then(() => {
           if (messages.type == "duo") {
             get(mainUnreadRef).then((snapshot) => {
-              console.log("unread ref data", snapshot.val());
               update(mainUnreadRef, {
                 [chatId]: snapshot.exists() ? snapshot.val()[chatId] + 1 : 1,
               });
-              console.log("unread ref updated");
             });
           } else {
             names.map((userInfo, index) => {
