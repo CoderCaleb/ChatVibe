@@ -28,6 +28,7 @@ import { useEffect, useState, useContext } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useNavigate, useParams } from "react-router-dom";
 import { MessageContext } from "./App";
+import { MdOutlineCancel } from "react-icons/md";
 import tickgif from "./images/blue-tick.gif";
 import discordGroupIcon from "./images/discord-group-icon.png";
 import discordIcon2 from "./images/discordIcon2.png";
@@ -96,8 +97,7 @@ export default function SideBar() {
     return colors[index];
   };
 
-  useEffect(() => {
-  }, [showRemoveModal]);
+  useEffect(() => {}, [showRemoveModal]);
   function ChoiceBox({ message, img, type }) {
     return (
       <div
@@ -295,7 +295,7 @@ function CreateForm({
       >
         <img
           src={cross}
-          className="absolute w-4 right-5 cursor-pointer"
+          className="absolute w-4 right-5 cursor-pointer z-40"
           onClick={() => {
             handleClose();
           }}
@@ -304,7 +304,7 @@ function CreateForm({
           <>
             {!isLoading ? (
               <>
-                <div className="">
+                <div className="relative">
                   <img src={smileyFace} className="w-14 m-auto"></img>
                   <p className="font-semibold text-xl mb-2">
                     Create your VibeChat
@@ -314,11 +314,13 @@ function CreateForm({
                     picture.
                   </p>
                 </div>
-                <div className="relative">
+                <div className="">
                   <div
                     className={
                       "absolute min-h-emojiMin max-h-emojiMax h-halfHeight overflow-y-auto" +
-                      (showEmoji ? " right-64 bottom-1" : " hidden")
+                      (showEmoji
+                        ? " top-1 md:right-64 md:-top-28 z-50"
+                        : " hidden")
                     }
                   >
                     <EmojiPicker
@@ -328,6 +330,13 @@ function CreateForm({
                         setShowEmoji(false);
                       }}
                       lazyLoadEmojis={true}
+                      skinTonesDisabled={true}
+                    />
+                    <MdOutlineCancel
+                      className="absolute top-1 right-1 text-4xl text-subColor cursor-pointer md:hidden"
+                      onClick={() => {
+                        setShowEmoji(false);
+                      }}
                     />
                   </div>
                   <button
@@ -336,17 +345,17 @@ function CreateForm({
                       setShowEmoji(!showEmoji);
                     }}
                   >
-                    {selectedEmoji ? (
+                    {showEmoji ? (
+                      <RxCross2 size={30} className="text-subColor" />
+                    ) : selectedEmoji ? (
                       <div className="flex items-center justify-center">
                         <p className=" text-4xl">{selectedEmoji}</p>
                       </div>
-                    ) : !showEmoji ? (
+                    ) : (
                       <MdOutlineEmojiEmotions
                         size={30}
                         className="text-subColor"
                       />
-                    ) : (
-                      <RxCross2 size={30} className="text-subColor" />
                     )}
                   </button>
                 </div>
@@ -561,7 +570,7 @@ function CreateForm({
                                           : null;
                                         const completeUsername =
                                           userInfo.name + userInfo.userCode;
-                                       
+
                                         if (
                                           contactArr &&
                                           contactArr.includes(completeUsername)
@@ -598,7 +607,6 @@ function CreateForm({
                                               });
                                             });
                                         } else {
-
                                           const fullUsername = `${name.val()}#${code.val()}`;
                                           push(chatRef, {
                                             author: user.uid,
@@ -758,7 +766,7 @@ function CreateForm({
     );
   }
 }
-function JoinModal({ setShowJoinModal, showJoinModal,userInfo }) {
+function JoinModal({ setShowJoinModal, showJoinModal, userInfo }) {
   const [joinModalIndex, setJoinModalIndex] = useState(1);
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
@@ -806,7 +814,13 @@ function JoinModal({ setShowJoinModal, showJoinModal,userInfo }) {
               const codesRef = ref(getDatabase(), `/codes/${code.trim()}`);
               get(codesRef).then((snapshot) => {
                 if (snapshot.exists()) {
-                  if(snapshot.val()&&(userInfo.chats||!Object.keys(userInfo.chats?userInfo.chats:{}).includes(snapshot.val()))){
+                  if (
+                    snapshot.val() &&
+                    (userInfo.chats ||
+                      !Object.keys(
+                        userInfo.chats ? userInfo.chats : {}
+                      ).includes(snapshot.val()))
+                  ) {
                     const chatRef = ref(
                       getDatabase(),
                       `/chats/${snapshot.val()}/participants`
@@ -828,14 +842,14 @@ function JoinModal({ setShowJoinModal, showJoinModal,userInfo }) {
                         });
                       });
                     });
-  
+
                     setJoinModalIndex(1);
                     setShowJoinModal(false);
+                  } else {
+                    setError(
+                      "You have already joined this chat. Please check your contacts"
+                    );
                   }
-                  else{
-                    setError('You have already joined this chat. Please check your contacts')
-                  }
-                  
                 } else {
                   setError("Code does not exist. Try again");
                 }
@@ -866,7 +880,6 @@ const CodeModal = ({ setShowCodeModal, showCodeModal }) => {
     if (showCodeModal == true) {
       setCode("");
       get(queryRef).then((snapshot) => {
-
         if (snapshot.exists()) {
           setCode(Object.keys(snapshot.val())[0]);
         } else {
@@ -992,13 +1005,11 @@ const ConfirmModal = ({
                         .then(() => {
                           push(messageRef, tempObj);
                         })
-                        .catch((err) => {
-                        });
+                        .catch((err) => {});
                     }
                   });
                 })
-                .catch((err) => {
-                });
+                .catch((err) => {});
             } else if (showRemoveModal.type == "admin") {
               const adminRef = ref(
                 getDatabase(),
@@ -1066,7 +1077,6 @@ const ConfirmModal = ({
               } else {
                 remove(userRef).then(() => {
                   remove(contactRef).then(() => {
-
                     if (groupSize <= 1) {
                       remove(mainChatRef).then(() => {
                         remove(metaData).then(() => {

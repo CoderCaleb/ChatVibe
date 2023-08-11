@@ -89,8 +89,6 @@ function App() {
               })
             ).then((codes) => {
               tempArr = names.map((snapshot, index) => {
-                console.log(snapshot.val());
-                console.log(Object.keys(mapData)[index]);
                 return {
                   name: snapshot.val(),
                   uid: Object.keys(mapData)[index],
@@ -118,24 +116,17 @@ function App() {
                   };
                 });
                 setNames(finalArr);
-                console.log("TEMP ARR NAMES", finalArr);
               });
             });
           })
           .catch((err) => {
-            console.log(err);
           });
       }
       if (messages.participants) {
         if (messages.type == "duo") {
           participantMap(messages.originalParticipants);
-          console.log(
-            "MAPPING OUT DUO CHAT PARTICIPANTAS",
-            messages.originalParticipants
-          );
         } else {
           participantMap(messages.participants);
-          console.log("MAPPING OUT GROUP CHAT PARTICIPANTAS");
         }
       }
 
@@ -164,13 +155,6 @@ function App() {
         listener: listener,
       };
     }
-
-    console.log("CHAT INFO", messages.chatName, previousState.current.chatName);
-    console.log(
-      "CHAT INFO",
-      messages.participants,
-      previousState.current.participants
-    );
     return () => {
       if (Object.keys(unreadListenerInfo).length !== 0) {
         off(unreadListenerInfo.ref, "value", unreadListenerInfo.callback);
@@ -178,7 +162,6 @@ function App() {
     };
   }, [messages.chatName, messages.participants]);
   useEffect(() => {
-    console.log("NAMES", !!names[1]);
     setUserState(
       isSignedIn && names[0] && names[1]
         ? names[0].uid !== isSignedIn.uid
@@ -187,15 +170,6 @@ function App() {
         : ""
     );
   }, [names]);
-  useEffect(() => {
-    console.log("namessssssijcsvoj", names);
-  }, [names]);
-  useEffect(() => {
-    console.log("user:", getAuth().currentUser);
-  }, []);
-  useEffect(() => {
-    console.log("messages has changed to", messages.type);
-  }, [messages]);
   return (
     <MessageContext.Provider
       value={{
@@ -265,14 +239,11 @@ function ProtectedRoute({
   const [isSignedIn, setIsSignedIn] = useState(false);
   useEffect(() => {
     const participantRef = ref(getDatabase(), `/chats/${chatId}/participants`);
-    console.log("condition", messages);
     const unsubscribe = onAuthStateChanged(getAuth(), (user) => {
       if (chatId !== "none" && Object.keys(messages).length !== 0) {
         get(participantRef).then((snapshot) => {
           const keys = Object.keys(snapshot.val());
-          console.log(snapshot.val(), user.uid);
           if (Object.keys(messages.participants).includes(user.uid)) {
-            console.log("User in");
           } else {
             navigate("/homescreen/none");
           }
@@ -295,7 +266,6 @@ function ProtectedRoute({
         update(updateRef, {
           [chatId]: 0,
         });
-        console.log("Unread updated");
       };
       const listenerRef = onValue(unreadRef, updateUnread);
       listenerInfo = {
@@ -313,23 +283,18 @@ function ProtectedRoute({
   useEffect(() => {
     const chatsRef = ref(getDatabase(), "/chats/" + chatId);
     let listenerInfo = {};
-    console.log("chatIDD", "/chats/" + chatId);
     const unsubscribe = onAuthStateChanged(getAuth(), (user) => {
       if (!user) {
         navigate("/auth");
       } else {
         const callback = (snapshot) => {
-          console.log("data pulled");
           if (snapshot.exists()) {
-            console.log("SNAPSHOT:", snapshot.val().messages);
             setMessages((prev) => {
               previousState.current = prev;
-              console.log("chatId changed to", snapshot.val());
               return snapshot.val();
             });
           } else {
             setMessages({});
-            console.log("Data doesnt exist");
           }
         };
         const listener = onValue(chatsRef, callback);
@@ -346,7 +311,6 @@ function ProtectedRoute({
       unsubscribe();
       if (Object.keys(listenerInfo).length !== 0) {
         off(listenerInfo.ref, "value", listenerInfo.callback);
-        console.log("listener detached.");
       }
     };
   }, [chatId]);
@@ -389,10 +353,8 @@ function ProtectedRoute({
             tempArr.some((obj) => Object.values(obj).includes(value))
               ? (tempArr[index] = { ...snapshot.val(), chatId: snapshot.key })
               : tempArr.push({ ...snapshot.val(), chatId: value });
-            console.log("tempArr:", tempArr[0], "value", snapshot.key);
             originalRef.current = tempArr;
             setFilteredArr([...tempArr]);
-            console.log(tempArr);
           } else {
             setFilteredArr([]);
           }

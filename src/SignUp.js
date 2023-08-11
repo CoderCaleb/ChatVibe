@@ -116,7 +116,7 @@ export default function SignUp() {
           </button>
         </Link>
       </div>
-      <div className="flex max-w-si h-signUpHeight w-10/12 md:min-w-signUpMin max-w-maxSignUp rounded-lg overflow-hidden m-auto shadow-lg shadow-slate-600">
+      <div className="flex max-w-si h-signUpHeight md:w-10/12 w-11/12 md:min-w-signUpMin max-w-maxSignUp rounded-lg overflow-hidden m-auto shadow-lg shadow-slate-600">
         <div className="relative justify-center items-center flex-1 hidden md:flex">
           <p className="absolute text-3xl z-50 font-bold text-blue-700 text-center">
             Immerse Yourself in Interaction
