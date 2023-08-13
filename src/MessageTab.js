@@ -136,7 +136,6 @@ export default function MessageTab() {
       }
     });
     setPfpList(newPfpList)
-    console.log(newPfpList)
   }, [names]);
 
   function formatDateTime(timestamp) {

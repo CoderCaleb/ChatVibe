@@ -49,6 +49,7 @@ Check out the live version of ChatVibe: [ChatVibe Web App](https://chatvibe-app.
 
 - **Group Admin Management:** Admins can promote or demote participants to/from admin status, optimizing group dynamics and responsibilities.
 
+- **Custom Profile Pictures**: Users have the ability to upload their own profile pictures. Whether it's an avatar, selfie, or anything in between, users can express themselves visually.
 
 ## Getting Started
 
@@ -69,9 +70,10 @@ npm install
 ```
 
 - **Configure Firebase:**
-    - Create a Realtime Database and set up User Authentication (choose email and password) in your Firebase project.
+    - Create a Realtime Database and set up User Authentication (choose email and password) and Storage in your Firebase project.
     - Download the template JSON file provided in ./chatvibe_final.json and import it into your Firebase Realtime Database.
     - Copy the template for the Firebase Realtime Database rules in ./firebase_rules.json and paste it into your Firebase Realtime Database Rules.
+    - Copy the template for the Firebase Storage rules in ./storage_rules.txt and paste it into your Firebase Storage Rules.
 
 - **Add Firebase Config:**
     - Get the Firebase configuration object (SDK config) from your Firebase project.
@@ -93,6 +95,8 @@ Happy chatting! 🚀
 - **React:** JavaScript library for building user interfaces.
 - **Tailwind CSS:** Utility-first CSS framework for styling the user interface.
 - **Firebase Realtime Database:** Backend service for real-time data synchronization and user authentication.
+- **Firebase Authentication**: Secure user authentication and authorization for seamless access to app features.
+- **Firebase Storage**: Cloud storage solution for efficiently storing and managing files, like user profile pictures.
 
 ## Contributing
 
