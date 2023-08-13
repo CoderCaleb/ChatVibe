@@ -63,6 +63,15 @@ export default function ContactBar() {
                       : ""
                     : value.chatName
                 }
+                uid={
+                    value.type == "duo"
+                      ? userKeys[1] && userKeys[0]
+                        ? userKeys[0] == isSignedIn.uid
+                          ? userKeys[1]
+                          : userKeys[0]
+                        : ""
+                      : null
+                }
                 key={index}
                 lastMsg={value.lastMsg ? value.lastMsg : " "}
                 pfp={
@@ -97,8 +106,9 @@ export default function ContactBar() {
   );
 }
 
-const ContactBox = ({ name, pfp, lastMsg, chatKey, type, unreadData }) => {
+const ContactBox = ({ name, pfp, lastMsg, chatKey, type, unreadData, uid }) => {
   const { chatId } = useParams();
+  const [userPfp,setUserPfp] = useState(null)
   const getColorFromLetter = (letter) => {
     const colors = [
       " bg-gradient-to-r from-red-500 to-pink-500",
@@ -115,6 +125,16 @@ const ContactBox = ({ name, pfp, lastMsg, chatKey, type, unreadData }) => {
     const index = letter.charCodeAt(0) % colors.length;
     return colors[index];
   };
+  useEffect(()=>{
+    if(uid&&!userPfp){
+      const pfpRef = ref(getDatabase(),`/users/${uid}/pfpInfo/pfpLink`)
+      get(pfpRef).then((snapshot)=>{
+        if(snapshot.exists()){
+          setUserPfp(snapshot.val())
+        }
+      })
+    }
+  },[])
   return (
     <Link to={`/homescreen/${chatKey}`}>
       <div
@@ -131,7 +151,7 @@ const ContactBox = ({ name, pfp, lastMsg, chatKey, type, unreadData }) => {
           }
           onClick={() => {}}
         >
-          {<p className={"text-white"}>{pfp}</p>}
+          {!userPfp?<p className={"text-white"}>{pfp}</p>:<img src={userPfp} className="w-full h-full rounded-xl"/>}
         </button>
         <div>
           <p className={"text-white" + (unreadData ? " font-semibold" : "")}>

@@ -56,6 +56,7 @@ export default function InfoTab({
       setUserObj(user);
     });
   }, []);
+
   useEffect(() => {}, [messages]);
   return (
     <div className="flex flex-col gap-3 overflow-y-scroll relative">
@@ -85,9 +86,9 @@ export default function InfoTab({
         >
           <p className="text-7xl">
             {messages.type == "duo"
-              ? userState.name && userState.name.length > 0
+              ?!userState.pfp? userState.name && userState.name.length > 0
                 ? userState.name[0].toUpperCase()
-                : ""
+                : "":<img src={userState.pfp} className='w-full h-full rounded-3xl'/>
               : messages.pfp}
           </p>
         </div>
@@ -267,7 +268,7 @@ export default function InfoTab({
             </div>
             <div className="flex flex-col gap-6">
               {names.map((user, index) => {
-                return <ContactBar index={index} user={user} />;
+                return <ContactBar index={index} user={user} key={index}/>;
               })}
             </div>
           </>
@@ -365,7 +366,16 @@ export default function InfoTab({
             getColorFromLetter(user.name[0].toUpperCase())
           }
         >
-          <p className="text-white">{user.name[0].toUpperCase()}</p>
+          {
+            !user.pfp ? (
+              <p className="text-white">{user.name[0].toUpperCase()}</p>
+            ) : (
+              <img
+                src={user.pfp}
+                className="w-full h-full rounded-3xl"
+              />
+            )
+          }
         </div>
         <div>
           <p className="text-white text-base inline-block mr-1">

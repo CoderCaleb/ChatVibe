@@ -25,7 +25,7 @@ import { AiOutlineArrowDown } from "react-icons/ai";
 import { IoMdExit } from "react-icons/io";
 import { RiAdminLine } from "react-icons/ri";
 import { HiOutlineArrowNarrowRight } from "react-icons/hi";
-import {FiEdit2} from 'react-icons/fi'
+import { FiEdit2 } from "react-icons/fi";
 import nochatimg from "./images/nochat-img.png";
 export default function MessageTab() {
   const { messages, setShowCodeModal, names, userState, isSignedIn } =
@@ -37,6 +37,7 @@ export default function MessageTab() {
   const [showDownArrow, setShowDownArrow] = useState(false);
   const containerRef = useRef();
   const { chatId } = useParams();
+  const [pfpList, setPfpList] = useState({});
   const currentChat =
     Object.keys(messages).includes(chatId) && !!messages[chatId].messages
       ? messages[chatId].messages
@@ -127,6 +128,17 @@ export default function MessageTab() {
       };
     }
   }, [containerRef.current]);
+  useEffect(() => {
+    const newPfpList = {}
+    names.map((user, index) => {
+      if (user.pfp) {
+        newPfpList[user.uid] = user.pfp
+      }
+    });
+    setPfpList(newPfpList)
+    console.log(newPfpList)
+  }, [names]);
+
   function formatDateTime(timestamp) {
     const date = new Date(timestamp);
 
@@ -249,11 +261,22 @@ export default function MessageTab() {
               {
                 <p className="">
                   {" "}
-                  {messages.type == "duo"
-                    ? userState.name && userState.name.length > 0
-                      ? userState.name[0].toUpperCase()
-                      : ""
-                    : messages.pfp}
+                  {messages.type == "duo" ? (
+                    !userState.pfp ? (
+                      userState.name && userState.name.length > 0 ? (
+                        userState.name[0].toUpperCase()
+                      ) : (
+                        ""
+                      )
+                    ) : (
+                      <img
+                        src={userState.pfp}
+                        className="w-full h-full rounded-xl"
+                      />
+                    )
+                  ) : (
+                    messages.pfp
+                  )}
                 </p>
               }
             </button>
@@ -330,6 +353,7 @@ export default function MessageTab() {
                           makeNewRef={makeNewRef}
                           scrollToMsg={scrollToMsg}
                           data={value}
+                          pfpList={pfpList}
                         />
                       ) : (
                         <div
@@ -370,6 +394,7 @@ export default function MessageTab() {
                         makeNewRef={makeNewRef}
                         scrollToMsg={scrollToMsg}
                         data={value}
+                        pfpList={pfpList}
                       />
                     )}
                   </div>
@@ -449,6 +474,7 @@ const MessageBox = ({
   makeNewRef,
   scrollToMsg,
   data,
+  pfpList,
 }) => {
   const getColorFromLetter = (letter) => {
     const colors = [
@@ -511,7 +537,14 @@ const MessageBox = ({
             getColorFromLetter(name[0].toUpperCase())
           }
         >
-          <p className="text-white">{name[0].toUpperCase()}</p>
+          {!Object.keys(pfpList).includes(data.senderUID) ? (
+            <p className="text-white">{name[0].toUpperCase()}</p>
+          ) : (
+            <img
+              src={pfpList[data.senderUID]}
+              className="w-full h-full rounded-3xl"
+            />
+          )}
         </div>
         <div>
           <div className="flex gap-3 items-center">
@@ -562,15 +595,15 @@ const MessageBox = ({
       content="the group description"
       icon={<FiEdit2 className="text-green-600" size={22} />}
     />
-  ) : (
-    data.infoType == "join"? 
+  ) : data.infoType == "join" ? (
     <InfoMsg
       causeUser={data.causeUser}
       affectUser={data.affectUser}
       actionType="joined"
       content="the chat!"
       icon={<HiOutlineArrowNarrowRight className="text-green-600" size={22} />}
-    />:
+    />
+  ) : (
     <InfoMsg
       causeUser={data.causeUser}
       affectUser={data.affectUser}
@@ -590,7 +623,9 @@ const InfoMsg = ({ causeUser, affectUser, actionType, content, icon }) => {
           <p className="text-subColor font-light">
             <span className="text-white">{causeUser + " "}</span>
             {actionType + " "}
-            <span className="text-white">{affectUser?(affectUser + " "):''}</span>
+            <span className="text-white">
+              {affectUser ? affectUser + " " : ""}
+            </span>
             {content}
           </p>
         </>

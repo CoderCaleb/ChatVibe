@@ -6,6 +6,7 @@ import MessageTab from "./MessageTab";
 import firebase from "firebase/compat/app";
 import { onValue, get, getDatabase, ref, off, update } from "firebase/database";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import {getStorage,uploadBytes,ref as storageRef} from 'firebase/storage'
 import React, {
   createContext,
   useState,
@@ -33,10 +34,11 @@ const firebaseConfig = {
   appId: process.env.REACT_APP_APP_ID,
   measurementId: process.env.REACT_APP_MEASUREMENT_ID,
 };
-
+let app = null
 if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
+  app = firebase.initializeApp(firebaseConfig);
 }
+export const storage = getStorage(app)
 export const MessageContext = createContext();
 
 function App() {
@@ -88,35 +90,45 @@ function App() {
                 return get(codeRef);
               })
             ).then((codes) => {
-              tempArr = names.map((snapshot, index) => {
-                return {
-                  name: snapshot.val(),
-                  uid: Object.keys(mapData)[index],
-                };
-              });
-              const codeArr = codes.map((code, index) => {
-                return {
-                  userCode: code.val(),
-                };
-              });
               Promise.all(
-                Object.keys(mapData).map((uid, index) => {
-                  const aboutRef = ref(
-                    getDatabase(),
-                    "/users/" + uid + "/about"
-                  );
-                  return get(aboutRef);
+                Object.keys(mapData).map((uid,index)=>{
+                  const pfpRef = ref(getDatabase(),`/users/${uid}/pfpInfo/pfpLink`)
+                  return get(pfpRef)
                 })
-              ).then((aboutInfo) => {
-                const finalArr = aboutInfo.map((aboutSnapshot, index) => {
+              ).then(pfps=>{
+                tempArr = names.map((snapshot, index) => {
                   return {
-                    ...tempArr[index],
-                    ...codeArr[index],
-                    about: aboutSnapshot.val(),
+                    name: snapshot.val(),
+                    uid: Object.keys(mapData)[index],
+                    pfp: pfps[index].val()
                   };
                 });
-                setNames(finalArr);
-              });
+                const codeArr = codes.map((code, index) => {
+                  return {
+                    userCode: code.val(),
+                  };
+                });
+                Promise.all(
+                  Object.keys(mapData).map((uid, index) => {
+                    const aboutRef = ref(
+                      getDatabase(),
+                      "/users/" + uid + "/about"
+                    );
+                    return get(aboutRef);
+                  })
+                ).then((aboutInfo) => {
+                  const finalArr = aboutInfo.map((aboutSnapshot, index) => {
+                    return {
+                      ...tempArr[index],
+                      ...codeArr[index],
+                      about: aboutSnapshot.val(),
+                    };
+                  });
+                  console.log(finalArr)
+                  setNames(finalArr);
+                });
+              })
+              
             });
           })
           .catch((err) => {
