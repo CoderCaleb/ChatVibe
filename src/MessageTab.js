@@ -63,6 +63,7 @@ export default function MessageTab() {
       push(chatRef, tempObj).then((value) => {
         update(metaDataRef, {
           lastMsg: text,
+          lastMsgTime: Date.now()
         }).then(() => {
           if (messages.type == "duo") {
             get(mainUnreadRef).then((snapshot) => {

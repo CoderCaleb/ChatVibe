@@ -353,24 +353,39 @@ function ProtectedRoute({
       }
     };
   }, []);
-  const tempArr = [];
 
   useEffect(() => {
+    const tempArr = [];
+
     const listenerRefs = []; // Array to store the listener references
     if (userInfo.chats) {
       Object.keys(userInfo.chats).forEach((value, index) => {
         const chatsRef = ref(getDatabase(), `/chatMetaData/${value}`);
         const callback = (snapshot) => {
           if (snapshot.exists()) {
-            tempArr.some((obj) => Object.values(obj).includes(value))
-              ? (tempArr[index] = { ...snapshot.val(), chatId: snapshot.key })
-              : tempArr.push({ ...snapshot.val(), chatId: value });
+            const newData = { ...snapshot.val(), chatId: snapshot.key };
+            
+            const existingChat = tempArr.find(obj => obj.chatId === value);
+        
+            if (existingChat) {
+              // If it exists, update the corresponding object in `tempArr`
+              Object.assign(existingChat, newData);
+            } else {
+              // If it doesn't exist, add the new data to `tempArr`
+              tempArr.push(newData);
+            }
+        
+            // Update the reference and sort `tempArr`
             originalRef.current = tempArr;
+            tempArr.sort((a, b) => b.lastMsgTime - a.lastMsgTime);
+        
+            // Update `filteredArr` with sorted `tempArr`
             setFilteredArr([...tempArr]);
           } else {
             setFilteredArr([]);
           }
         };
+        
         const listenerRef = onValue(chatsRef, callback);
         listenerRefs.push({
           ref: chatsRef,

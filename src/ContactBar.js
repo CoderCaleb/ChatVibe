@@ -13,11 +13,12 @@ export default function ContactBar() {
     setFilteredArr,
     originalRef,
     unreadData,
-    setUnreadData,
   } = useContext(MessageContext);
   const [lastMsg, setLastMsg] = useState("");
   const tempArr = [];
-
+  useEffect(()=>{
+    console.log('Contacts',filteredArr)
+  },[filteredArr])
   return (
     <div
       className={
@@ -86,6 +87,7 @@ export default function ContactBar() {
                 chatKey={value.chatId}
                 type={value.type}
                 unreadData={unreadData[value.chatId]}
+                filteredArr={filteredArr}
               />
             );
           })}
@@ -106,9 +108,12 @@ export default function ContactBar() {
   );
 }
 
-const ContactBox = ({ name, pfp, lastMsg, chatKey, type, unreadData, uid }) => {
+const ContactBox = ({ name, pfp, lastMsg, chatKey, type, unreadData, uid,filteredArr }) => {
   const { chatId } = useParams();
   const [userPfp,setUserPfp] = useState(null)
+  useEffect(()=>{
+    console.log(name,uid)
+  },[lastMsg])
   const getColorFromLetter = (letter) => {
     const colors = [
       " bg-gradient-to-r from-red-500 to-pink-500",
@@ -126,15 +131,25 @@ const ContactBox = ({ name, pfp, lastMsg, chatKey, type, unreadData, uid }) => {
     return colors[index];
   };
   useEffect(()=>{
-    if(uid&&!userPfp){
+    if(uid){
       const pfpRef = ref(getDatabase(),`/users/${uid}/pfpInfo/pfpLink`)
       get(pfpRef).then((snapshot)=>{
         if(snapshot.exists()){
+          console.log(type,uid,'User pfp',snapshot.val())
           setUserPfp(snapshot.val())
+        }
+        else{
+          console.log(type,uid,'User pfp',snapshot.val(),'Doesnt exist')
+          setUserPfp(null)
         }
       })
     }
-  },[])
+    else{
+      setUserPfp(null)
+      console.log(uid,userPfp,'User pfp','returning null')
+    }
+  },[filteredArr])
+
   return (
     <Link to={`/homescreen/${chatKey}`}>
       <div
