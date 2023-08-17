@@ -1,26 +1,28 @@
-import React from "react";
-import { Tilt } from "react-tilt";
-import { useState, useEffect } from "react";
-import abstractBg from "./images/abstract-img.jpeg";
+import React, { useState, useEffect } from 'react';
+import { Tilt } from 'react-tilt';
 import {
   CreateUserWithEmailAndPassword,
   createUserWithEmailAndPassword,
   getAuth,
   updateProfile,
-} from "firebase/auth";
-import { update, ref, getDatabase, get } from "firebase/database";
-import { Link } from "react-router-dom";
-import loadingAni from './images/spinner-loader.gif'
+} from 'firebase/auth';
+import {
+  update, ref, getDatabase, get,
+} from 'firebase/database';
+import { Link } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
+import loadingAni from './images/spinner-loader.gif';
+import abstractBg from './images/abstract-img.jpeg';
+
 export default function SignUp() {
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [passwordError, setPasswordError] = useState("");
-  const [emailError, setEmailError] = useState("");
-  const [nameError, setNameError] = useState("");
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [nameError, setNameError] = useState('');
   const [showError, setShowError] = useState(false);
-  const [isSigningUp,setIsSigningUp] = useState(false)
+  const [isSigningUp, setIsSigningUp] = useState(false);
   function generateRandomCode() {
     const code = Math.floor(Math.random() * 9000) + 1000;
     return code.toString();
@@ -28,37 +30,35 @@ export default function SignUp() {
 
   function checkUsername() {
     if (!username.length > 0) {
-      setNameError("Please enter your name");
+      setNameError('Please enter your name');
       return false;
-    } else {
-      setNameError("");
-      return true;
     }
+    setNameError('');
+    return true;
   }
   function checkEmail() {
     if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
-      setEmailError("Please enter a valid email");
+      setEmailError('Please enter a valid email');
       return false;
-    } else {
-      setEmailError("");
-      return true;
     }
+    setEmailError('');
+    return true;
   }
   function checkPassword() {
     const hasNumber = /\d/;
     if (password.length == 0) {
-      setPasswordError("Password cannot be empty");
+      setPasswordError('Password cannot be empty');
     } else if (password.length <= 7 && password.length > 0) {
-      setPasswordError("Password must be at least 8 characters long");
+      setPasswordError('Password must be at least 8 characters long');
       return false;
     } else if (!hasNumber.test(password)) {
-      setPasswordError("Password needs to have at least 1 number");
+      setPasswordError('Password needs to have at least 1 number');
       return false;
     } else if (!/[a-zA-Z]/.test(password)) {
-      setPasswordError("Password needs to have at least 1 letter");
+      setPasswordError('Password needs to have at least 1 letter');
       return false;
     } else {
-      setPasswordError("");
+      setPasswordError('');
       return true;
     }
   }
@@ -68,12 +68,12 @@ export default function SignUp() {
     checkUsername();
     setShowError(false);
   }, [username, password, email]);
-  function checkAndSaveCode(user,userCode) {
+  function checkAndSaveCode(user, userCode) {
     const codesRef = ref(
       getDatabase(),
-      `userCodes/${user.displayName}/${userCode}`
+      `userCodes/${user.displayName}/${userCode}`,
     );
-    const usersRef = ref(getDatabase(), "users");
+    const usersRef = ref(getDatabase(), 'users');
 
     get(codesRef).then((snapshot) => {
       if (!snapshot.exists()) {
@@ -81,36 +81,35 @@ export default function SignUp() {
           [user.uid]: {
             name: user.displayName,
             email: user.email,
-            userCode: userCode,
+            userCode,
           },
         }).then(() => {
           const userCodesRef = ref(
             getDatabase(),
-            `userCodes/${user.displayName}`
+            `userCodes/${user.displayName}`,
           );
           update(userCodesRef, {
             [userCode]: user.uid,
           });
-        }).then(()=>{
-          toast.success('Sign up successful!. Try signing in.')
-        }).catch(()=>{
-          toast.error('Failed to sign up. Try again...')
-        })
-      }
-      else{
-        checkAndSaveCode(user,generateRandomCode())
+        }).then(() => {
+          toast.success('Sign up successful!. Try signing in.');
+        }).catch(() => {
+          toast.error('Failed to sign up. Try again...');
+        });
+      } else {
+        checkAndSaveCode(user, generateRandomCode());
       }
     });
   }
   return (
     <div className="w-full h-full flex items-center justify-center bg-neutral-800 bg-gradient-to-r from-purpleGrad to-blueGrad">
       <div className="absolute top-5 right-10 flex gap-3">
-        <Link to={"/auth/signin"}>
+        <Link to="/auth/signin">
           <button className=" w-20 h-9 rounded-lg bg-transparent text-white font-semibold">
             Login
           </button>
         </Link>
-        <Link to={"/auth"}>
+        <Link to="/auth">
           <button className="w-20 h-9 rounded-xl bg-indigo-600 text-white shadow-md transition-all duration-200 hover:shadow-indigo-400">
             Sign Up
           </button>
@@ -121,7 +120,7 @@ export default function SignUp() {
           <p className="absolute text-3xl z-50 font-bold text-blue-700 text-center">
             Immerse Yourself in Interaction
           </p>
-          <img src={abstractBg} className="h-full w-full"></img>
+          <img src={abstractBg} className="h-full w-full" />
         </div>
         <div className=" md:w-96 w-full bg-neutral-900 px-5 py-7">
           <p className="text-white text-xl mb-1">Sign up</p>
@@ -139,10 +138,10 @@ export default function SignUp() {
               setUsername(event.target.value);
             }}
             value={username}
-          ></input>
+          />
           <p
             className={
-              "text-red-400 text-xs" + (showError ? " block" : " hidden")
+              `text-red-400 text-xs${showError ? ' block' : ' hidden'}`
             }
           >
             {nameError}
@@ -157,10 +156,10 @@ export default function SignUp() {
               setEmail(event.target.value);
             }}
             value={email}
-          ></input>
+          />
           <p
             className={
-              "text-red-400 text-xs" + (showError ? " block" : " hidden")
+              `text-red-400 text-xs${showError ? ' block' : ' hidden'}`
             }
           >
             {emailError}
@@ -176,10 +175,10 @@ export default function SignUp() {
             }}
             value={password}
             type="password"
-          ></input>
+          />
           <p
             className={
-              "text-red-400 text-xs" + (showError ? " block" : " hidden")
+              `text-red-400 text-xs${showError ? ' block' : ' hidden'}`
             }
           >
             {passwordError}
@@ -190,46 +189,46 @@ export default function SignUp() {
             disabled={isSigningUp}
             onClick={() => {
               if (checkEmail() && checkPassword && checkUsername()) {
-                setIsSigningUp(true)
+                setIsSigningUp(true);
                 const auth = getAuth();
                 createUserWithEmailAndPassword(auth, email, password)
                   .then((value) => {
-                    const user = value.user;
+                    const { user } = value;
                     updateProfile(user, {
                       displayName: username,
                       photoURL:
-                        "https://static.vecteezy.com/system/resources/thumbnails/002/534/006/small/social-media-chatting-online-blank-profile-picture-head-and-body-icon-people-standing-icon-grey-background-free-vector.jpg",
+                        'https://static.vecteezy.com/system/resources/thumbnails/002/534/006/small/social-media-chatting-online-blank-profile-picture-head-and-body-icon-people-standing-icon-grey-background-free-vector.jpg',
                     }).then((value) => {
-                      checkAndSaveCode(user,generateRandomCode())
+                      checkAndSaveCode(user, generateRandomCode());
                     });
                   })
                   .catch((err) => {
-                    if(err=='FirebaseError: Firebase: Error (auth/email-already-in-use).'
-                    ){
-                      toast.error('Email already in use. Try another one.')
+                    if (err == 'FirebaseError: Firebase: Error (auth/email-already-in-use).'
+                    ) {
+                      toast.error('Email already in use. Try another one.');
+                    } else {
+                      toast.error('Something went wrong. Try again...');
                     }
-                    else{
-                      toast.error('Something went wrong. Try again...')
-                    }
-                  }).finally((value)=>{
-                    setIsSigningUp(false)
+                  }).finally((value) => {
+                    setIsSigningUp(false);
                   });
               } else {
                 setShowError(true);
               }
             }}
           >
-            {!isSigningUp?<p>Sign Up</p>:<img src={loadingAni} className='w-6 h-6 m-auto'/>}
+            {!isSigningUp ? <p>Sign Up</p> : <img src={loadingAni} className="w-6 h-6 m-auto" />}
           </button>
           <p className="text-xs text-white text-center">
-            Already have an account?{" "}
+            Already have an account?
+            {' '}
             <Link to="/auth/signin">
               <span className=" text-btnColor cursor-pointer">Sign In</span>
             </Link>
           </p>
         </div>
       </div>
-      <ToastContainer theme={'dark'} position={'top-center'}/>
+      <ToastContainer theme="dark" position="top-center" />
     </div>
   );
 }

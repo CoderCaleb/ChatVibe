@@ -1,5 +1,5 @@
-import { BsPlus, BsFillLightningFill, BsGearFill } from "react-icons/bs";
-import { FaFire, FaPoo, FaKey } from "react-icons/fa";
+import { BsPlus, BsFillLightningFill, BsGearFill } from 'react-icons/bs';
+import { FaFire, FaPoo, FaKey } from 'react-icons/fa';
 import {
   getDatabase,
   ref,
@@ -10,36 +10,36 @@ import {
   query,
   orderByValue,
   remove,
-} from "firebase/database";
-import EmojiPicker from "emoji-picker-react";
-import { MdOutlineEmojiEmotions } from "react-icons/md";
-import { RxCross2 } from "react-icons/rx";
-import fire from "./fire-gif.gif";
-import peace from "./images/peace-sign.png";
-import smileyFace from "./images/smiley-face.png";
-import alien from "./images/alien-face.png";
-import solo from "./images/chat-icon.png";
-import cross from "./images/close.png";
-import group from "./images/debate.png";
-import yingyang from "./images/yingyang.png";
-import stero from "./images/streo.png";
-import rightArrow from "./images/right-arrow.png";
-import { useEffect, useState, useContext } from "react";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { useNavigate, useParams } from "react-router-dom";
-import { MessageContext } from "./App";
-import { MdOutlineCancel } from "react-icons/md";
-import tickgif from "./images/blue-tick.gif";
-import discordGroupIcon from "./images/discord-group-icon.png";
-import discordIcon2 from "./images/discordIcon2.png";
-import loadingAni from "./images/loading-croppered.gif";
+} from 'firebase/database';
+import EmojiPicker from 'emoji-picker-react';
+import { MdOutlineEmojiEmotions, MdOutlineCancel } from 'react-icons/md';
+import { RxCross2 } from 'react-icons/rx';
+import { useEffect, useState, useContext } from 'react';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { useNavigate, useParams } from 'react-router-dom';
+import fire from './fire-gif.gif';
+import peace from './images/peace-sign.png';
+import smileyFace from './images/smiley-face.png';
+import alien from './images/alien-face.png';
+import solo from './images/chat-icon.png';
+import cross from './images/close.png';
+import group from './images/debate.png';
+import yingyang from './images/yingyang.png';
+import stero from './images/streo.png';
+import rightArrow from './images/right-arrow.png';
+import { MessageContext } from './App';
+import tickgif from './images/blue-tick.gif';
+import discordGroupIcon from './images/discord-group-icon.png';
+import discordIcon2 from './images/discordIcon2.png';
+import loadingAni from './images/loading-croppered.gif';
+
 export default function SideBar() {
   const [hover, setHover] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [formIndex, setFormIndex] = useState(1);
-  const [modalType, setModalType] = useState("duo");
-  const [chatName, setChatName] = useState("");
+  const [modalType, setModalType] = useState('duo');
+  const [chatName, setChatName] = useState('');
   const {
     showCodeModal,
     setShowCodeModal,
@@ -57,14 +57,14 @@ export default function SideBar() {
     });
   }, []);
 
-  const SidebarIcon = ({ icon, text, type }) => {
+  function SidebarIcon({ icon, text, type }) {
     return (
       <div
         className="sidebar-icon group"
         onClick={() => {
-          if (type == "plus") {
+          if (type == 'plus') {
             setShowModal(true);
-          } else if (type == "join") {
+          } else if (type == 'join') {
             setShowJoinModal(true);
           }
         }}
@@ -75,21 +75,21 @@ export default function SideBar() {
         </span>
       </div>
     );
-  };
+  }
   function handleChange(event, setError) {
     setChatName(event.target.value);
-    setError("");
+    setError('');
   }
   const getColorFromLetter = (letter) => {
     const colors = [
-      " bg-gradient-to-r from-red-500 to-pink-500",
-      " bg-gradient-to-r from-yellow-500 to-green-500",
-      " bg-gradient-to-r from-green-500 to-blue-500",
-      " bg-gradient-to-r from-blue-500 to-indigo-500",
-      " bg-gradient-to-r from-indigo-500 to-purple-500",
-      " bg-gradient-to-r from-purple-500 to-pink-500",
-      " bg-gradient-to-r from-pink-500 to-red-500",
-      " bg-gradient-to-r from-gray-500 to-gray-700",
+      ' bg-gradient-to-r from-red-500 to-pink-500',
+      ' bg-gradient-to-r from-yellow-500 to-green-500',
+      ' bg-gradient-to-r from-green-500 to-blue-500',
+      ' bg-gradient-to-r from-blue-500 to-indigo-500',
+      ' bg-gradient-to-r from-indigo-500 to-purple-500',
+      ' bg-gradient-to-r from-purple-500 to-pink-500',
+      ' bg-gradient-to-r from-pink-500 to-red-500',
+      ' bg-gradient-to-r from-gray-500 to-gray-700',
     ];
 
     // Get the index based on the letter's char code
@@ -108,10 +108,10 @@ export default function SideBar() {
         }}
       >
         <div className="flex items-center gap-2">
-          <img src={img} className={type == group ? "w-10" : "w-12"}></img>
+          <img src={img} className={type == group ? 'w-10' : 'w-12'} />
           <p className="font-semibold">{message}</p>
         </div>
-        <img src={rightArrow} className="w-4 mr-3"></img>
+        <img src={rightArrow} className="w-4 mr-3" />
       </div>
     );
   }
@@ -120,8 +120,8 @@ export default function SideBar() {
     <>
       <div
         className={
-          "flex items-center justify-center w-screen h-screen absolute transition-all duration-100 z-50 bg-blackRgba" +
-          (showModal ? "" : " hidden")
+          `flex items-center justify-center w-screen h-screen absolute transition-all duration-100 z-50 bg-blackRgba${
+            showModal ? '' : ' hidden'}`
         }
       >
         <CreateForm
@@ -139,8 +139,8 @@ export default function SideBar() {
       </div>
       <div
         className={
-          "flex items-center justify-center w-screen h-screen absolute transition-all duration-100 z-50 bg-blackRgba" +
-          (showJoinModal ? "" : " hidden")
+          `flex items-center justify-center w-screen h-screen absolute transition-all duration-100 z-50 bg-blackRgba${
+            showJoinModal ? '' : ' hidden'}`
         }
       >
         <JoinModal
@@ -151,8 +151,8 @@ export default function SideBar() {
       </div>
       <div
         className={
-          "flex items-center justify-center w-screen h-screen absolute transition-all duration-100 z-50 bg-blackRgba" +
-          (showCodeModal ? "" : " hidden")
+          `flex items-center justify-center w-screen h-screen absolute transition-all duration-100 z-50 bg-blackRgba${
+            showCodeModal ? '' : ' hidden'}`
         }
       >
         <CodeModal
@@ -162,8 +162,8 @@ export default function SideBar() {
       </div>
       <div
         className={
-          "flex items-center justify-center w-screen h-screen absolute transition-all duration-100 z-50 bg-blackRgba" +
-          (Object.keys(showRemoveModal).length !== 0 ? "" : " hidden")
+          `flex items-center justify-center w-screen h-screen absolute transition-all duration-100 z-50 bg-blackRgba${
+            Object.keys(showRemoveModal).length !== 0 ? '' : ' hidden'}`
         }
       >
         <ConfirmModal
@@ -178,30 +178,30 @@ export default function SideBar() {
           top-5"
           onMouseEnter={() => setHover(true)}
           onMouseLeave={() => setHover(false)}
-        ></div>
+        />
         {user && (
           <div
             className={
-              "w-12 h-12 mx-auto my-3 flex items-center justify-center cursor-pointer rounded-3xl hover:rounded-xl transition-all duration-300" +
-              getColorFromLetter(user.displayName[0].toUpperCase())
+              `w-12 h-12 mx-auto my-3 flex items-center justify-center cursor-pointer rounded-3xl hover:rounded-xl transition-all duration-300${
+                getColorFromLetter(user.displayName[0].toUpperCase())}`
             }
             onClick={() => {
               setProfileScreen(true);
             }}
           >
-            {!userInfo.pfpInfo?<p className="text-white">{user.displayName[0].toUpperCase()}</p>:<img src={userInfo.pfpInfo.pfpLink} className='w-full h-full rounded-3xl hover:rounded-xl transition-all duration-300'/>}
+            {!userInfo.pfpInfo ? <p className="text-white">{user.displayName[0].toUpperCase()}</p> : <img src={userInfo.pfpInfo.pfpLink} className="w-full h-full rounded-3xl hover:rounded-xl transition-all duration-300" />}
           </div>
         )}
         <SidebarIcon
           icon={<FaKey size="28" />}
           text="Join chat 🚀"
           type="join"
-        ></SidebarIcon>
+        />
         <SidebarIcon
           icon={<BsPlus size="28" />}
-          text={"Create chat 💬"}
+          text="Create chat 💬"
           type="plus"
-        ></SidebarIcon>
+        />
       </div>
     </>
   );
@@ -220,42 +220,39 @@ function CreateForm({
   userInfo,
 }) {
   const auth = getAuth();
-  const [uid, setUid] = useState("");
+  const [uid, setUid] = useState('');
   const [showEmoji, setShowEmoji] = useState(false);
-  const [selectedEmoji, setSelectedEmoji] = useState("");
-  const [error, setError] = useState("");
-  const [username, setUsername] = useState("");
+  const [selectedEmoji, setSelectedEmoji] = useState('');
+  const [error, setError] = useState('');
+  const [username, setUsername] = useState('');
   const [showTick, setShowTick] = useState(false);
   const { chatId } = useParams();
-  const [duoError, setDuoError] = useState("");
+  const [duoError, setDuoError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   function generateUID() {
-    const string =
-      "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890";
+    const string = 'qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890';
     const uid = [];
     for (let i = 0; i <= 8; i++) {
       uid.push(string[Math.floor(Math.random() * string.length)]);
     }
-    setUid(uid.join(""));
-    return uid.join("");
+    setUid(uid.join(''));
+    return uid.join('');
   }
   function handleClose() {
     setShowModal(false);
     setFormIndex(1);
     setShowEmoji(false);
-    setSelectedEmoji("");
-    setError("");
-    setDuoError("");
-    setUsername("");
+    setSelectedEmoji('');
+    setError('');
+    setDuoError('');
+    setUsername('');
     setIsLoading(false);
   }
   if (formIndex == 1) {
     return (
       <div
-        className={
-          "text-center bg-white rounded-lg p-5 w-96 relative animate-fade-up"
-        }
+        className="text-center bg-white rounded-lg p-5 w-96 relative animate-fade-up"
       >
         <img
           src={cross}
@@ -263,9 +260,9 @@ function CreateForm({
           onClick={() => {
             handleClose();
           }}
-        ></img>
+        />
         <div className="">
-          <img src={peace} className="w-20 m-auto"></img>
+          <img src={peace} className="w-20 m-auto" />
           <p className="font-semibold text-xl mb-2">Create a VibeChat</p>
           <p className="font-normal text-neutral-500 text-sm mb-5">
             Create a VibeChat – Hangout with Friends! Start your chat for 2 or a
@@ -283,15 +280,13 @@ function CreateForm({
           type="group"
         />
 
-        <div></div>
+        <div />
       </div>
     );
-  } else if (formIndex == 2) {
+  } if (formIndex == 2) {
     return (
       <div
-        className={
-          "text-center bg-white rounded-lg p-5 w-96 relative animate-fade-up"
-        }
+        className="text-center bg-white rounded-lg p-5 w-96 relative animate-fade-up"
       >
         <img
           src={cross}
@@ -299,13 +294,13 @@ function CreateForm({
           onClick={() => {
             handleClose();
           }}
-        ></img>
-        {modalType == "group" ? (
+        />
+        {modalType == 'group' ? (
           <>
             {!isLoading ? (
               <>
                 <div className="relative">
-                  <img src={smileyFace} className="w-14 m-auto"></img>
+                  <img src={smileyFace} className="w-14 m-auto" />
                   <p className="font-semibold text-xl mb-2">
                     Create your VibeChat
                   </p>
@@ -317,20 +312,20 @@ function CreateForm({
                 <div className="">
                   <div
                     className={
-                      "absolute min-h-emojiMin max-h-emojiMax h-halfHeight overflow-y-auto" +
-                      (showEmoji
-                        ? " top-1 md:right-64 md:-top-28 z-50"
-                        : " hidden")
+                      `absolute min-h-emojiMin max-h-emojiMax h-halfHeight overflow-y-auto${
+                        showEmoji
+                          ? ' top-1 md:right-64 md:-top-28 z-50'
+                          : ' hidden'}`
                     }
                   >
                     <EmojiPicker
-                      height={"100%"}
+                      height="100%"
                       onEmojiClick={(emojiData) => {
                         setSelectedEmoji(emojiData.emoji);
                         setShowEmoji(false);
                       }}
-                      lazyLoadEmojis={true}
-                      skinTonesDisabled={true}
+                      lazyLoadEmojis
+                      skinTonesDisabled
                     />
                     <MdOutlineCancel
                       className="absolute top-1 right-1 text-4xl text-subColor cursor-pointer md:hidden"
@@ -363,13 +358,11 @@ function CreateForm({
                 <input
                   className="w-full border border-gray-200 rounded-lg p-2 text-sm outline-none"
                   placeholder="John's chat"
-                  onChange={(event) =>
-                    event.target.value.length <= 25
-                      ? handleChange(event, setError)
-                      : null
-                  }
+                  onChange={(event) => (event.target.value.length <= 25
+                    ? handleChange(event, setError)
+                    : null)}
                   value={chatName}
-                ></input>
+                />
                 <p className="text-sm text-red-500">{error}</p>
               </>
             ) : (
@@ -383,7 +376,7 @@ function CreateForm({
             {!isLoading ? (
               <>
                 <div className="">
-                  <img src={smileyFace} className="w-14 m-auto"></img>
+                  <img src={smileyFace} className="w-14 m-auto" />
                   <p className="font-semibold text-xl mb-2">
                     Create your VibeChat
                   </p>
@@ -401,14 +394,14 @@ function CreateForm({
                       value={username}
                       onChange={(event) => {
                         setUsername(event.target.value);
-                        setDuoError("");
+                        setDuoError('');
                         if (
                           /^[a-zA-Z0-9]+\#[0-9]{4}$/.test(event.target.value)
                         ) {
-                          const splitName = event.target.value.split("#");
+                          const splitName = event.target.value.split('#');
                           const codeRef = ref(
                             getDatabase(),
-                            `userCodes/${splitName[0]}/${splitName[1]}`
+                            `userCodes/${splitName[0]}/${splitName[1]}`,
                           );
                           get(codeRef).then((snapshot) => {
                             if (snapshot.exists()) {
@@ -421,7 +414,7 @@ function CreateForm({
                           setShowTick(false);
                         }
                       }}
-                    ></input>
+                    />
                     {showTick ? (
                       <div className="relative flex justify-center group">
                         <img src={tickgif} className="w-5 h-5 mr-4" />
@@ -457,24 +450,24 @@ function CreateForm({
             className="done-button "
             disabled={isLoading}
             onClick={() => {
-              if (modalType == "group") {
+              if (modalType == 'group') {
                 if (
-                  chatName.trim().length !== 0 &&
-                  selectedEmoji.trim().length !== 0
+                  chatName.trim().length !== 0
+                  && selectedEmoji.trim().length !== 0
                 ) {
                   setIsLoading(true);
-                  const chatRef = ref(getDatabase(), "/chats");
+                  const chatRef = ref(getDatabase(), '/chats');
 
                   const userRef = ref(
                     getDatabase(),
-                    `/users/${auth.currentUser.uid}/chats`
+                    `/users/${auth.currentUser.uid}/chats`,
                   );
-                  const codesRef = ref(getDatabase(), "/codes");
-                  const metaData = ref(getDatabase(), "/chatMetaData");
+                  const codesRef = ref(getDatabase(), '/codes');
+                  const metaData = ref(getDatabase(), '/chatMetaData');
                   setShowEmoji(false);
                   push(chatRef, {
                     author: auth.currentUser.uid,
-                    chatName: chatName,
+                    chatName,
                     pfp: selectedEmoji,
                     timeCreated: Date.now(),
                     participants: {
@@ -490,7 +483,7 @@ function CreateForm({
                       }).then((result) => {
                         update(metaData, {
                           [value.key]: {
-                            chatName: chatName,
+                            chatName,
                             pfp: selectedEmoji,
                             admin: {
                               [auth.currentUser.uid]: true,
@@ -504,246 +497,243 @@ function CreateForm({
                     });
                   });
                 } else if (selectedEmoji.trim().length == 0) {
-                  setError("Please choose an emoji for group pfp");
+                  setError('Please choose an emoji for group pfp');
                 } else {
-                  setError("Please enter a valid chat name");
+                  setError('Please enter a valid chat name');
                 }
-              } else {
-                if (showTick) {
-                  const chatRef = ref(getDatabase(), "/chats");
-                  const userRef = ref(
+              } else if (showTick) {
+                const chatRef = ref(getDatabase(), '/chats');
+                const userRef = ref(
+                  getDatabase(),
+                  `/users/${user.uid}/chats`,
+                );
+                if (/^[a-zA-Z0-9]+\#[0-9]{4}$/.test(username)) {
+                  const splitName = username.split('#');
+                  const codeRef = ref(
                     getDatabase(),
-                    `/users/${user.uid}/chats`
+                    `userCodes/${splitName[0]}/${splitName[1]}`,
                   );
-                  if (/^[a-zA-Z0-9]+\#[0-9]{4}$/.test(username)) {
-                    const splitName = username.split("#");
-                    const codeRef = ref(
-                      getDatabase(),
-                      `userCodes/${splitName[0]}/${splitName[1]}`
-                    );
-                    setIsLoading(true);
-                    get(codeRef).then((snapshot) => {
-                      if (snapshot.exists() && user) {
-                        const nameRef = ref(
-                          getDatabase(),
-                          `users/${snapshot.val()}/name`
-                        );
-                        const codeRef = ref(
-                          getDatabase(),
-                          `users/${snapshot.val()}/userCode`
-                        );
-                        const otherUserRef = ref(
-                          getDatabase(),
-                          `users/${snapshot.val()}/chats`
-                        );
-                        const contactRef = ref(
-                          getDatabase(),
-                          `/users/${user.uid}/contacts`
-                        );
-                        const cleanedUsername = username
-                          ? username.replace(/#/g, "")
-                          : "";
+                  setIsLoading(true);
+                  get(codeRef).then((snapshot) => {
+                    if (snapshot.exists() && user) {
+                      const nameRef = ref(
+                        getDatabase(),
+                        `users/${snapshot.val()}/name`,
+                      );
+                      const codeRef = ref(
+                        getDatabase(),
+                        `users/${snapshot.val()}/userCode`,
+                      );
+                      const otherUserRef = ref(
+                        getDatabase(),
+                        `users/${snapshot.val()}/chats`,
+                      );
+                      const contactRef = ref(
+                        getDatabase(),
+                        `/users/${user.uid}/contacts`,
+                      );
+                      const cleanedUsername = username
+                        ? username.replace(/#/g, '')
+                        : '';
 
-                        const checkContactRef = ref(
-                          getDatabase(),
-                          `/users/${user.uid}/contacts/${cleanedUsername}`
-                        );
-                        const otherContactRef = ref(
-                          getDatabase(),
-                          `/users/${snapshot.val()}/contacts`
-                        );
+                      const checkContactRef = ref(
+                        getDatabase(),
+                        `/users/${user.uid}/contacts/${cleanedUsername}`,
+                      );
+                      const otherContactRef = ref(
+                        getDatabase(),
+                        `/users/${snapshot.val()}/contacts`,
+                      );
 
-                        get(checkContactRef).then((contact) => {
-                          if (!contact.exists()) {
-                            get(nameRef).then((name) => {
-                              if (name.exists()) {
-                                get(codeRef).then((code) => {
-                                  if (
-                                    code.exists() &&
-                                    username.replace(/#/g, "") !==
-                                      userInfo.name + userInfo.userCode
-                                  ) {
-                                    get(otherContactRef).then(
-                                      (targetContact) => {
-                                        const contactArr = targetContact.val()
-                                          ? Object.keys(targetContact.val())
-                                          : null;
-                                        const completeUsername =
-                                          userInfo.name + userInfo.userCode;
+                      get(checkContactRef).then((contact) => {
+                        if (!contact.exists()) {
+                          get(nameRef).then((name) => {
+                            if (name.exists()) {
+                              get(codeRef).then((code) => {
+                                if (
+                                  code.exists()
+                                    && username.replace(/#/g, '')
+                                      !== userInfo.name + userInfo.userCode
+                                ) {
+                                  get(otherContactRef).then(
+                                    (targetContact) => {
+                                      const contactArr = targetContact.val()
+                                        ? Object.keys(targetContact.val())
+                                        : null;
+                                      const completeUsername = userInfo.name + userInfo.userCode;
 
-                                        if (
-                                          contactArr &&
-                                          contactArr.includes(completeUsername)
-                                        ) {
-                                          update(contactRef, {
-                                            [username.replace(/#/g, "")]:
+                                      if (
+                                        contactArr
+                                          && contactArr.includes(completeUsername)
+                                      ) {
+                                        update(contactRef, {
+                                          [username.replace(/#/g, '')]:
                                               targetContact.val()[
                                                 completeUsername
                                               ],
-                                          })
-                                            .then(() => {
-                                              update(userRef, {
-                                                [targetContact.val()[
-                                                  completeUsername
-                                                ]]: true,
-                                              });
-                                            })
-                                            .then(() => {
-                                              const participantRef = ref(
-                                                getDatabase(),
-                                                `/chats/${
-                                                  targetContact.val()[
-                                                    completeUsername
-                                                  ]
-                                                }/participants`
-                                              );
-                                              update(participantRef, {
-                                                [user.uid]: true,
-                                              }).then(() => {
-                                                setFormIndex(
-                                                  (prev) => prev + 1
-                                                );
-                                                setIsLoading(false);
-                                              });
-                                            });
-                                        } else {
-                                          const fullUsername = `${name.val()}#${code.val()}`;
-                                          push(chatRef, {
-                                            author: user.uid,
-                                            timeCreated: Date.now(),
-                                            type: "duo",
-                                            participants: {
-                                              [user.uid]: true,
-                                              [snapshot.val()]: true,
-                                            },
-                                            originalParticipants: {
-                                              [user.uid]: true,
-                                              [snapshot.val()]: true,
-                                            },
-                                          }).then((value) => {
+                                        })
+                                          .then(() => {
                                             update(userRef, {
-                                              [value.key]: true,
+                                              [targetContact.val()[
+                                                completeUsername
+                                              ]]: true,
+                                            });
+                                          })
+                                          .then(() => {
+                                            const participantRef = ref(
+                                              getDatabase(),
+                                              `/chats/${
+                                                targetContact.val()[
+                                                  completeUsername
+                                                ]
+                                              }/participants`,
+                                            );
+                                            update(participantRef, {
+                                              [user.uid]: true,
                                             }).then(() => {
-                                              update(otherUserRef, {
-                                                [value.key]: true,
-                                              }).then((result) => {
-                                                const metaData = ref(
-                                                  getDatabase(),
-                                                  "/chatMetaData"
-                                                );
-                                                update(metaData, {
-                                                  [value.key]: {
-                                                    chatName: name.val(),
-                                                    pfp: name
-                                                      .val()[0]
-                                                      .toUpperCase(),
-                                                    type: "duo",
-                                                    participants: {
-                                                      [user.uid]:
+                                              setFormIndex(
+                                                (prev) => prev + 1,
+                                              );
+                                              setIsLoading(false);
+                                            });
+                                          });
+                                      } else {
+                                        const fullUsername = `${name.val()}#${code.val()}`;
+                                        push(chatRef, {
+                                          author: user.uid,
+                                          timeCreated: Date.now(),
+                                          type: 'duo',
+                                          participants: {
+                                            [user.uid]: true,
+                                            [snapshot.val()]: true,
+                                          },
+                                          originalParticipants: {
+                                            [user.uid]: true,
+                                            [snapshot.val()]: true,
+                                          },
+                                        }).then((value) => {
+                                          update(userRef, {
+                                            [value.key]: true,
+                                          }).then(() => {
+                                            update(otherUserRef, {
+                                              [value.key]: true,
+                                            }).then((result) => {
+                                              const metaData = ref(
+                                                getDatabase(),
+                                                '/chatMetaData',
+                                              );
+                                              update(metaData, {
+                                                [value.key]: {
+                                                  chatName: name.val(),
+                                                  pfp: name
+                                                    .val()[0]
+                                                    .toUpperCase(),
+                                                  type: 'duo',
+                                                  participants: {
+                                                    [user.uid]:
                                                         user.displayName,
-                                                      [snapshot.val()]:
+                                                    [snapshot.val()]:
                                                         name.val(),
-                                                    },
                                                   },
-                                                }).then(() => {
-                                                  update(contactRef, {
-                                                    [username.replace(
-                                                      /#/g,
-                                                      ""
-                                                    )]: value.key,
-                                                  })
-                                                    .then(() => {
-                                                      update(otherContactRef, {
-                                                        [(
-                                                          userInfo.name +
-                                                          "#" +
-                                                          userInfo.userCode
-                                                        ).replace(/#/g, "")]:
+                                                },
+                                              }).then(() => {
+                                                update(contactRef, {
+                                                  [username.replace(
+                                                    /#/g,
+                                                    '',
+                                                  )]: value.key,
+                                                })
+                                                  .then(() => {
+                                                    update(otherContactRef, {
+                                                      [(
+                                                        `${userInfo.name
+                                                        }#${
+                                                          userInfo.userCode}`
+                                                      ).replace(/#/g, '')]:
                                                           value.key,
-                                                      });
-                                                    })
-                                                    .then(() => {
-                                                      setFormIndex(
-                                                        (prev) => prev + 1
-                                                      );
-                                                      setIsLoading(false);
                                                     });
-                                                });
+                                                  })
+                                                  .then(() => {
+                                                    setFormIndex(
+                                                      (prev) => prev + 1,
+                                                    );
+                                                    setIsLoading(false);
+                                                  });
                                               });
                                             });
                                           });
-                                        }
+                                        });
                                       }
-                                    );
-                                  } else {
-                                    setDuoError("Oops! Username not found");
-                                    setIsLoading(false);
-                                  }
-                                });
-                              } else {
-                                setDuoError("Oops! Username not found");
-                                setIsLoading(false);
-                              }
-                            });
-                          } else {
-                            setDuoError("Oops! You already added this user");
-                            setShowTick(false);
-                            setIsLoading(false);
-                          }
-                        });
-                      } else {
-                        setDuoError(
-                          "Oops! Something went wrong. Please try again"
-                        );
-                      }
-                    });
-                  } else {
-                    setDuoError(
-                      "Invalid username format. Use [username] + #[4-digit number]. For example: bob#5837."
-                    );
-                  }
-                } else if (!/^[a-zA-Z0-9]+\#[0-9]{4}$/.test(username)) {
-                  setDuoError(
-                    "Invalid username format. Use [username] + #[4-digit number]. For example: bob#5837."
-                  );
+                                    },
+                                  );
+                                } else {
+                                  setDuoError('Oops! Username not found');
+                                  setIsLoading(false);
+                                }
+                              });
+                            } else {
+                              setDuoError('Oops! Username not found');
+                              setIsLoading(false);
+                            }
+                          });
+                        } else {
+                          setDuoError('Oops! You already added this user');
+                          setShowTick(false);
+                          setIsLoading(false);
+                        }
+                      });
+                    } else {
+                      setDuoError(
+                        'Oops! Something went wrong. Please try again',
+                      );
+                    }
+                  });
                 } else {
                   setDuoError(
-                    "Oops. User not found. Try double checking the username"
+                    'Invalid username format. Use [username] + #[4-digit number]. For example: bob#5837.',
                   );
                 }
+              } else if (!/^[a-zA-Z0-9]+\#[0-9]{4}$/.test(username)) {
+                setDuoError(
+                  'Invalid username format. Use [username] + #[4-digit number]. For example: bob#5837.',
+                );
+              } else {
+                setDuoError(
+                  'Oops. User not found. Try double checking the username',
+                );
               }
             }}
           >
             Create
           </button>
         </div>
-        <div></div>
+        <div />
       </div>
     );
-  } else if (formIndex == 3) {
+  } if (formIndex == 3) {
     return (
-      <div className={"text-center bg-white rounded-lg p-5 w-96 relative"}>
+      <div className="text-center bg-white rounded-lg p-5 w-96 relative">
         <img
           src={cross}
           className="absolute w-4 right-5 cursor-pointer"
           onClick={() => {
             handleClose();
           }}
-        ></img>
+        />
         <div className="">
-          <img src={alien} className=" w-14 m-auto"></img>
+          <img src={alien} className=" w-14 m-auto" />
           <p className="font-semibold text-xl mb-2">
-            {modalType == "group"
-              ? "Chat Code Unleashed!"
-              : "VibeChat Created!"}
+            {modalType == 'group'
+              ? 'Chat Code Unleashed!'
+              : 'VibeChat Created!'}
           </p>
           <p className="font-normal text-neutral-500 text-sm mb-5">
-            {modalType == "group"
-              ? "Share this code with friends to invite them to the chat"
+            {modalType == 'group'
+              ? 'Share this code with friends to invite them to the chat'
               : `Your private chat with ${username} has been successfully created!`}
           </p>
         </div>
-        {modalType == "group" ? (
+        {modalType == 'group' ? (
           <div className="w-5/6 h-20 bg-gray-100 m-auto rounded-lg flex justify-center items-center">
             <p className=" text-2xl tracking-widest font-light">{uid}</p>
           </div>
@@ -761,15 +751,15 @@ function CreateForm({
             Done
           </button>
         </div>
-        <div></div>
+        <div />
       </div>
     );
   }
 }
 function JoinModal({ setShowJoinModal, showJoinModal, userInfo }) {
   const [joinModalIndex, setJoinModalIndex] = useState(1);
-  const [code, setCode] = useState("");
-  const [error, setError] = useState("");
+  const [code, setCode] = useState('');
+  const [error, setError] = useState('');
   let userRef = null;
   const { chatId } = useParams();
   onAuthStateChanged(getAuth(), (user) => {
@@ -777,9 +767,7 @@ function JoinModal({ setShowJoinModal, showJoinModal, userInfo }) {
   });
   return (
     <div
-      className={
-        "text-center bg-white rounded-lg p-5 w-96 relative animate-jump-in"
-      }
+      className="text-center bg-white rounded-lg p-5 w-96 relative animate-jump-in"
     >
       <img
         src={cross}
@@ -787,13 +775,14 @@ function JoinModal({ setShowJoinModal, showJoinModal, userInfo }) {
         onClick={() => {
           setShowJoinModal(false);
         }}
-      ></img>
+      />
       <div className="">
-        <img src={yingyang} className="w-14 m-auto"></img>
+        <img src={yingyang} className="w-14 m-auto" />
         <p className="font-semibold text-xl mb-2">Join Chat with Code</p>
         <p className="font-normal text-neutral-500 text-sm mb-5">
           Enter the unique code provided by the group participants to join the
-          chat and connect with others{" "}
+          chat and connect with others
+          {' '}
         </p>
       </div>
       <input
@@ -802,9 +791,9 @@ function JoinModal({ setShowJoinModal, showJoinModal, userInfo }) {
         value={code}
         onChange={(event) => {
           setCode(event.target.value);
-          setError("");
+          setError('');
         }}
-      ></input>
+      />
       <p className="text-red-400 text-sm">{error}</p>
       <div className="flex gap-2 mt-5">
         <button
@@ -815,15 +804,15 @@ function JoinModal({ setShowJoinModal, showJoinModal, userInfo }) {
               get(codesRef).then((snapshot) => {
                 if (snapshot.exists()) {
                   if (
-                    snapshot.val() &&
-                    (userInfo.chats ||
-                      !Object.keys(
-                        userInfo.chats ? userInfo.chats : {}
+                    snapshot.val()
+                    && (userInfo.chats
+                      || !Object.keys(
+                        userInfo.chats ? userInfo.chats : {},
                       ).includes(snapshot.val()))
                   ) {
                     const chatRef = ref(
                       getDatabase(),
-                      `/chats/${snapshot.val()}/participants`
+                      `/chats/${snapshot.val()}/participants`,
                     );
                     update(chatRef, {
                       [getAuth().currentUser.uid]: true,
@@ -833,11 +822,11 @@ function JoinModal({ setShowJoinModal, showJoinModal, userInfo }) {
                       }).then((value) => {
                         const messageRef = ref(
                           getDatabase(),
-                          `/chats/${snapshot.val()}/messages`
+                          `/chats/${snapshot.val()}/messages`,
                         );
                         push(messageRef, {
-                          type: "info",
-                          infoType: "join",
+                          type: 'info',
+                          infoType: 'join',
                           affectUser: getAuth().currentUser.displayName,
                         });
                       });
@@ -847,43 +836,43 @@ function JoinModal({ setShowJoinModal, showJoinModal, userInfo }) {
                     setShowJoinModal(false);
                   } else {
                     setError(
-                      "You have already joined this chat. Please check your contacts"
+                      'You have already joined this chat. Please check your contacts',
                     );
                   }
                 } else {
-                  setError("Code does not exist. Try again");
+                  setError('Code does not exist. Try again');
                 }
               });
             } else {
-              setError("Please enter a valid code");
+              setError('Please enter a valid code');
             }
           }}
         >
           Done
         </button>
       </div>
-      <div></div>
+      <div />
     </div>
   );
 }
 
-const CodeModal = ({ setShowCodeModal, showCodeModal }) => {
-  const [code, setCode] = useState("");
+function CodeModal({ setShowCodeModal, showCodeModal }) {
+  const [code, setCode] = useState('');
   const { chatId } = useParams();
-  const codesRef = ref(getDatabase(), "/codes");
+  const codesRef = ref(getDatabase(), '/codes');
   const queryRef = query(
     codesRef,
     orderByValue(), // 👈
-    equalTo(chatId)
+    equalTo(chatId),
   );
   useEffect(() => {
     if (showCodeModal == true) {
-      setCode("");
+      setCode('');
       get(queryRef).then((snapshot) => {
         if (snapshot.exists()) {
           setCode(Object.keys(snapshot.val())[0]);
         } else {
-          setCode("Chat code failed");
+          setCode('Chat code failed');
         }
       });
     }
@@ -891,9 +880,7 @@ const CodeModal = ({ setShowCodeModal, showCodeModal }) => {
 
   return (
     <div
-      className={
-        "text-center bg-white rounded-lg p-5 w-96 relative animate-fade-right"
-      }
+      className="text-center bg-white rounded-lg p-5 w-96 relative animate-fade-right"
     >
       <img
         src={cross}
@@ -901,17 +888,18 @@ const CodeModal = ({ setShowCodeModal, showCodeModal }) => {
         onClick={() => {
           setShowCodeModal(false);
         }}
-      ></img>
+      />
       <div className="">
-        <img src={stero} className=" w-16 m-auto"></img>
+        <img src={stero} className=" w-16 m-auto" />
         <p className="font-semibold text-xl mb-2">The Chat Code Revealed</p>
         <p className="font-normal text-neutral-500 text-sm mb-5">
-          Invite others to the chat by sharing this unique code{" "}
+          Invite others to the chat by sharing this unique code
+          {' '}
         </p>
       </div>
       <div className="w-5/6 h-20 bg-gray-100 m-auto rounded-lg flex justify-center items-center">
         <p className=" text-2xl tracking-widest font-light">
-          {code !== "" ? code : "Loading..."}
+          {code !== '' ? code : 'Loading...'}
         </p>
       </div>
       <div className="flex gap-2 mt-5">
@@ -924,46 +912,46 @@ const CodeModal = ({ setShowCodeModal, showCodeModal }) => {
           Done
         </button>
       </div>
-      <div></div>
+      <div />
     </div>
   );
-};
+}
 
-const ConfirmModal = ({
+function ConfirmModal({
   setShowRemoveModal,
   showRemoveModal,
   participants,
-}) => {
+}) {
   const { chatId } = useParams();
   const auth = getAuth();
   return (
-    <div className={"text-center bg-white rounded-lg p-5 w-96 relative"}>
+    <div className="text-center bg-white rounded-lg p-5 w-96 relative">
       <img
         src={cross}
         className="absolute w-4 right-5 cursor-pointer"
         onClick={() => {
           setShowRemoveModal({});
         }}
-      ></img>
+      />
       <div className="">
-        <img src={peace} className="w-20 m-auto"></img>
+        <img src={peace} className="w-20 m-auto" />
         <p className="font-semibold text-xl mb-2">
-          {showRemoveModal.type === "remove"
-            ? "Remove User"
-            : showRemoveModal.type === "dismiss"
-            ? "Dismiss as admin"
-            : showRemoveModal.type === "leave"
-            ? "Leave Chat"
-            : "Make admin"}
+          {showRemoveModal.type === 'remove'
+            ? 'Remove User'
+            : showRemoveModal.type === 'dismiss'
+              ? 'Dismiss as admin'
+              : showRemoveModal.type === 'leave'
+                ? 'Leave Chat'
+                : 'Make admin'}
         </p>
         <p className="font-normal text-neutral-500 text-sm mb-5">
-          {showRemoveModal.type === "remove"
-            ? "Are you sure you want to remove this user from the chat?"
-            : showRemoveModal.type === "dismiss"
-            ? "Are you sure you want to dismiss this user as admin"
-            : showRemoveModal.type === "leave"
-            ? "Are you sure you want to leave this chat?"
-            : "Are you sure you want to make this user an admin"}
+          {showRemoveModal.type === 'remove'
+            ? 'Are you sure you want to remove this user from the chat?'
+            : showRemoveModal.type === 'dismiss'
+              ? 'Are you sure you want to dismiss this user as admin'
+              : showRemoveModal.type === 'leave'
+                ? 'Are you sure you want to leave this chat?'
+                : 'Are you sure you want to make this user an admin'}
         </p>
       </div>
       <div className="flex gap-2 mt-5">
@@ -980,17 +968,17 @@ const ConfirmModal = ({
           onClick={() => {
             const messageRef = ref(getDatabase(), `/chats/${chatId}/messages`);
             const tempObj = {
-              type: "info",
+              type: 'info',
               infoType: showRemoveModal.type,
               ...(showRemoveModal.causeUser
                 ? { causeUser: showRemoveModal.causeUser }
                 : {}),
               affectUser: showRemoveModal.affectUser,
             };
-            if (showRemoveModal.type == "remove") {
+            if (showRemoveModal.type == 'remove') {
               const chatRef = ref(
                 getDatabase(),
-                `chats/${chatId}/participants/${showRemoveModal.user}`
+                `chats/${chatId}/participants/${showRemoveModal.user}`,
               );
               remove(chatRef)
                 .then(() => {
@@ -999,7 +987,7 @@ const ConfirmModal = ({
                     if (user) {
                       const userRef = ref(
                         getDatabase(),
-                        `users/${showRemoveModal.user}/chats/${chatId}`
+                        `users/${showRemoveModal.user}/chats/${chatId}`,
                       );
                       remove(userRef)
                         .then(() => {
@@ -1010,10 +998,10 @@ const ConfirmModal = ({
                   });
                 })
                 .catch((err) => {});
-            } else if (showRemoveModal.type == "admin") {
+            } else if (showRemoveModal.type == 'admin') {
               const adminRef = ref(
                 getDatabase(),
-                `chatMetaData/${chatId}/admin`
+                `chatMetaData/${chatId}/admin`,
               );
               update(adminRef, {
                 [showRemoveModal.user]: true,
@@ -1022,39 +1010,39 @@ const ConfirmModal = ({
                   setShowRemoveModal({});
                 });
               });
-            } else if (showRemoveModal.type == "leave") {
+            } else if (showRemoveModal.type == 'leave') {
               const chatRef = ref(
                 getDatabase(),
-                `/chats/${showRemoveModal.chat}/participants/${showRemoveModal.user}`
+                `/chats/${showRemoveModal.chat}/participants/${showRemoveModal.user}`,
               );
               const originalChatRef = ref(
                 getDatabase(),
-                `/chats/${showRemoveModal.chat}/originalParticipants/${showRemoveModal.user}`
+                `/chats/${showRemoveModal.chat}/originalParticipants/${showRemoveModal.user}`,
               );
               const mainChatRef = ref(
                 getDatabase(),
-                `/chats/${showRemoveModal.chat}`
+                `/chats/${showRemoveModal.chat}`,
               );
               const userRef = ref(
                 getDatabase(),
-                `/users/${auth.currentUser.uid}/chats/${showRemoveModal.chat}`
+                `/users/${auth.currentUser.uid}/chats/${showRemoveModal.chat}`,
               );
-              const codesRef = ref(getDatabase(), "/codes");
+              const codesRef = ref(getDatabase(), '/codes');
               const metaData = ref(
                 getDatabase(),
-                `/chatMetaData/${showRemoveModal.chat}`
+                `/chatMetaData/${showRemoveModal.chat}`,
               );
               const queryRef = query(
                 codesRef,
                 orderByValue(), // 👈
-                equalTo(showRemoveModal.chat)
+                equalTo(showRemoveModal.chat),
               );
               const groupSize = Object.keys(participants).length;
               const contactRef = ref(
                 getDatabase(),
-                `/users/${auth.currentUser.uid}/contacts/${showRemoveModal.username}`
+                `/users/${auth.currentUser.uid}/contacts/${showRemoveModal.username}`,
               );
-              if (showRemoveModal.chatType == "group") {
+              if (showRemoveModal.chatType == 'group') {
                 remove(userRef).then(() => {
                   if (groupSize > 1) {
                     remove(chatRef).then(() => {
@@ -1098,21 +1086,18 @@ const ConfirmModal = ({
             } else {
               const adminRef = ref(
                 getDatabase(),
-                `chatMetaData/${chatId}/admin/${showRemoveModal.user}`
+                `chatMetaData/${chatId}/admin/${showRemoveModal.user}`,
               );
-              remove(adminRef).then(() =>
-                push(messageRef, tempObj).then(() => {
-                  setShowRemoveModal({});
-                })
-              );
+              remove(adminRef).then(() => push(messageRef, tempObj).then(() => {
+                setShowRemoveModal({});
+              }));
             }
           }}
         >
-          {showRemoveModal.type == "remove" ? "Remove" : "Confirm"}
+          {showRemoveModal.type == 'remove' ? 'Remove' : 'Confirm'}
         </button>
       </div>
-      <div></div>
+      <div />
     </div>
   );
-};
-
+}

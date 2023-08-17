@@ -1,27 +1,29 @@
-import React from "react";
-import { useState, useEffect, useContext, useRef } from "react";
-import { MessageContext } from "./App";
-import { MdOutlineCancel } from "react-icons/md";
-import { ref, getDatabase, get, update } from "firebase/database";
+import React, {
+  useState, useEffect, useContext, useRef,
+} from 'react';
+import { MdOutlineCancel } from 'react-icons/md';
+import {
+  ref, getDatabase, get, update,
+} from 'firebase/database';
 import {
   deleteObject,
   getDownloadURL,
   listAll,
   ref as storageRef,
   uploadBytes,
-} from "firebase/storage";
-import { FiEdit2 } from "react-icons/fi";
-import { FiLogOut } from "react-icons/fi";
-import { ToastContainer, toast } from "react-toastify";
-import { getAuth, signOut } from "firebase/auth";
-import { useNavigate } from "react-router-dom";
-import { RiImageAddFill } from "react-icons/ri";
-import cross from "./images/close.png";
-import stero from "./images/streo.png";
-import loadingAni from "./images/spinner-loader.gif";
-import { storage } from "./App";
-import { v4 } from "uuid";
-import "react-toastify/dist/ReactToastify.css";
+} from 'firebase/storage';
+import { FiEdit2, FiLogOut } from 'react-icons/fi';
+import { ToastContainer, toast } from 'react-toastify';
+import { getAuth, signOut } from 'firebase/auth';
+import { useNavigate } from 'react-router-dom';
+import { RiImageAddFill } from 'react-icons/ri';
+import { v4 } from 'uuid';
+import cross from './images/close.png';
+import stero from './images/streo.png';
+import loadingAni from './images/spinner-loader.gif';
+import { storage, MessageContext } from './App';
+import 'react-toastify/dist/ReactToastify.css';
+
 export default function ProfileScreen() {
   const {
     userInfo,
@@ -35,7 +37,7 @@ export default function ProfileScreen() {
     profileScreen,
     setProfileScreen,
   } = useContext(MessageContext);
-  const [aboutMe, setAboutMe] = useState("");
+  const [aboutMe, setAboutMe] = useState('');
   const [showPfpModal, setShowPfpModal] = useState(false);
   const [uploadedFile, setUploadedFile] = useState(null);
   const [error, setError] = useState('');
@@ -47,14 +49,14 @@ export default function ProfileScreen() {
   }, [userInfo.about]);
   const getColorFromLetter = (letter) => {
     const colors = [
-      " bg-gradient-to-r from-red-500 to-pink-500",
-      " bg-gradient-to-r from-yellow-500 to-green-500",
-      " bg-gradient-to-r from-green-500 to-blue-500",
-      " bg-gradient-to-r from-blue-500 to-indigo-500",
-      " bg-gradient-to-r from-indigo-500 to-purple-500",
-      " bg-gradient-to-r from-purple-500 to-pink-500",
-      " bg-gradient-to-r from-pink-500 to-red-500",
-      " bg-gradient-to-r from-gray-500 to-gray-700",
+      ' bg-gradient-to-r from-red-500 to-pink-500',
+      ' bg-gradient-to-r from-yellow-500 to-green-500',
+      ' bg-gradient-to-r from-green-500 to-blue-500',
+      ' bg-gradient-to-r from-blue-500 to-indigo-500',
+      ' bg-gradient-to-r from-indigo-500 to-purple-500',
+      ' bg-gradient-to-r from-purple-500 to-pink-500',
+      ' bg-gradient-to-r from-pink-500 to-red-500',
+      ' bg-gradient-to-r from-gray-500 to-gray-700',
     ];
 
     // Get the index based on the letter's char code
@@ -63,18 +65,16 @@ export default function ProfileScreen() {
   };
   const navigate = useNavigate();
   return (
-    <div className={" p-8 text-white flex-1 relative overflow-scroll"}>
+    <div className=" p-8 text-white flex-1 relative overflow-scroll">
       <div
         className={
-          "w-screen h-screen bg-blackRgba flex items-center justify-center absolute z-40 top-0 left-0" + (showPfpModal ? "" : " hidden")
+          `w-screen h-screen bg-blackRgba flex items-center justify-center absolute z-40 top-0 left-0${showPfpModal ? '' : ' hidden'}`
         }
       >
         <div className="">
           {showPfpModal ? (
             <div
-              className={
-                "text-center bg-white rounded-lg p-5 w-96 relative animate-fade-right text-black"
-              }
+              className="text-center bg-white rounded-lg p-5 w-96 relative animate-fade-right text-black"
             >
               <img
                 src={cross}
@@ -82,9 +82,9 @@ export default function ProfileScreen() {
                 onClick={() => {
                   setShowPfpModal(false);
                 }}
-              ></img>
+              />
               <div className="">
-                <img src={stero} className=" w-16 m-auto"></img>
+                <img src={stero} className=" w-16 m-auto" />
                 <p className="font-semibold text-xl mb-2">Change your pfp</p>
                 <p className="font-normal text-neutral-500 text-sm mb-5">
                   Upload an image file for your pfp
@@ -107,8 +107,8 @@ export default function ProfileScreen() {
                   )}
                   <p className=" text-gray-500 font-semibold">
                     {!uploadedFile
-                      ? "Upload Image"
-                      : "Image successfully chosen"}
+                      ? 'Upload Image'
+                      : 'Image successfully chosen'}
                   </p>
                 </label>
                 <p className="text-sm text-red-500">{error}</p>
@@ -117,7 +117,7 @@ export default function ProfileScreen() {
                   id="filePicker"
                   className="hidden"
                   accept="image/*"
-                  onChange={(event) => {setUploadedFile(event.target.files[0]);setError('')}}
+                  onChange={(event) => { setUploadedFile(event.target.files[0]); setError(''); }}
                 />
               </div>
               <div className="flex gap-2 mt-5">
@@ -125,19 +125,19 @@ export default function ProfileScreen() {
                   className="done-button"
                   disabled={isLoading}
                   onClick={() => {
-                    if(uploadedFile){
+                    if (uploadedFile) {
                       const imageRef = storageRef(
                         storage,
-                        `pfp/${isSignedIn.uid}/${uploadedFile.name + v4()}`
+                        `pfp/${isSignedIn.uid}/${uploadedFile.name + v4()}`,
                       );
                       const folderRef = storageRef(
                         storage,
-                        `pfp/${isSignedIn.uid}`
+                        `pfp/${isSignedIn.uid}`,
                       );
                       console.log(`pfp/${isSignedIn.uid}`);
                       const pfpRef = ref(
                         getDatabase(),
-                        `users/${isSignedIn.uid}/pfpInfo`
+                        `users/${isSignedIn.uid}/pfpInfo`,
                       );
                       function uploadPfp() {
                         uploadBytes(imageRef, uploadedFile).then(() => {
@@ -152,10 +152,10 @@ export default function ProfileScreen() {
                                 setShowPfpModal(false);
                                 setIsLoading(false);
                                 toast.success(
-                                  "Successfully updated profile picture!"
+                                  'Successfully updated profile picture!',
                                 );
                                 setUploadedFile(null);
-                                setError('')
+                                setError('');
                               });
                             });
                           });
@@ -165,17 +165,16 @@ export default function ProfileScreen() {
                       if (userInfo.pfpInfo) {
                         console.log(userInfo.pfpInfo.pfpRef);
                         deleteObject(
-                          storageRef(storage, userInfo.pfpInfo.pfpRef)
+                          storageRef(storage, userInfo.pfpInfo.pfpRef),
                         ).then(() => {
                           uploadPfp();
                         });
-                        console.log("pfpref:", userInfo.pfpRef);
+                        console.log('pfpref:', userInfo.pfpRef);
                       } else {
                         uploadPfp();
-                      } 
-                    }
-                    else{
-                      setError('Please upload a file')
+                      }
+                    } else {
+                      setError('Please upload a file');
                     }
                   }}
                 >
@@ -200,43 +199,37 @@ export default function ProfileScreen() {
       />
       <div className="flex gap-3 h-min items-center">
         <div
-          className={
-            "flex w-32 h-32 justify-center items-center text-2xl group cursor-pointer"
-          }
+          className="flex w-32 h-32 justify-center items-center text-2xl group cursor-pointer"
           onClick={() => {
             setShowPfpModal(true);
           }}
         >
-          {
-            <>
-              <FiEdit2
-                className="text-white absolute hidden group-hover:block z-40"
-                size={50}
-              />
-              <div
-                className={
-                  "w-full h-full group-hover:opacity-60 flex justify-center items-center rounded-xl transition-all duration-300" +
-                  getColorFromLetter(isSignedIn.displayName)
+          <FiEdit2
+            className="text-white absolute hidden group-hover:block z-40"
+            size={50}
+          />
+          <div
+            className={
+                  `w-full h-full group-hover:opacity-60 flex justify-center items-center rounded-xl transition-all duration-300${
+                    getColorFromLetter(isSignedIn.displayName)}`
                 }
-              >
-                {!userInfo.pfpInfo ? (
-                  <p className={"text-7xl"}>
-                    {isSignedIn.displayName[0].toUpperCase()}
-                  </p>
-                ) : (
-                  <img
-                    src={userInfo.pfpInfo.pfpLink}
-                    className="w-full h-full rounded-xl"
-                  />
-                )}
-              </div>
-            </>
-          }
+          >
+            {!userInfo.pfpInfo ? (
+              <p className="text-7xl">
+                {isSignedIn.displayName[0].toUpperCase()}
+              </p>
+            ) : (
+              <img
+                src={userInfo.pfpInfo.pfpLink}
+                className="w-full h-full rounded-xl"
+              />
+            )}
+          </div>
         </div>
         <div className=" h-min">
           <p className=" text-4xl font-bold">{isSignedIn.displayName}</p>
           <p className="text-subColor">
-            {isSignedIn.displayName + "#" + userInfo.userCode}
+            {`${isSignedIn.displayName}#${userInfo.userCode}`}
           </p>
         </div>
         <div className="group relative">
@@ -246,10 +239,10 @@ export default function ProfileScreen() {
             onClick={() => {
               signOut(getAuth())
                 .then(() => {
-                  navigate("/auth/signin");
+                  navigate('/auth/signin');
                 })
                 .catch(() => {
-                  toast.error("Failed in sign out. Please try again...");
+                  toast.error('Failed in sign out. Please try again...');
                 });
             }}
           >
@@ -263,7 +256,7 @@ export default function ProfileScreen() {
           Edit and view your profile details here
         </p>
       </div>
-      <div className="bg-subColor h-onePixel w-full mb-5"></div>
+      <div className="bg-subColor h-onePixel w-full mb-5" />
       <div className="block gap-32 items-center md:flex">
         <div className="flex flex-col w-44 mb-4 md:mb-0">
           <p>User Credidentials</p>
@@ -276,7 +269,7 @@ export default function ProfileScreen() {
             <p className=" text-slate-500 font-semibold">Username</p>
             <p>
               {isSignedIn.displayName}
-              <span className="text-subColor">{"#" + userInfo.userCode}</span>
+              <span className="text-subColor">{`#${userInfo.userCode}`}</span>
             </p>
           </div>
           <div>
@@ -285,7 +278,7 @@ export default function ProfileScreen() {
           </div>
         </div>
       </div>
-      <div className="bg-subColor h-onePixel w-full mb-5 mt-5"></div>
+      <div className="bg-subColor h-onePixel w-full mb-5 mt-5" />
       <div className="gap-32 items-center block md:flex">
         <div className="flex flex-col w-44 mb-4 md:mb-0">
           <p>About Me</p>
@@ -304,12 +297,12 @@ export default function ProfileScreen() {
           </div>
           <button
             className={
-              "done-button w-20 h-9" +
-              (aboutMe.length > 0 &&
-              aboutMe.length <= 180 &&
-              aboutMe !== userInfo.about
-                ? ""
-                : " bg-gray-600 pointer-events-none")
+              `done-button w-20 h-9${
+                aboutMe.length > 0
+              && aboutMe.length <= 180
+              && aboutMe !== userInfo.about
+                  ? ''
+                  : ' bg-gray-600 pointer-events-none'}`
             }
             onClick={() => {
               const userRef = ref(getDatabase(), `users/${isSignedIn.uid}`);
@@ -318,10 +311,8 @@ export default function ProfileScreen() {
                 update(userRef, {
                   about: aboutMe,
                 })
-                  .then(() => toast.success("About me successfully updated!"))
-                  .catch(() =>
-                    toast.error("Failed in update about me. Try again")
-                  );
+                  .then(() => toast.success('About me successfully updated!'))
+                  .catch(() => toast.error('Failed in update about me. Try again'));
               }
             }}
           >
@@ -329,7 +320,7 @@ export default function ProfileScreen() {
           </button>
         </div>
       </div>
-      <ToastContainer theme={"dark"} position={"top-center"} />
+      <ToastContainer theme="dark" position="top-center" />
     </div>
   );
 }

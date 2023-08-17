@@ -1,29 +1,26 @@
-import logo from "./logo.svg";
-import "./App.css";
-import SideBar from "./SideBar";
-import ContactBar from "./ContactBar";
-import MessageTab from "./MessageTab";
-import firebase from "firebase/compat/app";
-import { onValue, get, getDatabase, ref, off, update } from "firebase/database";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-import {getStorage,uploadBytes,ref as storageRef} from 'firebase/storage'
+import './App.css';
+import firebase from 'firebase/compat/app';
+import {
+  onValue, get, getDatabase, ref, off, update,
+} from 'firebase/database';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { getStorage } from 'firebase/storage';
 import React, {
   createContext,
   useState,
   useEffect,
-  useMemo,
   useRef,
-} from "react";
-import SignUp from "./SignUp";
+} from 'react';
 import {
   Route,
   Routes,
-  redirect,
   useNavigate,
   useParams,
-} from "react-router-dom";
-import SignIn from "./SignIn";
-import DashBoard from "./Dashboard";
+} from 'react-router-dom';
+import SignUp from './SignUp';
+import SignIn from './SignIn';
+import DashBoard from './Dashboard';
+
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_API_KEY,
   authDomain: process.env.REACT_APP_AUTH_DOMAIN,
@@ -34,11 +31,11 @@ const firebaseConfig = {
   appId: process.env.REACT_APP_APP_ID,
   measurementId: process.env.REACT_APP_MEASUREMENT_ID,
 };
-let app = null
+let app = null;
 if (!firebase.apps.length) {
   app = firebase.initializeApp(firebaseConfig);
 }
-export const storage = getStorage(app)
+export const storage = getStorage(app);
 export const MessageContext = createContext();
 
 function App() {
@@ -49,7 +46,7 @@ function App() {
   const [userState, setUserState] = useState({});
   const [profileScreen, setProfileScreen] = useState(false);
   const [names, setNames] = useState([]);
-  const [author, setAuthor] = useState("");
+  const [author, setAuthor] = useState('');
   const [isSignedIn, setIsSignedIn] = useState(null);
   const [filteredArr, setFilteredArr] = useState([]);
   const [unreadData, setUnreadData] = useState({});
@@ -62,80 +59,73 @@ function App() {
       setIsSignedIn(user);
     });
   }, []);
-  useEffect(() => {
-    if (
-      Object.keys(messages).length !== 0 &&
-      (JSON.stringify(messages.participants) !==
-        JSON.stringify(previousState.current.participants) ||
-        JSON.stringify(messages.chatName) !==
-          JSON.stringify(previousState.current.chatName) ||
-        firstRender.current)
-    ) {
-      firstRender.current = false;
-      function participantMap(mapData) {
+  function participantMap(mapData) {
+    Promise.all(
+      Object.keys(mapData).map((uid, index) => {
+        const nameRef = ref(getDatabase(), `/users/${uid}/name`);
+        return get(nameRef);
+      }),
+    )
+      .then((names) => {
+        let tempArr = [];
         Promise.all(
           Object.keys(mapData).map((uid, index) => {
-            const nameRef = ref(getDatabase(), "/users/" + uid + "/name");
-            return get(nameRef);
-          })
-        )
-          .then((names) => {
-            let tempArr = [];
+            const codeRef = ref(
+              getDatabase(),
+              `/users/${uid}/userCode`,
+            );
+            return get(codeRef);
+          }),
+        ).then((codes) => {
+          Promise.all(
+            Object.keys(mapData).map((uid, index) => {
+              const pfpRef = ref(getDatabase(), `/users/${uid}/pfpInfo/pfpLink`);
+              return get(pfpRef);
+            }),
+          ).then((pfps) => {
+            tempArr = names.map((snapshot, index) => ({
+              name: snapshot.val(),
+              uid: Object.keys(mapData)[index],
+              pfp: pfps[index].val(),
+            }));
+            const codeArr = codes.map((code, index) => ({
+              userCode: code.val(),
+            }));
             Promise.all(
               Object.keys(mapData).map((uid, index) => {
-                const codeRef = ref(
+                const aboutRef = ref(
                   getDatabase(),
-                  "/users/" + uid + "/userCode"
+                  `/users/${uid}/about`,
                 );
-                return get(codeRef);
-              })
-            ).then((codes) => {
-              Promise.all(
-                Object.keys(mapData).map((uid,index)=>{
-                  const pfpRef = ref(getDatabase(),`/users/${uid}/pfpInfo/pfpLink`)
-                  return get(pfpRef)
-                })
-              ).then(pfps=>{
-                tempArr = names.map((snapshot, index) => {
-                  return {
-                    name: snapshot.val(),
-                    uid: Object.keys(mapData)[index],
-                    pfp: pfps[index].val()
-                  };
-                });
-                const codeArr = codes.map((code, index) => {
-                  return {
-                    userCode: code.val(),
-                  };
-                });
-                Promise.all(
-                  Object.keys(mapData).map((uid, index) => {
-                    const aboutRef = ref(
-                      getDatabase(),
-                      "/users/" + uid + "/about"
-                    );
-                    return get(aboutRef);
-                  })
-                ).then((aboutInfo) => {
-                  const finalArr = aboutInfo.map((aboutSnapshot, index) => {
-                    return {
-                      ...tempArr[index],
-                      ...codeArr[index],
-                      about: aboutSnapshot.val(),
-                    };
-                  });
-                  console.log(finalArr)
-                  setNames(finalArr);
-                });
-              })
-              
+                return get(aboutRef);
+              }),
+            ).then((aboutInfo) => {
+              const finalArr = aboutInfo.map((aboutSnapshot, index) => ({
+                ...tempArr[index],
+                ...codeArr[index],
+                about: aboutSnapshot.val(),
+              }));
+              setNames(finalArr);
             });
-          })
-          .catch((err) => {
           });
-      }
+        });
+      })
+      .catch((err) => {
+      });
+  }
+  useEffect(() => {
+    if (
+      Object.keys(messages).length !== 0
+      && (JSON.stringify(messages.participants)
+        !== JSON.stringify(previousState.current.participants)
+        || JSON.stringify(messages.chatName)
+          !== JSON.stringify(previousState.current.chatName)
+        || firstRender.current)
+    ) {
+      firstRender.current = false;
+      
       if (messages.participants) {
-        if (messages.type == "duo") {
+        if (messages.type === 'duo') {
           participantMap(messages.originalParticipants);
         } else {
           participantMap(messages.participants);
@@ -144,7 +134,7 @@ function App() {
 
       const authorRef = ref(
         getDatabase(),
-        "/users/" + messages.author + "/name"
+        `/users/${messages.author}/name`,
       );
       get(authorRef).then((snapshot) => {
         setAuthor(snapshot.val());
@@ -163,13 +153,13 @@ function App() {
       const listener = onValue(unreadRef, callback);
       unreadListenerInfo = {
         ref: unreadRef,
-        callback: callback,
-        listener: listener,
+        callback,
+        listener,
       };
     }
     return () => {
       if (Object.keys(unreadListenerInfo).length !== 0) {
-        off(unreadListenerInfo.ref, "value", unreadListenerInfo.callback);
+        off(unreadListenerInfo.ref, 'value', unreadListenerInfo.callback);
       }
     };
   }, [messages.chatName, messages.participants]);
@@ -179,7 +169,7 @@ function App() {
         ? names[0].uid !== isSignedIn.uid
           ? names[0]
           : names[1]
-        : ""
+        : '',
     );
   }, [names]);
   return (
@@ -214,7 +204,7 @@ function App() {
           </Route>
           <Route
             path="/homescreen/:chatId"
-            element={
+            element={(
               <ProtectedRoute
                 setMessages={setMessages}
                 setUserinfo={setUserinfo}
@@ -227,9 +217,9 @@ function App() {
               >
                 <DashBoard />
               </ProtectedRoute>
-            }
+            )}
           />
-          <Route path="*" element={<h1>Not found</h1>}></Route>
+          <Route path="*" element={<h1>Not found</h1>} />
         </Routes>
       </div>
     </MessageContext.Provider>
@@ -248,16 +238,14 @@ function ProtectedRoute({
 }) {
   const navigate = useNavigate();
   const { chatId } = useParams();
-  const [isSignedIn, setIsSignedIn] = useState(false);
   useEffect(() => {
     const participantRef = ref(getDatabase(), `/chats/${chatId}/participants`);
     const unsubscribe = onAuthStateChanged(getAuth(), (user) => {
-      if (chatId !== "none" && Object.keys(messages).length !== 0) {
+      if (chatId !== 'none' && Object.keys(messages).length !== 0) {
         get(participantRef).then((snapshot) => {
-          const keys = Object.keys(snapshot.val());
           if (Object.keys(messages.participants).includes(user.uid)) {
           } else {
-            navigate("/homescreen/none");
+            navigate('/homescreen/none');
           }
         });
       }
@@ -268,10 +256,10 @@ function ProtectedRoute({
   }, [messages.participants]);
   useEffect(() => {
     let listenerInfo = {};
-    if (currentUser && chatId !== "none") {
+    if (currentUser && chatId !== 'none') {
       const unreadRef = ref(
         getDatabase(),
-        `/unreadData/${currentUser.uid}/${chatId}`
+        `/unreadData/${currentUser.uid}/${chatId}`,
       );
       const updateRef = ref(getDatabase(), `/unreadData/${currentUser.uid}`);
       const updateUnread = () => {
@@ -288,16 +276,16 @@ function ProtectedRoute({
     }
     return () => {
       if (Object.keys(listenerInfo).length !== 0) {
-        off(listenerInfo.ref, "value", listenerInfo.callback);
+        off(listenerInfo.ref, 'value', listenerInfo.callback);
       }
     };
   }, [currentUser, chatId]);
   useEffect(() => {
-    const chatsRef = ref(getDatabase(), "/chats/" + chatId);
+    const chatsRef = ref(getDatabase(), `/chats/${chatId}`);
     let listenerInfo = {};
     const unsubscribe = onAuthStateChanged(getAuth(), (user) => {
       if (!user) {
-        navigate("/auth");
+        navigate('/auth');
       } else {
         const callback = (snapshot) => {
           if (snapshot.exists()) {
@@ -312,8 +300,8 @@ function ProtectedRoute({
         const listener = onValue(chatsRef, callback);
         listenerInfo = {
           ref: chatsRef,
-          callback: callback,
-          listener: listener,
+          callback,
+          listener,
         };
       }
     });
@@ -322,7 +310,7 @@ function ProtectedRoute({
     return () => {
       unsubscribe();
       if (Object.keys(listenerInfo).length !== 0) {
-        off(listenerInfo.ref, "value", listenerInfo.callback);
+        off(listenerInfo.ref, 'value', listenerInfo.callback);
       }
     };
   }, [chatId]);
@@ -331,7 +319,7 @@ function ProtectedRoute({
     let userListenerInfo = {};
     const unsubscribe = onAuthStateChanged(getAuth(), (user) => {
       if (!user) {
-        navigate("/auth");
+        navigate('/auth');
       } else {
         const auth = getAuth();
         const userRef = ref(getDatabase(), `users/${auth.currentUser.uid}`);
@@ -341,15 +329,15 @@ function ProtectedRoute({
         const listener = onValue(userRef, callback);
         userListenerInfo = {
           ref: userRef,
-          callback: callback,
-          listener: listener,
+          callback,
+          listener,
         };
       }
     });
     return () => {
       unsubscribe();
       if (Object.keys(userListenerInfo).length !== 0) {
-        off(userListenerInfo.ref, "value", userListenerInfo.callback);
+        off(userListenerInfo.ref, 'value', userListenerInfo.callback);
       }
     };
   }, []);
@@ -364,9 +352,9 @@ function ProtectedRoute({
         const callback = (snapshot) => {
           if (snapshot.exists()) {
             const newData = { ...snapshot.val(), chatId: snapshot.key };
-            
-            const existingChat = tempArr.find(obj => obj.chatId === value);
-        
+
+            const existingChat = tempArr.find((obj) => obj.chatId === value);
+
             if (existingChat) {
               // If it exists, update the corresponding object in `tempArr`
               Object.assign(existingChat, newData);
@@ -374,22 +362,22 @@ function ProtectedRoute({
               // If it doesn't exist, add the new data to `tempArr`
               tempArr.push(newData);
             }
-        
+
             // Update the reference and sort `tempArr`
             originalRef.current = tempArr;
             tempArr.sort((a, b) => b.lastMsgTime - a.lastMsgTime);
-        
+
             // Update `filteredArr` with sorted `tempArr`
             setFilteredArr([...tempArr]);
           } else {
             setFilteredArr([]);
           }
         };
-        
+
         const listenerRef = onValue(chatsRef, callback);
         listenerRefs.push({
           ref: chatsRef,
-          callback: callback,
+          callback,
           unsubscribe: listenerRef,
         }); // Add the listener reference to the array
       });
@@ -400,7 +388,7 @@ function ProtectedRoute({
     // Cleanup function to unsubscribe the listeners
     return () => {
       listenerRefs.forEach((listenerRef) => {
-        off(listenerRef.ref, "value", listenerRef.callback);
+        off(listenerRef.ref, 'value', listenerRef.callback);
         listenerRef.unsubscribe();
       });
     };

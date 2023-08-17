@@ -9,24 +9,22 @@ import {
   onValue,
   off,
 } from "firebase/database";
-import send from "./images/send-message.png";
-import { MessageContext } from "./App";
 import { Link, useParams } from "react-router-dom";
 import { getAuth } from "firebase/auth";
-import { HiOutlineUserGroup } from "react-icons/hi";
-import { AiOutlineUserDelete } from "react-icons/ai";
-import { FiLink } from "react-icons/fi";
+import { HiOutlineUserGroup, HiOutlineArrowNarrowRight } from "react-icons/hi";
+import { AiOutlineUserDelete, AiOutlineArrowDown } from "react-icons/ai";
+import { FiLink, FiEdit2 } from "react-icons/fi";
 import { FaAngleLeft } from "react-icons/fa";
 import EmojiPicker from "emoji-picker-react";
-import InfoTab from "./InfoTab";
 import { MdReply } from "react-icons/md";
-import cross from "./images/close.png";
-import { AiOutlineArrowDown } from "react-icons/ai";
 import { IoMdExit } from "react-icons/io";
 import { RiAdminLine } from "react-icons/ri";
-import { HiOutlineArrowNarrowRight } from "react-icons/hi";
-import { FiEdit2 } from "react-icons/fi";
+import cross from "./images/close.png";
+import InfoTab from "./InfoTab";
+import { MessageContext } from "./App";
+import send from "./images/send-message.png";
 import nochatimg from "./images/nochat-img.png";
+
 export default function MessageTab() {
   const { messages, setShowCodeModal, names, userState, isSignedIn } =
     useContext(MessageContext);
@@ -35,13 +33,11 @@ export default function MessageTab() {
   const [replyInfo, setReplyInfo] = useState({});
   const [metaInfo, setMetaInfo] = useState({});
   const [showDownArrow, setShowDownArrow] = useState(false);
+  const [typingState, setTypingState] = useState({});
   const containerRef = useRef();
   const { chatId } = useParams();
   const [pfpList, setPfpList] = useState({});
-  const currentChat =
-    Object.keys(messages).includes(chatId) && !!messages[chatId].messages
-      ? messages[chatId].messages
-      : {};
+  const timeoutId = useRef("");
   const replyRefs = useRef({});
   function handleSubmit() {
     const msgType = Object.keys(replyInfo).length !== 0 ? "reply" : "normal";
@@ -63,7 +59,7 @@ export default function MessageTab() {
       push(chatRef, tempObj).then((value) => {
         update(metaDataRef, {
           lastMsg: text,
-          lastMsgTime: Date.now()
+          lastMsgTime: Date.now(),
         }).then(() => {
           if (messages.type == "duo") {
             get(mainUnreadRef).then((snapshot) => {
@@ -130,13 +126,13 @@ export default function MessageTab() {
     }
   }, [containerRef.current]);
   useEffect(() => {
-    const newPfpList = {}
+    const newPfpList = {};
     names.map((user, index) => {
       if (user.pfp) {
-        newPfpList[user.uid] = user.pfp
+        newPfpList[user.uid] = user.pfp;
       }
     });
-    setPfpList(newPfpList)
+    setPfpList(newPfpList);
   }, [names]);
 
   function formatDateTime(timestamp) {
@@ -153,11 +149,11 @@ export default function MessageTab() {
     const ampm = hours >= 12 ? "PM" : "AM";
 
     // Convert to 12-hour format
-    hours = hours % 12;
-    hours = hours ? hours : 12; // Handle midnight (0 hours)
+    hours %= 12;
+    hours = hours || 12; // Handle midnight (0 hours)
 
     // Add leading zeros to minutes if needed
-    minutes = minutes < 10 ? "0" + minutes : minutes;
+    minutes = minutes < 10 ? `0${minutes}` : minutes;
 
     // Format the date and time
     const formattedDateTime = `${month}/${day}/${year} ${hours}:${minutes} ${ampm}`;
@@ -172,12 +168,21 @@ export default function MessageTab() {
   }, [messages, replyInfo]);
   useEffect(() => {
     setReplyInfo({});
-  }, [messages]);
+  }, [chatId, messages]);
   useEffect(() => {
-    setReplyInfo({});
-  }, [chatId]);
+    const typingRef = ref(getDatabase(), `typingStatus/${chatId}/`);
+    const callback = (snapshot) => {
+      if (snapshot.exists()) {
+        setTypingState(snapshot.val()[Object.keys(snapshot.val())]);
+      }
+    };
+    const listener = onValue(typingRef, callback);
+    return () => {
+      off(typingRef, "value", callback);
+    };
+  }, []);
   useEffect(() => {
-    const metaRef = ref(getDatabase(), "/chatMetaData/" + chatId + "/admin");
+    const metaRef = ref(getDatabase(), `/chatMetaData/${chatId}/admin`);
     const callback = (snapshot) => {
       if (snapshot.exists()) {
         setMetaInfo(snapshot.val());
@@ -211,10 +216,9 @@ export default function MessageTab() {
 
   return Object.keys(messages).length !== 0 && chatId !== "none" ? (
     <div
-      className={
-        "flex-1 min-w-messageMin w-1/4 flex-col relative break-words md:flex border-borderColor border-l md:border-none" +
-        (Object.keys(messages).length !== 0 ? " flex" : " hidden")
-      }
+      className={`flex-1 min-w-messageMin w-1/4 flex-col relative break-words md:flex border-borderColor border-l md:border-none${
+        Object.keys(messages).length !== 0 ? " flex" : " hidden"
+      }`}
     >
       {screen == "message" ? (
         <>
@@ -223,7 +227,7 @@ export default function MessageTab() {
               <div
                 className="w-7 h-7 rounded-xl flex justify-center items-center bg-slate-700 absolute right-7 bottom-24 z-40 cursor-pointer"
                 onClick={() => {
-                  if (!!containerRef.current) {
+                  if (containerRef.current) {
                     const container = containerRef.current;
                     container.scrollTo({
                       top: container.scrollHeight,
@@ -237,48 +241,44 @@ export default function MessageTab() {
             ) : (
               <></>
             )}
-            <Link to={"/homescreen/none"}>
-              <FaAngleLeft className="md:hidden text-white text-2xl mr-3 cursor-pointer"></FaAngleLeft>
+            <Link to="/homescreen/none">
+              <FaAngleLeft className="md:hidden text-white text-2xl mr-3 cursor-pointer" />
             </Link>
             <button
-              className={
-                " rounded-xl w-10 h-10 flex items-center justify-center m-auto bg-stone-800 text-2xl" +
-                (messages.type == "duo"
-                  ? " text-base" +
-                    getColorFromLetter(
+              className={` rounded-xl w-10 h-10 flex items-center justify-center m-auto bg-stone-800 text-2xl${
+                messages.type == "duo"
+                  ? ` text-base${getColorFromLetter(
                       messages.type == "duo"
                         ? userState.name && userState.name.length > 0
                           ? userState.name[0].toUpperCase()
                           : ""
                         : messages.pfp
-                    )
-                  : "")
-              }
+                    )}`
+                  : ""
+              }`}
               onClick={() => {
                 setScreen("info");
               }}
             >
-              {
-                <p className="">
-                  {" "}
-                  {messages.type == "duo" ? (
-                    !userState.pfp ? (
-                      userState.name && userState.name.length > 0 ? (
-                        userState.name[0].toUpperCase()
-                      ) : (
-                        ""
-                      )
+              <p className="">
+                {" "}
+                {messages.type == "duo" ? (
+                  !userState.pfp ? (
+                    userState.name && userState.name.length > 0 ? (
+                      userState.name[0].toUpperCase()
                     ) : (
-                      <img
-                        src={userState.pfp}
-                        className="w-full h-full rounded-xl"
-                      />
+                      ""
                     )
                   ) : (
-                    messages.pfp
-                  )}
-                </p>
-              }
+                    <img
+                      src={userState.pfp}
+                      className="w-full h-full rounded-xl"
+                    />
+                  )
+                ) : (
+                  messages.pfp
+                )}
+              </p>
             </button>
             <div className="flex items-center justify-between flex-1 mr-5">
               <div
@@ -293,26 +293,29 @@ export default function MessageTab() {
                 </p>
                 {messages.type !== "duo" ? (
                   <div className="flex flex-row">
-                    {names.map((username, index) => {
-                      return (
-                        <p className="text-xs text-subColor" key={index}>
-                          {names.length - 1 === index
-                            ? username.name
-                            : username.name + ",\u00A0"}
-                        </p>
-                      );
-                    })}
+                    {names.map((username, index) => (
+                      <p className="text-xs text-subColor" key={index}>
+                        {names.length - 1 === index
+                          ? username.name
+                          : `${username.name},\u00A0`}
+                      </p>
+                    ))}
                   </div>
+                ) : typingState && Object.keys(typingState).length !== 0 ? (
+                  <p className="text-sm text-subColor">
+                    {typingState.status
+                      ? `${typingState.name} is typing...`
+                      : ""}
+                  </p>
                 ) : (
                   <></>
                 )}
               </div>
               <FiLink
                 size={20}
-                className={
-                  "text-white cursor-pointer" +
-                  (messages.type == "duo" ? " hidden" : "")
-                }
+                className={`text-white cursor-pointer${
+                  messages.type == "duo" ? " hidden" : ""
+                }`}
                 onClick={() => {
                   setShowCodeModal(true);
                 }}
@@ -320,69 +323,26 @@ export default function MessageTab() {
             </div>
           </div>
           <div
-            className={
-              " h-full overflow-y-scroll" +
-              (Object.keys(replyInfo).length !== 0 ? " mb-44" : " mb-20")
-            }
+            className={` h-full overflow-y-scroll${
+              Object.keys(replyInfo).length !== 0 ? " mb-44" : " mb-20"
+            }`}
             ref={containerRef}
           >
-            {Object.values(!!messages.messages ? messages.messages : {}).map(
-              (value, index) => {
-                return (
-                  <div key={index}>
-                    {index > 0 ? (
-                      value.senderUID !==
-                        messages.messages[
-                          Object.keys(messages.messages)[index - 1]
-                        ].senderUID ||
-                      value.timestamp -
-                        messages.messages[
-                          Object.keys(messages.messages)[index - 1]
-                        ].timestamp >
-                        60000 ||
-                      value.replyInfo ||
-                      !value.content ? (
-                        <MessageBox
-                          pfp="https://wallpapers.com/images/hd/shadow-boy-white-eyes-unique-cool-pfp-nft-13yuypusuweug9xn.jpg"
-                          name={value.sender}
-                          msg={value.content}
-                          date={formatDateTime(value.timestamp)}
-                          setReplyInfo={setReplyInfo}
-                          msgType={value.replyInfo}
-                          chatUid={Object.keys(messages.messages)[index]}
-                          makeNewRef={makeNewRef}
-                          scrollToMsg={scrollToMsg}
-                          data={value}
-                          pfpList={pfpList}
-                        />
-                      ) : (
-                        <div
-                          className="relative hover:bg-slate-800 h-6 group flex items-center"
-                          ref={(ref) =>
-                            makeNewRef(
-                              Object.keys(messages.messages)[index],
-                              ref
-                            )
-                          }
-                        >
-                          <div
-                            className="absolute right-10 text-white hidden cursor-pointer group-hover:block"
-                            onClick={() =>
-                              setReplyInfo({
-                                name: value.sender,
-                                msg: value.content,
-                                msgUID: Object.keys(messages.messages)[index],
-                              })
-                            }
-                          >
-                            <MdReply size="22" />
-                          </div>
-                          <p className="text-white pl-5 text-sm font-light ml-14">
-                            {value.content}
-                          </p>
-                        </div>
-                      )
-                    ) : (
+            {Object.values(messages.messages ? messages.messages : {}).map(
+              (value, index) => (
+                <div key={index}>
+                  {index > 0 ? (
+                    value.senderUID !==
+                      messages.messages[
+                        Object.keys(messages.messages)[index - 1]
+                      ].senderUID ||
+                    value.timestamp -
+                      messages.messages[
+                        Object.keys(messages.messages)[index - 1]
+                      ].timestamp >
+                      60000 ||
+                    value.replyInfo ||
+                    !value.content ? (
                       <MessageBox
                         pfp="https://wallpapers.com/images/hd/shadow-boy-white-eyes-unique-cool-pfp-nft-13yuypusuweug9xn.jpg"
                         name={value.sender}
@@ -396,10 +356,47 @@ export default function MessageTab() {
                         data={value}
                         pfpList={pfpList}
                       />
-                    )}
-                  </div>
-                );
-              }
+                    ) : (
+                      <div
+                        className="relative hover:bg-slate-800 group flex items-center"
+                        ref={(ref) =>
+                          makeNewRef(Object.keys(messages.messages)[index], ref)
+                        }
+                      >
+                        <div
+                          className="absolute right-10 text-white hidden cursor-pointer group-hover:block"
+                          onClick={() =>
+                            setReplyInfo({
+                              name: value.sender,
+                              msg: value.content,
+                              msgUID: Object.keys(messages.messages)[index],
+                            })
+                          }
+                        >
+                          <MdReply size="22" />
+                        </div>
+                        <p className="text-white pl-5 pr-8 text-sm font-light ml-14 break-all">
+                          {value.content}
+                        </p>
+                      </div>
+                    )
+                  ) : (
+                    <MessageBox
+                      pfp="https://wallpapers.com/images/hd/shadow-boy-white-eyes-unique-cool-pfp-nft-13yuypusuweug9xn.jpg"
+                      name={value.sender}
+                      msg={value.content}
+                      date={formatDateTime(value.timestamp)}
+                      setReplyInfo={setReplyInfo}
+                      msgType={value.replyInfo}
+                      chatUid={Object.keys(messages.messages)[index]}
+                      makeNewRef={makeNewRef}
+                      scrollToMsg={scrollToMsg}
+                      data={value}
+                      pfpList={pfpList}
+                    />
+                  )}
+                </div>
+              )
             )}
           </div>
           <div className=" bg-inputColor rounded-xl py-3 text-white pl-4 outline-none placeholder-borderColor absolute bottom-6 left-5 right-5 shadow-slate-600 shadow-lg flex flex-col">
@@ -426,6 +423,39 @@ export default function MessageTab() {
                 placeholder="Type message"
                 onChange={(event) => {
                   setText(event.target.value);
+                  clearTimeout(timeoutId.current);
+                  const typingRef = ref(
+                    getDatabase(),
+                    `typingStatus/${chatId}`
+                  );
+                  if (event.target.value == "") {
+                    set(typingRef, {
+                      [isSignedIn.uid]: {
+                        status: false,
+                        name: isSignedIn.displayName,
+                      },
+                    });
+                  } else {
+                    set(typingRef, {
+                      [isSignedIn.uid]: {
+                        status: true,
+                        name: isSignedIn.displayName,
+                      },
+                    });
+                    timeoutId.current = setTimeout(() => {
+                      set(typingRef, {
+                        [isSignedIn.uid]: {
+                          status: false,
+                          name: isSignedIn.displayName,
+                        },
+                      });
+                      console.log(
+                        event.target.value,
+                        timeoutId.current,
+                        "timeout ran"
+                      );
+                    }, 2000);
+                  }
                 }}
                 value={text}
                 onKeyDown={(event) => {
@@ -433,7 +463,7 @@ export default function MessageTab() {
                     handleSubmit();
                   }
                 }}
-              ></input>
+              />
               <div>
                 <img
                   src={send}
@@ -441,7 +471,7 @@ export default function MessageTab() {
                   onClick={() => {
                     handleSubmit();
                   }}
-                ></img>
+                />
               </div>
             </div>
           </div>
@@ -463,7 +493,7 @@ export default function MessageTab() {
   );
 }
 
-const MessageBox = ({
+function MessageBox({
   pfp,
   name,
   msg,
@@ -475,7 +505,7 @@ const MessageBox = ({
   scrollToMsg,
   data,
   pfpList,
-}) => {
+}) {
   const getColorFromLetter = (letter) => {
     const colors = [
       " bg-gradient-to-r from-red-500 to-pink-500",
@@ -501,41 +531,39 @@ const MessageBox = ({
         className="absolute right-10 text-white hidden cursor-pointer group-hover:block"
         onClick={() => {
           setReplyInfo({
-            name: name,
-            msg: msg,
+            name,
+            msg,
             msgUID: chatUid,
           });
         }}
       >
         <MdReply size="25" />
       </div>
-      {!!msgType ? (
+      {msgType ? (
         <div
-          className="flex ml-14 text-subColor gap-2 text-sm items-center cursor-pointer"
-          onClick={() => scrollToMsg(!!msgType ? msgType.msgUID : null)}
+          className="flex ml-14 text-subColor gap-2 text-sm items-center cursor-pointer overflow-hidden pr-7"
+          onClick={() => scrollToMsg(msgType ? msgType.msgUID : null)}
         >
           <div className="flex gap-2 items-center">
             <div
-              className={
-                "rounded-3xl w-4 h-4 flex items-center justify-center" +
-                getColorFromLetter(!!msgType ? msgType.name[0] : "")
-              }
+              className={`rounded-3xl w-4 h-4 flex items-center justify-center${getColorFromLetter(
+                msgType ? msgType.name[0] : ""
+              )}`}
             >
-              <p className="text-white">{!!msgType ? msgType.name[0] : ""}</p>
+              <p className="text-white">{msgType ? msgType.name[0] : ""}</p>
             </div>
-            <p className=" font-semibold">{!!msgType ? msgType.name : ""}</p>
+            <p className=" font-semibold">{msgType ? msgType.name : ""}</p>
           </div>
-          <p className=" font-light">{!!msgType ? msgType.msg : ""}</p>
+          <p className=" font-light pr-7">{msgType ? msgType.msg : ""}</p>
         </div>
       ) : (
         <></>
       )}
-      <div className="flex gap-4">
+      <div className="flex gap-4 w-full break-all mr-8">
         <div
-          className={
-            "rounded-3xl w-10 h-10 flex items-center justify-center" +
-            getColorFromLetter(name[0].toUpperCase())
-          }
+          className={`rounded-3xl flex-shrink-0 w-10 h-10 flex items-center justify-center${getColorFromLetter(
+            name[0].toUpperCase()
+          )}`}
         >
           {!Object.keys(pfpList).includes(data.senderUID) ? (
             <p className="text-white">{name[0].toUpperCase()}</p>
@@ -546,8 +574,8 @@ const MessageBox = ({
             />
           )}
         </div>
-        <div>
-          <div className="flex gap-3 items-center">
+        <div className=' pr-8'>
+          <div className="flex gap-3 items-center flex-1">
             <p className="text-white">{name}</p>
             <p className=" text-subColor text-xs">{date}</p>
           </div>
@@ -612,19 +640,19 @@ const MessageBox = ({
       icon={<FiEdit2 className="text-green-600" size={22} />}
     />
   );
-};
+}
 
-const InfoMsg = ({ causeUser, affectUser, actionType, content, icon }) => {
+function InfoMsg({ causeUser, affectUser, actionType, content, icon }) {
   return (
     <div className="flex gap-7 py-2 pl-6 mt-3 items-center">
       {causeUser ? (
         <>
           {icon}
           <p className="text-subColor font-light">
-            <span className="text-white">{causeUser + " "}</span>
-            {actionType + " "}
+            <span className="text-white">{`${causeUser} `}</span>
+            {`${actionType} `}
             <span className="text-white">
-              {affectUser ? affectUser + " " : ""}
+              {affectUser ? `${affectUser} ` : ""}
             </span>
             {content}
           </p>
@@ -633,12 +661,12 @@ const InfoMsg = ({ causeUser, affectUser, actionType, content, icon }) => {
         <>
           {icon}
           <p className="text-subColor font-light">
-            <span className="text-white">{affectUser + " "}</span>
-            {actionType + " "}
+            <span className="text-white">{`${affectUser} `}</span>
+            {`${actionType} `}
             {content}
           </p>
         </>
       )}
     </div>
   );
-};
+}
