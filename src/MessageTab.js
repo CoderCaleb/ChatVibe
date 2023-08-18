@@ -541,7 +541,7 @@ function MessageBox({
       </div>
       {msgType ? (
         <div
-          className="flex ml-14 text-subColor gap-2 text-sm items-center cursor-pointer overflow-hidden pr-7"
+          className="flex ml-14 text-subColor gap-2 text-sm items-center cursor-pointer overflow-hidden"
           onClick={() => scrollToMsg(msgType ? msgType.msgUID : null)}
         >
           <div className="flex gap-2 items-center">
@@ -554,7 +554,7 @@ function MessageBox({
             </div>
             <p className=" font-semibold">{msgType ? msgType.name : ""}</p>
           </div>
-          <p className=" font-light pr-7">{msgType ? msgType.msg : ""}</p>
+          <p className=" font-light">{msgType ? msgType.msg : ""}</p>
         </div>
       ) : (
         <></>
