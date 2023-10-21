@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/ChatVibe/static/css/main.ecf0c895.css",
-    "main.js": "/ChatVibe/static/js/main.252f5b35.js",
+    "main.js": "/ChatVibe/static/js/main.682203dc.js",
     "static/js/787.323d39fc.chunk.js": "/ChatVibe/static/js/787.323d39fc.chunk.js",
     "static/media/loading-croppered.gif": "/ChatVibe/static/media/loading-croppered.f833654cad18d2f63dd7.gif",
     "static/media/fire-gif.gif": "/ChatVibe/static/media/fire-gif.629df451930a3e66a9c1.gif",
@@ -20,11 +20,11 @@
     "static/media/discordIcon2.png": "/ChatVibe/static/media/discordIcon2.86a1d5aa4fe53bd3118a.png",
     "index.html": "/ChatVibe/index.html",
     "main.ecf0c895.css.map": "/ChatVibe/static/css/main.ecf0c895.css.map",
-    "main.252f5b35.js.map": "/ChatVibe/static/js/main.252f5b35.js.map",
+    "main.682203dc.js.map": "/ChatVibe/static/js/main.682203dc.js.map",
     "787.323d39fc.chunk.js.map": "/ChatVibe/static/js/787.323d39fc.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.ecf0c895.css",
-    "static/js/main.252f5b35.js"
+    "static/js/main.682203dc.js"
   ]
 }
