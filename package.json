@@ -1,7 +1,6 @@
 {
   "name": "tailwind-test",
   "version": "0.1.0",
-  "homepage": "https://CoderCaleb.github.io/ChatVibe",
   "private": true,
   "dependencies": {
     "@testing-library/jest-dom": "^5.16.5",
