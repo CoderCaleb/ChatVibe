@@ -51,10 +51,6 @@ export default function MessageTab() {
       };
       const chatRef = ref(getDatabase(), `/chats/${chatId}/messages`);
       const metaDataRef = ref(getDatabase(), `/chatMetaData/${chatId}`);
-      const unreadRef = ref(
-        getDatabase(),
-        `unreadData/${userState.uid}/${chatId}`
-      );
       const mainUnreadRef = ref(getDatabase(), `unreadData/${userState.uid}`);
       push(chatRef, tempObj).then((value) => {
         update(metaDataRef, {
@@ -245,7 +241,7 @@ export default function MessageTab() {
               <FaAngleLeft className="md:hidden text-white text-2xl mr-3 cursor-pointer" />
             </Link>
             <button
-              className={` rounded-xl w-10 h-10 flex items-center justify-center m-auto bg-stone-800 text-2xl${
+              className={` rounded-xl w-10 h-10 flex items-center justify-center bg-stone-800 text-2xl${
                 messages.type == "duo"
                   ? ` text-base${getColorFromLetter(
                       messages.type == "duo"
@@ -260,7 +256,7 @@ export default function MessageTab() {
                 setScreen("info");
               }}
             >
-              <p className="">
+              <p className={userState.pfp&&messages.type == "duo"?"w-full h-full":""}>
                 {" "}
                 {messages.type == "duo" ? (
                   !userState.pfp ? (
@@ -272,7 +268,8 @@ export default function MessageTab() {
                   ) : (
                     <img
                       src={userState.pfp}
-                      className="w-full h-full rounded-xl"
+                      className="w-full h-full rounded-xl flex-1"
+                      alt="pfp"
                     />
                   )
                 ) : (

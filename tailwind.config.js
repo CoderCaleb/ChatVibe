@@ -15,7 +15,7 @@ module.exports = {
         btnColor:'#00efbb',
         purpleGrad:'#4C4177',
         blueGrad:'#2a5470',
-        blackRgba: 'rgba(0, 0, 0, 0.7)',
+        blackRgba: 'rgba(0, 0, 0, 0.3)',
       },
       minWidth:{
         messageMin: '310px',
@@ -36,7 +36,8 @@ module.exports = {
       },
       maxWidth:{
         maxSignUp:'1050px'
-      }
+      },
+      
     },
   },
   plugins: [

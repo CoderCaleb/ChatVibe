@@ -925,7 +925,7 @@ function ConfirmModal({
   const { chatId } = useParams();
   const auth = getAuth();
   return (
-    <div className="text-center bg-white rounded-lg p-5 w-96 relative">
+    <div className="text-center bg-white rounded-lg p-5 w-96 relative animate-jump-in">
       <img
         src={cross}
         className="absolute w-4 right-5 cursor-pointer"

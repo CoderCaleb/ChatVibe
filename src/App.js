@@ -16,6 +16,7 @@ import {
   Routes,
   useNavigate,
   useParams,
+  createBrowserRouter,
 } from 'react-router-dom';
 import SignUp from './SignUp';
 import SignIn from './SignIn';
@@ -43,7 +44,7 @@ function App() {
   const [userInfo, setUserinfo] = useState({});
   const [showCodeModal, setShowCodeModal] = useState(false);
   const [showRemoveModal, setShowRemoveModal] = useState({});
-  const [userState, setUserState] = useState({});
+  const [userState, setUserState] = useState({}); //The other user in duo chat
   const [profileScreen, setProfileScreen] = useState(false);
   const [names, setNames] = useState([]);
   const [author, setAuthor] = useState('');
@@ -53,10 +54,14 @@ function App() {
   const previousState = useRef(messages);
   const firstRender = useRef(true);
   const originalRef = useRef([]);
-
+  const navigate = useNavigate()
   useEffect(() => {
     onAuthStateChanged(getAuth(), (user) => {
       setIsSignedIn(user);
+      if(user){
+        navigate("/homescreen/none")
+      }
+      console.log("USER",user)
     });
   }, []);
   function participantMap(mapData) {
@@ -197,7 +202,7 @@ function App() {
     >
       <div className="flex bg-bgColor h-screen w-screen">
         <Routes>
-          <Route path="/" element={<SignUp />} />
+          <Route path="/" element={<SignUp />}/>
           <Route path="/auth">
             <Route index element={<SignUp />} />
             <Route path="signin" element={<SignIn />} />
@@ -280,7 +285,7 @@ function ProtectedRoute({
       }
     };
   }, [currentUser, chatId]);
-  useEffect(() => {
+  useEffect(() => { //useEffect to update messages
     const chatsRef = ref(getDatabase(), `/chats/${chatId}`);
     let listenerInfo = {};
     const unsubscribe = onAuthStateChanged(getAuth(), (user) => {
@@ -342,7 +347,7 @@ function ProtectedRoute({
     };
   }, []);
 
-  useEffect(() => {
+  useEffect(() => { //useEffect to update contact bar
     const tempArr = [];
 
     const listenerRefs = []; // Array to store the listener references
