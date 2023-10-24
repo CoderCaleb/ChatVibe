@@ -1,30 +1,30 @@
 {
   "files": {
-    "main.css": "/ChatVibe/static/css/main.ea729729.css",
-    "main.js": "/ChatVibe/static/js/main.420ad019.js",
-    "static/js/787.323d39fc.chunk.js": "/ChatVibe/static/js/787.323d39fc.chunk.js",
-    "static/media/loading-croppered.gif": "/ChatVibe/static/media/loading-croppered.f833654cad18d2f63dd7.gif",
-    "static/media/fire-gif.gif": "/ChatVibe/static/media/fire-gif.629df451930a3e66a9c1.gif",
-    "static/media/spinner-loader.gif": "/ChatVibe/static/media/spinner-loader.1d663fc01439e8e3b281.gif",
-    "static/media/blue-tick.gif": "/ChatVibe/static/media/blue-tick.9ffc3ded3369ee9557bf.gif",
-    "static/media/nochat-img.png": "/ChatVibe/static/media/nochat-img.a7278e5088ee2e67a936.png",
-    "static/media/no-contact-img.png": "/ChatVibe/static/media/no-contact-img.f5c7845c10a8fbd31b5d.png",
-    "static/media/abstract-img.jpeg": "/ChatVibe/static/media/abstract-img.82d690453b1b9650b4f7.jpeg",
-    "static/media/smiley-face.png": "/ChatVibe/static/media/smiley-face.93793dd42fc9096026e0.png",
-    "static/media/alien-face.png": "/ChatVibe/static/media/alien-face.c272a0a18c77898ca96d.png",
-    "static/media/yingyang.png": "/ChatVibe/static/media/yingyang.bfb9ce1b0dbf2ec3ccdc.png",
-    "static/media/peace-sign.png": "/ChatVibe/static/media/peace-sign.e732c7812132d40a575b.png",
-    "static/media/streo.png": "/ChatVibe/static/media/streo.7cb3d662700957c67ae5.png",
-    "static/media/debate.png": "/ChatVibe/static/media/debate.77bd44cc08d52bba5256.png",
-    "static/media/chat-icon.png": "/ChatVibe/static/media/chat-icon.8847bbfdd84aa558467a.png",
-    "static/media/discordIcon2.png": "/ChatVibe/static/media/discordIcon2.86a1d5aa4fe53bd3118a.png",
-    "index.html": "/ChatVibe/index.html",
-    "main.ea729729.css.map": "/ChatVibe/static/css/main.ea729729.css.map",
-    "main.420ad019.js.map": "/ChatVibe/static/js/main.420ad019.js.map",
-    "787.323d39fc.chunk.js.map": "/ChatVibe/static/js/787.323d39fc.chunk.js.map"
+    "main.css": "/static/css/main.ea729729.css",
+    "main.js": "/static/js/main.c3cb1929.js",
+    "static/js/787.323d39fc.chunk.js": "/static/js/787.323d39fc.chunk.js",
+    "static/media/loading-croppered.gif": "/static/media/loading-croppered.f833654cad18d2f63dd7.gif",
+    "static/media/fire-gif.gif": "/static/media/fire-gif.629df451930a3e66a9c1.gif",
+    "static/media/spinner-loader.gif": "/static/media/spinner-loader.1d663fc01439e8e3b281.gif",
+    "static/media/blue-tick.gif": "/static/media/blue-tick.9ffc3ded3369ee9557bf.gif",
+    "static/media/nochat-img.png": "/static/media/nochat-img.a7278e5088ee2e67a936.png",
+    "static/media/no-contact-img.png": "/static/media/no-contact-img.f5c7845c10a8fbd31b5d.png",
+    "static/media/abstract-img.jpeg": "/static/media/abstract-img.82d690453b1b9650b4f7.jpeg",
+    "static/media/smiley-face.png": "/static/media/smiley-face.93793dd42fc9096026e0.png",
+    "static/media/alien-face.png": "/static/media/alien-face.c272a0a18c77898ca96d.png",
+    "static/media/yingyang.png": "/static/media/yingyang.bfb9ce1b0dbf2ec3ccdc.png",
+    "static/media/peace-sign.png": "/static/media/peace-sign.e732c7812132d40a575b.png",
+    "static/media/streo.png": "/static/media/streo.7cb3d662700957c67ae5.png",
+    "static/media/debate.png": "/static/media/debate.77bd44cc08d52bba5256.png",
+    "static/media/chat-icon.png": "/static/media/chat-icon.8847bbfdd84aa558467a.png",
+    "static/media/discordIcon2.png": "/static/media/discordIcon2.86a1d5aa4fe53bd3118a.png",
+    "index.html": "/index.html",
+    "main.ea729729.css.map": "/static/css/main.ea729729.css.map",
+    "main.c3cb1929.js.map": "/static/js/main.c3cb1929.js.map",
+    "787.323d39fc.chunk.js.map": "/static/js/787.323d39fc.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.ea729729.css",
-    "static/js/main.420ad019.js"
+    "static/js/main.c3cb1929.js"
   ]
 }
