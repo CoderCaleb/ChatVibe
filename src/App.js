@@ -56,14 +56,19 @@ function App() {
   const originalRef = useRef([]);
   const navigate = useNavigate()
   useEffect(() => {
-    onAuthStateChanged(getAuth(), (user) => {
+    let isSignedIn = false;
+
+    const unsubscribe = onAuthStateChanged(getAuth(), (user) => {
       setIsSignedIn(user);
-      if(user){
-        navigate("/homescreen/none")
+      if (user && !isSignedIn) {
+        // User is signed in, navigate to homescreen/none
+        navigate("/homescreen/none");
       }
-      console.log("USER",user)
+      isSignedIn = true;
     });
-  }, []);
+    return () => unsubscribe();
+  }, []); 
+  
   function participantMap(mapData) {
     Promise.all(
       Object.keys(mapData).map((uid, index) => {
@@ -248,7 +253,7 @@ function ProtectedRoute({
     const unsubscribe = onAuthStateChanged(getAuth(), (user) => {
       if (chatId !== 'none' && Object.keys(messages).length !== 0) {
         get(participantRef).then((snapshot) => {
-          if (Object.keys(messages.participants).includes(user.uid)) {
+          if (user&&Object.keys(messages.participants).includes(user.uid)) {
           } else {
             navigate('/homescreen/none');
           }

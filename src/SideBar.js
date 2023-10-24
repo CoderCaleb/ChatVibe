@@ -667,7 +667,7 @@ function CreateForm({
                                     },
                                   );
                                 } else {
-                                  setDuoError('Oops! Username not found');
+                                  setDuoError('Oops! Username not found.');
                                   setIsLoading(false);
                                 }
                               });
